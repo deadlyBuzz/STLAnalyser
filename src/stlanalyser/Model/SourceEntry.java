@@ -183,8 +183,9 @@ public class SourceEntry {
                         sourceLineEntries.add(new lineEntry(stringLine,i,0,lineEntry.CODE_COMMENT));
                         break;
                     }
-                    //<<<< Still to do...                                                          
-                    // 1 - Write up the rules in one location rather than iterating forward and backward
+                    //<<<< Still to do...                                                                              
+                    // 1 - See how to accomodate Timers, counters and "A(" into the Memory ID as they don't
+                    //      divide too well into placeholder[0] & [1]
                     // 2 - See how to encode the Direct and Indirect memory access into the encoding.
                     // 3 - Update method to ID The memory typoe from the text passed to the functions
                     // 4 - Good ol' Indirect Addressing.
@@ -205,7 +206,7 @@ public class SourceEntry {
                             placeHolder[1] = dataPlaceHolder;                                                    
                     }
                     else 
-                        placeHolder[1] = placeHolder[1].substring(placeHolder[1].length()-1, placeHolder[1].length());
+                        placeHolder[1] = IDmemoryType(placeHolder[1]);
                     }
                     catch(ArrayIndexOutOfBoundsException e){
                         System.err.println(String.valueOf(i)+" " + placeHolder);
@@ -228,7 +229,7 @@ public class SourceEntry {
          * B = Byte = 8 bits, any data type that takes up 8 bits is accessed as a Byte.
          * S5Time takes up 16 Bits thus is encoded as a Word.
          */
-        memoryTypes.put("BOOL", "");
+        memoryTypes.put("BOOL", "b");
         memoryTypes.put("BYTE", ",B");
         memoryTypes.put("INT",",W");
         memoryTypes.put("WORD",",W");
@@ -244,7 +245,7 @@ public class SourceEntry {
         if(placeHolder == null) {
             JOptionPane.showMessageDialog(null, "Memory Type " + memory + " Not found --> Please adddess.");
             System.out.println("Memory Type " + memory + " Not found --> Please adddess.");
-            placeHolder = "B";
+            placeHolder = "b";
         }        
         return placeHolder;
     }
@@ -309,7 +310,17 @@ public class SourceEntry {
      * @return The Memory Identifier.
      */
     private String IDmemoryType(String Var){
+        // Boolean Local Variable or Memory Flag
+        if(Var.toUpperCase().matches("[LM]"))
+            return "b";
+        // Constant Timer Variable
+        if(Var.toUpperCase().matches("S5T#.*"))
+            return "W"; // Stored as a Word ???
+        if(Var.length()>1)
+            return Var.substring(Var.length()-1, Var.length());
         
-        return "";
+        //If we've got this far, then this is an unknown address.  Treat it as such.
+        System.out.println("IDMemoryType:" +Var+"> Unknown Var - Please Address");
+        return Var;
     }
 }
