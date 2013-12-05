@@ -33,6 +33,8 @@ public class SourceEntry {
     public static final String reNOPSTATEMENT   = "NOP\\s+\\d+.*"; // NOP any whitespace, any digit
     public static final String reLABELID        = "[a-zA-Z_]\\w{0,3}:\\s*(.*);";
     public static final String reBLDSTATEMENT   = "BLD\\s+.*";
+    public static final String reJUMPSTATEMENT  = "(J[ULCOZNP]|JCN|JNB|JBI|JNBI|JOS|JPZ|JMZ|JUO|LOOP)";
+    
     
     /**
      * Default Constructor. 
@@ -74,7 +76,7 @@ public class SourceEntry {
         final Integer VARDECLARE        = 1;
         final Integer NETWORKANALYSIS   = 2;
         
-        int[] debugLines = {23,29};
+        int[] debugLines = {26};
         
         //1 - Empty the arraylist to start with.
         sourceLineEntries.clear();
@@ -209,12 +211,16 @@ public class SourceEntry {
                         placeHolder[1] = IDmemoryType(placeHolder[1]);
                     }
                     catch(ArrayIndexOutOfBoundsException e){
-                        System.err.println(String.valueOf(i)+" " + placeHolder);
+                        System.err.println("<<<< Error processing entry:"+String.valueOf(i)+" " + placeHolder);
                     }
-                    sourceLineEntries.add(new lineEntry(placeHolder[0]+","+placeHolder[1],i,0,lineEntry.CODE_SOURCE));
+                    if(placeHolder[0].matches(reJUMPSTATEMENT))
+                        sourceLineEntries.add(new lineEntry(stringLine,i,mGet(placeHolder[0]),lineEntry.CODE_SOURCE));
+                    else
+                        sourceLineEntries.add(new lineEntry(stringLine,i,mGet(placeHolder[0]+","+placeHolder[1]),lineEntry.CODE_SOURCE));
+
                     break;
                 default :
-                    System.out.println("How the Hell did I get here? Line" + String.valueOf(i) + ": " + stringLine);
+                    System.out.println("<<<< How the Hell did I get here? Line" + String.valueOf(i) + ": " + stringLine);
                     break;
             }
         }
@@ -263,30 +269,52 @@ public class SourceEntry {
         m.put("L,C", 450); // C= Counter
         m.put("LC,C", 1090); // Loading a counter value with a BCD Value
         m.put("LC,T", 1090); // Loading a Timer value with BCD
-        m.put("=", 80);
-        m.put("A",50); //S7300_Instruction_list.pdf p22<sup>1</sup>
-        m.put("O", 50);
-        m.put("ON", 50);
-        m.put("AN", 50);
+        m.put("=,b", 80);
+        m.put("A,b",50); //S7300_Instruction_list.pdf p22<sup>1</sup>
+        m.put("O,b", 50);
+        m.put("AN,b",50); //S7300_Instruction_list.pdf p22<sup>1</sup>
+        m.put("ON,b", 50);
         m.put("A,T",230);
         m.put("A,C",100);
-        m.put("A(", 120);
+        m.put("A(,b", 120);
         m.put("AN,T",230);
         m.put("AN,C",100);
-        m.put("AN(", 120);
-        m.put("O(",120);
-        m.put("ON(",120);
-        m.put("<>I",200);
-        m.put(")", 120);
+        m.put("AN(,b", 120);
+        m.put("O(,b",120);
+        m.put("ON(,b",120);
+        m.put("<>I,b",200);
+        m.put("),b", 120);
         //m.put("BLD", 0); // Transferred to Comment
-        m.put("JNB",160);
+        m.put("JNB,b",160);
         m.put("T,B",80); // S7300_Instruction_list.pdf P36
         m.put("T,W",90);
         m.put("T,D",110);
         m.put("CALL",130);
-        m.put("R", 80);
-        m.put("S", 80);        
-        m.put("SD,W", 510); // SS German pnemonic, S7300_Instruction_list.pdf P32
+        m.put("R,b", 80);
+        m.put("S,b", 80);        
+        m.put("SD,T", 510); // SS German pnemonic, S7300_Instruction_list.pdf P32
+        
+        // Jump entries - different scenario.
+        m.put("JC", 160); //s7300_instruction_list.pdf P64
+        m.put("JCN", 160);
+        m.put("JCB", 160);
+        m.put("JNB", 160);
+        m.put("JBI", 160);
+        m.put("JBIN", 160);
+        m.put("JO", 160);
+        m.put("JOS", 160);
+        m.put("JUO", 160);
+        m.put("JZ", 160);
+        m.put("JP", 210);
+        m.put("JM", 210);
+        m.put("JN", 160);
+        m.put("JMZ", 160);
+        m.put("JPZ", 160);
+        m.put("JU", 160);
+        m.put("JL", 160);
+        m.put("LOOP", 150);
+        
+        
     /*
      * <sup>1</sup>: Different calculation when evaluating an A Etc. with a signal
      * compared with specified conditions. (Compare P22 with P27>
@@ -316,11 +344,29 @@ public class SourceEntry {
         // Constant Timer Variable
         if(Var.toUpperCase().matches("S5T#.*"))
             return "W"; // Stored as a Word ???
+        // If there is a ";", this is a single command and should be treated as a "b"
+        if(Var.toUpperCase().matches("(;|JNB|JU|JC).*"))
+            return "b";
+        // Timers - A Quick and easy (and somewhat Lazy) solution.
+        if(Var.toUpperCase().matches("T"))
+            return "T";
+        //Read is this is a constant value being passed.
+        if(Var.toUpperCase().matches("[0-9\\.]+\\s*;?"))
+            return "K";
         if(Var.length()>1)
             return Var.substring(Var.length()-1, Var.length());
         
         //If we've got this far, then this is an unknown address.  Treat it as such.
-        System.out.println("IDMemoryType:" +Var+"> Unknown Var - Please Address");
+        System.out.println("<<<< IDMemoryType:" +Var+"> Unknown Var - Please Address");
         return Var;
+    }
+    
+    private int mGet(String getM){
+        int i = 0;
+        if(m.get(getM)==null){
+            System.out.println("<<<< mGet: Could not find "+getM);            
+            return i;
+        }
+        return m.get(getM);
     }
 }

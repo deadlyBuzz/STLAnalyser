@@ -1,0 +1,67 @@
+<!--
+To change this template, choose Tools | Templates
+and open the template in the editor.
+-->
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Rules etc.</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    </head>
+    <body><font face="tahoma">
+        <h1>Rules</h1>
+        <div>This is a specific text location from which to document the 
+            different rules and references involved in building the program</div>
+        <h2>Execution Times</h2>
+        <div> A Statement consists of 2 parts.
+            <ol>
+                <li>Load the Address of the instruction</li>
+                <li>Loading the Address of the operand</li>
+            </ol>
+        This means that you have to calculate the basic execution time of an 
+        instruction with addressed operand from these 2 parts
+        </div>
+        <div>
+            <table><th>Line No.</th><th>Code Block</th>
+    <tr><td>0</td><td>FUNCTION FC 1 : VOID</td></tr>
+    <tr><td>1</td><td>TITLE =</td></tr>
+    <tr><td>2</td><td>VERSION : 0.1</td></tr>
+    <tr><td>3</td><td></td></tr>
+    <tr><td>4</td><td>BEGIN</td></tr>
+    <tr><td>5</td><td>NETWORK</td></tr>
+    <tr><td>6</td><td>TITLE =</td></tr>
+    <tr><td>7</td><td></td></tr>
+    <tr><td>8</td><td>      AN    T      1; </td></tr>
+    <tr><td>9</td><td>      =     L      0.0; </td></tr>
+    <tr><td>10</td><td>      A     L      0.0; </td></tr>
+    <tr><td>11</td><td>      BLD   102; </td></tr>
+    <tr><td>12</td><td>      L     S5T#3S; <sup>1</sup></td></tr>
+    <tr><td>13</td><td>      SD    T      1; </td></tr>
+    <tr><td>14</td><td>      A     L      0.0; </td></tr>
+    <tr><td>15</td><td>      A     M      2.1; </td></tr>
+    <tr><td>16</td><td>      A(    ; </td></tr>
+    <tr><td>17</td><td>      L     MW     8; </td></tr>
+    <tr><td>18</td><td>      L     0; </td></tr>
+    <tr><td>19</td><td>      &lt;&gt;   ; </td></tr>
+    <tr><td>20</td><td>      )     ; </td></tr>
+    <tr><td>21</td><td>      =     L      0.1; </td></tr>
+    <tr><td>22</td><td>      A     L      0.1; </td></tr>
+    <tr><td>23</td><td>      BLD   102; </td></tr>
+    <tr><td>24</td><td>      =     M      2.0; </td></tr>
+    <tr><td>25</td><td>      A     L      0.1; </td></tr>
+    <tr><td>26</td><td>      JNB   _001; </td></tr>
+    <tr><td>27</td><td>      L     0; </td></tr>
+    <tr><td>28</td><td>      T     MW     8; </td></tr>
+    <tr><td>29</td><td>_001: NOP   0; </td></tr>
+    <tr><td>30</td><td>      A     L      0.0; </td></tr>
+    <tr><td>31</td><td>      A     T      1; </td></tr>
+    <tr><td>32</td><td>      R     M      2.1; </td></tr>
+    <tr><td>33</td><td>END_FUNCTION</td></tr>
+            </table>
+            <sup>1</sup>Stored as a Word?  unclear from s7300_instruction_list.pdf P34/35<br/>
+                
+        </div>
+        <p>Alan Curley<br/>04 DEC 2013</p>
+        </font>
+    </body>
+</html>
