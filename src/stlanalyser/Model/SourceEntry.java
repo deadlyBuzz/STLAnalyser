@@ -56,7 +56,8 @@ public class SourceEntry {
         loadHashMap(); // populate the hashmap with instructions and times.
 
         //1 - Break the Source code Entry into individual lines.
-        String sourceCodeArray[] = SourceCode.split("\r\n");
+        //String sourceCodeArray[] = SourceCode.split("(\\r\\n)");
+        String sourceCodeArray[] = SourceCode.split("\n");
         sourceLines.addAll(Arrays.asList(sourceCodeArray)); //(Thank you Netbeans Hints)
     }
 
@@ -76,7 +77,7 @@ public class SourceEntry {
         final Integer VARDECLARE        = 1;
         final Integer NETWORKANALYSIS   = 2;
         
-        int[] debugLines = {26};
+        int[] debugLines = {12};
         
         //1 - Empty the arraylist to start with.
         sourceLineEntries.clear();
@@ -186,13 +187,10 @@ public class SourceEntry {
                         break;
                     }
                     //<<<< Still to do...                                                                              
-                    // 1 - See how to accomodate Timers, counters and "A(" into the Memory ID as they don't
-                    //      divide too well into placeholder[0] & [1]
-                    // 2 - See how to encode the Direct and Indirect memory access into the encoding.
-                    // 3 - Update method to ID The memory typoe from the text passed to the functions
-                    // 4 - Good ol' Indirect Addressing.
+                    // 1 - See how to encode the Direct and Indirect memory access into the encoding.
+                    // 2 - Accomodate Data Blocks
                     
-                    
+                                        
                     // If we're here - This is a Valid Line to process.
                     placeHolder = stringLine.trim().split("\\s+"); // split via any whitespace characters.
 
@@ -209,14 +207,15 @@ public class SourceEntry {
                     }
                     else 
                         placeHolder[1] = IDmemoryType(placeHolder[1]);
-                    }
-                    catch(ArrayIndexOutOfBoundsException e){
-                        System.err.println("<<<< Error processing entry:"+String.valueOf(i)+" " + placeHolder);
-                    }
                     if(placeHolder[0].matches(reJUMPSTATEMENT))
                         sourceLineEntries.add(new lineEntry(stringLine,i,mGet(placeHolder[0]),lineEntry.CODE_SOURCE));
                     else
                         sourceLineEntries.add(new lineEntry(stringLine,i,mGet(placeHolder[0]+","+placeHolder[1]),lineEntry.CODE_SOURCE));
+
+                    }
+                    catch(ArrayIndexOutOfBoundsException e){
+                        System.err.println("<<<< Error processing entry:"+String.valueOf(i)+" " + placeHolder);
+                    }
 
                     break;
                 default :
@@ -282,10 +281,10 @@ public class SourceEntry {
         m.put("AN(,b", 120);
         m.put("O(,b",120);
         m.put("ON(,b",120);
-        m.put("<>I,b",200);
+        m.put("<>I,b",200); // S7300_instruction_list.PDF P49
         m.put("),b", 120);
         //m.put("BLD", 0); // Transferred to Comment
-        m.put("JNB,b",160);
+        m.put("JNB,b",160); // S7300_instruction_list.PDF P64
         m.put("T,B",80); // S7300_Instruction_list.pdf P36
         m.put("T,W",90);
         m.put("T,D",110);
@@ -343,7 +342,7 @@ public class SourceEntry {
             return "b";
         // Constant Timer Variable
         if(Var.toUpperCase().matches("S5T#.*"))
-            return "W"; // Stored as a Word ???
+            return "K"; // Stored as a Word ???
         // If there is a ";", this is a single command and should be treated as a "b"
         if(Var.toUpperCase().matches("(;|JNB|JU|JC).*"))
             return "b";

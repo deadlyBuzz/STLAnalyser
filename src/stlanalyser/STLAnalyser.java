@@ -17,6 +17,12 @@ public class STLAnalyser {
      */
     public static void main(String[] args) {
         // TODO code application logic here
+        //defaultMethod();
+        stlAnalyserWindow SAW = new stlAnalyserWindow();
+        SAW.setVisible(true);
+    }
+    
+    public static void defaultMethod(){
         String dataString = "";
         dataString = dataString.concat("FUNCTION FC 1 : VOID\r\n");
         dataString = dataString.concat("TITLE =\r\n");
