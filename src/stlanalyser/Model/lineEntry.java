@@ -33,6 +33,7 @@ public class lineEntry {
     public static final int NETWORK_TITLE      = 10;
     public static final int CODE_COMMENT       = 11;
     public static final int CODE_SOURCE        = 12;
+    public static final int DB_ENTRY           = 13;
     public static final int INVALID_ENTRY      = -1;
     public static final int INCOMPLETE_ENTRY   = -2;
     public static final int EMPTY_LINE         = -3;
@@ -97,6 +98,7 @@ public class lineEntry {
         typeTable.put(10,"NETWORK_TITLE");
         typeTable.put(11,"CODE_COMMENT");
         typeTable.put(12,"CODE_SOURCE");
+        typeTable.put(13,"DB_ENTRY");
         typeTable.put(-1,"INVALID_ENTRY");
         typeTable.put(-2,"INCOMPLETE_ENTRY");
         typeTable.put(-3,"EMPTY_LINE");

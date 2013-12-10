@@ -18,7 +18,9 @@ public class SourceEntry {
     private Map<String, Integer> m;
     
     //http://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html
-    public static final String reFUNCTIONHEADER = "FUNCTION(_BLOCK).*";
+    public static final String reFUNCTIONHEADER = "(FUNCTION|ORGANIZATION)(_BLOCK)?.*";
+    public static final String reDBHEADER       = "DATA_BLOCK.*";
+    public static final String reBLOCKFOOTER    = "END_(ORGANIZATION|DATA|FUNCTION)(_BLOCK)?";
     public static final String reTITLELINE      = "TITLE =.*"; // Title will always be only one line.
     public static final String reVERSIONLINE    = "VERSION : \\d+\\.\\d+";
     public static final String reBEGIN          = "BEGIN";
@@ -71,17 +73,19 @@ public class SourceEntry {
      * This is the method that performs the process of analysing the source code.
      */
     public void processSourceCode(){
-        Integer StateMachine = new Integer(0);
+        Integer StateMachine;// = new Integer(0);
         Map<String,String> VAR = new HashMap<>();
-        final Integer BLOCKHEADER       = 0;             
-        final Integer VARDECLARE        = 1;
-        final Integer NETWORKANALYSIS   = 2;
+        final Integer UNKNOWN           = 0;
+        final Integer BLOCKHEADER       = 1;             
+        final Integer VARDECLARE        = 2;
+        final Integer NETWORKANALYSIS   = 3;
+        final Integer DATABLOCK         = 4; // Data Blocks are Not runtime executable - Data only.
         
-        int[] debugLines = {12};
+        int[] debugLines = {32};
         
         //1 - Empty the arraylist to start with.
         sourceLineEntries.clear();
-        StateMachine = BLOCKHEADER;        
+        StateMachine = UNKNOWN;        
         for(int i=0; i<sourceLines.size(); i++){
             String stringLine = sourceLines.get(i).replaceAll(reLABELID, "$1").trim(); // get rid of any Labels
             
@@ -93,13 +97,22 @@ public class SourceEntry {
                 if(i==debugLines[d])
                     System.out.println("<<<<Debug: "+ stringLine +">>>>");
             }
-            switch(StateMachine){
-/*----------*/  case 0 : //BlockHeader
-                    // 1st Line - This is Definitley a Block Declaration.
-                    if(i == 0) {
+            switch(StateMachine){                
+/*----------*/  case 0 : //Unknown.
+                    if(stringLine.matches(reFUNCTIONHEADER)) {
                         sourceLineEntries.add(new lineEntry(stringLine,i,0,lineEntry.BLOCK_DECLARATION));
+                        StateMachine = BLOCKHEADER;
                         break;
-                    }                    
+                    }
+                    if(stringLine.matches(reDBHEADER)){
+                        sourceLineEntries.add(new lineEntry(stringLine,i,0,lineEntry.BLOCK_DECLARATION));
+                        StateMachine = DATABLOCK;
+                        break;
+                    }
+                    sourceLineEntries.add(new lineEntry(stringLine,i,0,lineEntry.EMPTY_LINE));
+                    break;
+/*----------*/  case 1 : //BlockHeader
+                    // 1st Line - This is Definitley a Block Declaration.
                     if(stringLine.length()<1){
                         sourceLineEntries.add(new lineEntry(" ",i,0,lineEntry.EMPTY_LINE));
                         break;                        
@@ -130,7 +143,7 @@ public class SourceEntry {
                         StateMachine = VARDECLARE;
                         break;
                     }                    
-/*----------*/  case 1 : //VARDECLARE   
+/*----------*/  case 2 : //VARDECLARE   
                     if(stringLine.matches(reVAREND)){
                         sourceLineEntries.add(new lineEntry(stringLine,i,0,lineEntry.VAR_FOOTER));
                         break;
@@ -147,10 +160,10 @@ public class SourceEntry {
                     else{
                         sourceLineEntries.add(new lineEntry(stringLine,i,0,lineEntry.VAR_DECLARE));
                         String[] placeHolder =  stringLine.split(":");
-                        String put = VAR.put(placeHolder[0], resolveMemory(placeHolder[1]));                                            
+                        String put = VAR.put(placeHolder[0], resolveMemory(placeHolder[1].replaceAll(";", "").trim())); // Clear out any trailing colons.                                           
                     }
                     break;
-/*----------*/  case 2 : // NETWORKANALYSIS
+/*----------*/  case 3 : // NETWORKANALYSIS
                     String[] placeHolder;
                     String dataPlaceHolder;
 
@@ -177,6 +190,7 @@ public class SourceEntry {
                     // END_FUNCTION Declaration indicating the end if a function block or function call.
                     if(stringLine.matches(reENDFUNCTION)){
                         sourceLineEntries.add(new lineEntry(stringLine,i,0,lineEntry.BLOCK_END));
+                        StateMachine = UNKNOWN;
                         break;
                     }                    
                     
@@ -186,10 +200,15 @@ public class SourceEntry {
                         sourceLineEntries.add(new lineEntry(stringLine,i,0,lineEntry.CODE_COMMENT));
                         break;
                     }
+                    
+                    // If this is a Footer - Push back to "unknown" to search for another title.
+                    if(stringLine.matches(reBLOCKFOOTER)){
+                        sourceLineEntries.add(new lineEntry(stringLine,i,0,lineEntry.BLOCK_END));
+                        StateMachine = UNKNOWN;
+                        break;
+                    }
                     //<<<< Still to do...                                                                              
                     // 1 - See how to encode the Direct and Indirect memory access into the encoding.
-                    // 2 - Accomodate Data Blocks
-                    
                                         
                     // If we're here - This is a Valid Line to process.
                     placeHolder = stringLine.trim().split("\\s+"); // split via any whitespace characters.
@@ -218,6 +237,14 @@ public class SourceEntry {
                     }
 
                     break;
+/*----------*/  case 4 : //DATA BLOCK
+                    if(stringLine.matches(reBLOCKFOOTER)){ // All Entries are Data points only until the end of the Block.
+                        StateMachine = UNKNOWN;
+                        sourceLineEntries.add(new lineEntry(stringLine,i,0,lineEntry.BLOCK_END));
+                        break;
+                    }
+                    sourceLineEntries.add(new lineEntry(stringLine,i,0,lineEntry.DB_ENTRY));
+                    break;    
                 default :
                     System.out.println("<<<< How the Hell did I get here? Line" + String.valueOf(i) + ": " + stringLine);
                     break;
@@ -248,7 +275,7 @@ public class SourceEntry {
         
         placeHolder = memoryTypes.get(memory);     
         if(placeHolder == null) {
-            JOptionPane.showMessageDialog(null, "Memory Type " + memory + " Not found --> Please adddess.");
+            //JOptionPane.showMessageDialog(null, "Memory Type " + memory + " Not found --> Please adddess.");
             System.out.println("Memory Type " + memory + " Not found --> Please adddess.");
             placeHolder = "b";
         }        
