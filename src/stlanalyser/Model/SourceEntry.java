@@ -36,6 +36,7 @@ public class SourceEntry {
     public static final String reLABELID        = "[a-zA-Z_]\\w{0,3}:\\s*(.*);";
     public static final String reBLDSTATEMENT   = "BLD\\s+.*";
     public static final String reJUMPSTATEMENT  = "(J[ULCOZNP]|JCN|JNB|JBI|JNBI|JOS|JPZ|JMZ|JUO|LOOP)";
+    public static final String reCALLSTATEMENT  = "(CALL|UC|CC)";
     
     
     /**
@@ -80,8 +81,9 @@ public class SourceEntry {
         final Integer VARDECLARE        = 2;
         final Integer NETWORKANALYSIS   = 3;
         final Integer DATABLOCK         = 4; // Data Blocks are Not runtime executable - Data only.
+        final Integer BLOCKCALL         = 5; // Block calls - Any parameter transfers do not incurr
         
-        int[] debugLines = {32};
+        int[] debugLines = {52,55};
         
         //1 - Empty the arraylist to start with.
         sourceLineEntries.clear();
@@ -160,7 +162,7 @@ public class SourceEntry {
                     else{
                         sourceLineEntries.add(new lineEntry(stringLine,i,0,lineEntry.VAR_DECLARE));
                         String[] placeHolder =  stringLine.split(":");
-                        String put = VAR.put(placeHolder[0], resolveMemory(placeHolder[1].replaceAll(";", "").trim())); // Clear out any trailing colons.                                           
+                        String put = VAR.put(placeHolder[0].trim(), resolveMemory(placeHolder[1].replaceAll(";", "").trim())); // Clear out any trailing colons.                                           
                     }
                     break;
 /*----------*/  case 3 : // NETWORKANALYSIS
@@ -211,29 +213,41 @@ public class SourceEntry {
                     // 1 - See how to encode the Direct and Indirect memory access into the encoding.
                                         
                     // If we're here - This is a Valid Line to process.
-                    placeHolder = stringLine.trim().split("\\s+"); // split via any whitespace characters.
+                    placeHolder = stringLine.trim().replaceAll(";", "").split("\\s+"); // split via any whitespace characters.
 
                     try{
-                    if (placeHolder[1].matches(reLOCALVARIABLE)){
-                        dataPlaceHolder = VAR.get(placeHolder[1]);
-                        if (dataPlaceHolder == null){
-                            JOptionPane.showMessageDialog(null, "Error Matching Variables- Ensure correct script details");
-                            System.err.println("Error Matching Variables- Ensure correct script details");
-                            System.exit(0);
+                        if(placeHolder.length>1){
+                            if (placeHolder[1].matches(reLOCALVARIABLE)){
+                                dataPlaceHolder = VAR.get(placeHolder[1].replace("#", ""));
+                                if (dataPlaceHolder == null){
+                                    JOptionPane.showMessageDialog(null, "Error Matching Variables- Ensure correct script details");
+                                    System.err.println("Error Matching Variables- Ensure correct script details");
+                                    System.exit(0);
+                                }
+                                else
+                                    placeHolder[1] = dataPlaceHolder;                                                    
+                            }
+
+                            // -------- We're here this is a genuine sourcecode entry, - Now check what the statement has consisted of. --------------
+                            // Check that the entry is a Jump statement in which the key part of the statement is the Jump function.
+                            else if(placeHolder[0].matches(reJUMPSTATEMENT))
+                                sourceLineEntries.add(new lineEntry(stringLine,i,mGet(placeHolder[0]),lineEntry.CODE_SOURCE));
+                            // Check that the entry is calling an additional Function Block or DB Call.
+                            else if(placeHolder[0].toUpperCase().matches(reCALLSTATEMENT)){
+                                sourceLineEntries.add(new lineEntry(stringLine,i,mGet(placeHolder[0]+","+placeHolder[1]),lineEntry.CODE_SOURCE));
+                                StateMachine = BLOCKCALL; // S7300_instruction_list.PDF P59 
+                                                          // AWL_e.PDF P265
+                            }
+                            else{
+                                placeHolder[1] = IDmemoryType(placeHolder[1]);
+                                sourceLineEntries.add(new lineEntry(stringLine,i,mGet(placeHolder[0]+","+placeHolder[1]),lineEntry.CODE_SOURCE));
+                            }
                         }
                         else
-                            placeHolder[1] = dataPlaceHolder;                                                    
-                    }
-                    else 
-                        placeHolder[1] = IDmemoryType(placeHolder[1]);
-                    if(placeHolder[0].matches(reJUMPSTATEMENT))
-                        sourceLineEntries.add(new lineEntry(stringLine,i,mGet(placeHolder[0]),lineEntry.CODE_SOURCE));
-                    else
-                        sourceLineEntries.add(new lineEntry(stringLine,i,mGet(placeHolder[0]+","+placeHolder[1]),lineEntry.CODE_SOURCE));
-
+                            sourceLineEntries.add(new lineEntry(stringLine,i,mGet(placeHolder[0]+",b"),lineEntry.CODE_SOURCE));                       
                     }
                     catch(ArrayIndexOutOfBoundsException e){
-                        System.err.println("<<<< Error processing entry:"+String.valueOf(i)+" " + placeHolder);
+                        System.err.println("<<<< Error processing entry:"+String.valueOf(i)+" " + stringLine);
                     }
 
                     break;
@@ -245,6 +259,13 @@ public class SourceEntry {
                     }
                     sourceLineEntries.add(new lineEntry(stringLine,i,0,lineEntry.DB_ENTRY));
                     break;    
+                case 5: // BLOCK CALL
+                    // ignore all the entries while in block call until we see a ")"                    
+                    sourceLineEntries.add(new lineEntry(stringLine,i,0,lineEntry.CODE_COMMENT));
+                    //If this is a closing bracket - go back to calcuating execution times.
+                    if(stringLine.matches(".*\\);?.*"))
+                        StateMachine = NETWORKANALYSIS;
+                    break;
                 default :
                     System.out.println("<<<< How the Hell did I get here? Line" + String.valueOf(i) + ": " + stringLine);
                     break;
@@ -272,11 +293,20 @@ public class SourceEntry {
         memoryTypes.put("TIME",",D");
         memoryTypes.put("DATE",",W");
         memoryTypes.put("CHAR",",B");
+        memoryTypes.put("DATE_AND_TIME","X"); // X = Complex.
+        memoryTypes.put("ANY", ",X");
+        memoryTypes.put("STRING", "X");        
+        memoryTypes.put("ARRAY", "X");        
+        memoryTypes.put("STRUCT", "X");
+        memoryTypes.put("TIMER", "P"); // P = Parameter.
+        memoryTypes.put("COUNTER", "P"); 
+        memoryTypes.put("POINTER", "P"); 
+        memoryTypes.put("ANY", "P"); // P = Parameter.        
         
         placeHolder = memoryTypes.get(memory);     
         if(placeHolder == null) {
             //JOptionPane.showMessageDialog(null, "Memory Type " + memory + " Not found --> Please adddess.");
-            System.out.println("Memory Type " + memory + " Not found --> Please adddess.");
+            System.out.println("<<<< resolveMemory: Memory Type " + memory + " Not found --> Please adddess.");
             placeHolder = "b";
         }        
         return placeHolder;
@@ -309,13 +339,49 @@ public class SourceEntry {
         m.put("O(,b",120);
         m.put("ON(,b",120);
         m.put("<>I,b",200); // S7300_instruction_list.PDF P49
+        m.put(">=I,b", 200);
+        m.put(">I,b", 200);
+        m.put("<=I,b", 200);
+        m.put("<I,b", 200);
+        m.put("==I,b", 200);
+        m.put("<>D,b",180); // S7300_instruction_list.PDF P49
+        m.put(">=D,b", 180);
+        m.put(">D,b", 180);
+        m.put("<=D,b", 180);
+        m.put("<D,b", 180);
+        m.put("==D,b", 180);
+        m.put("<>R,b",670); // S7300_instruction_list.PDF P49
+        m.put(">=R,b", 670);
+        m.put(">R,b", 670);
+        m.put("<=R,b", 670);
+        m.put("<R,b", 670);
+        m.put("==R,b", 670);
+
+        m.put("+I,b", 100); // S7300_instruction_list.PDF P43
+        m.put("+D,b", 90); 
+        m.put("+R,b", 440); 
+        m.put("-I,b", 100); // S7300_instruction_list.PDF P43
+        m.put("-D,b", 90); 
+        m.put("-R,b", 440); 
+        m.put("*I,b", 120); // S7300_instruction_list.PDF P43
+        m.put("*D,b", 90); 
+        m.put("*R,b", 440); 
+        m.put("/I,b", 220); // S7300_instruction_list.PDF P44
+        m.put("/D,b", 210); 
+        m.put("/R,b", 1930);         
+        m.put("MOD,b", 180);
         m.put("),b", 120);
         //m.put("BLD", 0); // Transferred to Comment
         m.put("JNB,b",160); // S7300_instruction_list.PDF P64
         m.put("T,B",80); // S7300_Instruction_list.pdf P36
         m.put("T,W",90);
         m.put("T,D",110);
-        m.put("CALL",130);
+        m.put("CALL,FB",2050); // S7300_instruction_list.PDF P60
+        m.put("CALL,FC",2030);
+        m.put("UC,FB",1590);
+        m.put("UC,FC",1770);
+        m.put("CC,FB",1590);
+        m.put("CC,FC",1770);
         m.put("R,b", 80);
         m.put("S,b", 80);        
         m.put("SD,T", 510); // SS German pnemonic, S7300_Instruction_list.pdf P32
