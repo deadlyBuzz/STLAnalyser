@@ -19,6 +19,8 @@ public class STLAnalyser {
         // TODO code application logic here
         //defaultMethod();
         stlAnalyserWindow SAW = new stlAnalyserWindow();
+        // Check if the Debug window is to be enabled or not?
+        SAW.setDebugStatus(args.length>0);
         SAW.setVisible(true);
     }
     
@@ -60,8 +62,8 @@ public class STLAnalyser {
         dataString = dataString.concat("END_FUNCTION\r\n");
 
         SourceEntry source = new SourceEntry(dataString);
-        source.processSourceCode();
-        source.printDetails(System.out);
+        //source.processSourceCode();
+        //source.printDetails(System.out);
         System.out.println("Done.");
     }
 }

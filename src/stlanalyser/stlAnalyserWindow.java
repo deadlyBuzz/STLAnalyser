@@ -18,6 +18,12 @@ public class stlAnalyserWindow extends javax.swing.JFrame {
     public stlAnalyserWindow() {
         initComponents();
     }
+    
+    public void setDebugStatus(boolean enabled){
+        if(!enabled)
+            debugLinesTF.setText("-1");
+        debugLinesTF.setVisible(enabled);
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -31,6 +37,7 @@ public class stlAnalyserWindow extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         dataEntryTA = new javax.swing.JTextArea();
         goButton = new javax.swing.JButton();
+        debugLinesTF = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -46,18 +53,24 @@ public class stlAnalyserWindow extends javax.swing.JFrame {
             }
         });
 
+        debugLinesTF.setText("Debug line separated by Commas.");
+        debugLinesTF.setToolTipText("");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jScrollPane1)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jScrollPane1))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(157, 157, 157)
+                        .addComponent(goButton)
+                        .addGap(18, 18, 18)
+                        .addComponent(debugLinesTF, javax.swing.GroupLayout.DEFAULT_SIZE, 168, Short.MAX_VALUE)))
                 .addContainerGap())
-            .addGroup(layout.createSequentialGroup()
-                .addGap(157, 157, 157)
-                .addComponent(goButton)
-                .addContainerGap(196, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -65,7 +78,9 @@ public class stlAnalyserWindow extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 244, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(goButton)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(goButton)
+                    .addComponent(debugLinesTF, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
 
@@ -75,7 +90,8 @@ public class stlAnalyserWindow extends javax.swing.JFrame {
     private void goButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_goButtonActionPerformed
         // TODO add your handling code here:
         SourceEntry source = new SourceEntry(dataEntryTA.getText());
-        source.processSourceCode();
+        String debugLines[] = debugLinesTF.getText().split(",");
+        source.processSourceCode(debugLines);
         source.printDetails(System.out);
         System.out.println("Done.");
     }//GEN-LAST:event_goButtonActionPerformed
@@ -116,6 +132,7 @@ public class stlAnalyserWindow extends javax.swing.JFrame {
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextArea dataEntryTA;
+    private javax.swing.JTextField debugLinesTF;
     private javax.swing.JButton goButton;
     private javax.swing.JScrollPane jScrollPane1;
     // End of variables declaration//GEN-END:variables

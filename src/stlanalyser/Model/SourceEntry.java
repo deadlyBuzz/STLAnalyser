@@ -37,6 +37,7 @@ public class SourceEntry {
     public static final String reBLDSTATEMENT   = "BLD\\s+.*";
     public static final String reJUMPSTATEMENT  = "(J[ULCOZNP]|JCN|JNB|JBI|JNBI|JOS|JPZ|JMZ|JUO|LOOP)";
     public static final String reCALLSTATEMENT  = "(CALL|UC|CC)";
+    public static final String reARRAYSTATEMENT = ".*ARRAY\\s*\\[[0-9]+\\s+\\.+\\s[0-9]+\\s\\].*";
     
     
     /**
@@ -73,7 +74,7 @@ public class SourceEntry {
     /**
      * This is the method that performs the process of analysing the source code.
      */
-    public void processSourceCode(){
+    public void processSourceCode(String[] args){
         Integer StateMachine;// = new Integer(0);
         Map<String,String> VAR = new HashMap<>();
         final Integer UNKNOWN           = 0;
@@ -82,9 +83,9 @@ public class SourceEntry {
         final Integer NETWORKANALYSIS   = 3;
         final Integer DATABLOCK         = 4; // Data Blocks are Not runtime executable - Data only.
         final Integer BLOCKCALL         = 5; // Block calls - Any parameter transfers do not incurr
-        
-        int[] debugLines = {52,55};
-        
+        ArrayList<String> memData = new ArrayList<>();  // Create a new Arraylist to hold any data we're supposed to remember
+                                                        // from any previousl lines (E.G - Arrays)
+                
         //1 - Empty the arraylist to start with.
         sourceLineEntries.clear();
         StateMachine = UNKNOWN;        
@@ -95,8 +96,8 @@ public class SourceEntry {
              * Purely for Debug purposes only.
              * Allows me to Break the processing at any line I want to.
              */
-            for(int d=0; d<debugLines.length; d++){
-                if(i==debugLines[d])
+            for(int d=0; d<args.length; d++){
+                if(i==Integer.parseInt(args[d]))
                     System.out.println("<<<<Debug: "+ stringLine +">>>>");
             }
             switch(StateMachine){                
@@ -159,9 +160,23 @@ public class SourceEntry {
                         StateMachine = NETWORKANALYSIS;
                         break;
                     }
-                    else{
+                    else if(stringLine.matches(reARRAYSTATEMENT)){
+                        memData.add(stringLine);
                         sourceLineEntries.add(new lineEntry(stringLine,i,0,lineEntry.VAR_DECLARE));
-                        String[] placeHolder =  stringLine.split(":");
+                        break;
+                    }
+                    else{
+                        sourceLineEntries.add(new lineEntry(stringLine,i,0,lineEntry.VAR_DECLARE));                        
+                        String[] placeHolder =  stringLine.split(":");                        
+                        if(placeHolder.length<2){ // if there is no Colon in the entry... why?
+                                if(memData.get(memData.size()-1).matches(reARRAYSTATEMENT)){ // if the last entry was an Array Declare
+                                        String[] datPlaceHolder = new String[]{"",""};                                        
+                                        datPlaceHolder[1] = placeHolder[0].replace(";", ""); // build a new "PlaceHolder"
+                                        datPlaceHolder[0] = memData.get(memData.size()-1).replace("(.*):(.*)", "$1:");
+                                        placeHolder = datPlaceHolder;
+                                }
+                            }
+                                                            
                         String put = VAR.put(placeHolder[0].trim(), resolveMemory(placeHolder[1].replaceAll(";", "").trim())); // Clear out any trailing colons.                                           
                     }
                     break;
@@ -316,6 +331,10 @@ public class SourceEntry {
         // Time is to be recorded in nanoseconds.
         // This is to accmmodate time of .11us for certain instructions.
         // until i come up with a better way of doing this, this is how it;s done.
+        // NOTE:  The instruction times here are all derived for the S7-315 controller.
+        //      The page numbers are included in the comments in groups such that in 
+        //      the event that the details of another PLC are required, it is easier
+        //      reference.
         m = new HashMap<>();
         m.put("L,W", 110); //S7300_Instruction_list.pdf p34
         m.put("L,B", 90);
@@ -384,6 +403,9 @@ public class SourceEntry {
         m.put("CC,FC",1770);
         m.put("R,b", 80);
         m.put("S,b", 80);        
+        m.put("SET,b",50); // SS German pnemonic, S7300_Instruction_list.pdf P31
+        m.put("CLR,b",50);
+        m.put("NOT,b",50);
         m.put("SD,T", 510); // SS German pnemonic, S7300_Instruction_list.pdf P32
         
         // Jump entries - different scenario.
