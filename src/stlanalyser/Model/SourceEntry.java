@@ -171,9 +171,12 @@ public class SourceEntry {
                         if(placeHolder.length<2){ // if there is no Colon in the entry... why?
                                 if(memData.get(memData.size()-1).matches(reARRAYSTATEMENT)){ // if the last entry was an Array Declare
                                         String[] datPlaceHolder = new String[]{"",""};                                        
-                                        datPlaceHolder[1] = placeHolder[0].replace(";", ""); // build a new "PlaceHolder"
-                                        datPlaceHolder[0] = memData.get(memData.size()-1).replace("(.*):(.*)", "$1:");
+                                        datPlaceHolder[1] = placeHolder[0].replace(";", "").trim(); // build a new "PlaceHolder"
+                                        datPlaceHolder[0] = memData.get(memData.size()-1);
+                                        datPlaceHolder[0] = datPlaceHolder[0].substring(0, datPlaceHolder[0].indexOf(":"));
+                                        //datPlaceHolder[0] = datPlaceHolder[0].replace("(.*):(.*)", "$1:");
                                         placeHolder = datPlaceHolder;
+                                        memData.remove(memData.size()-1); //When finished - Remove the last string item.
                                 }
                             }
                                                             
@@ -232,8 +235,9 @@ public class SourceEntry {
 
                     try{
                         if(placeHolder.length>1){
-                            if (placeHolder[1].matches(reLOCALVARIABLE)){
-                                dataPlaceHolder = VAR.get(placeHolder[1].replace("#", ""));
+                            //placeHolder[1] = placeHolder[1].trim().replaceAll("\\[[0-9\\s]+\\]","");                             
+                            if (placeHolder[1].trim().replaceAll("\\[[0-9\\s]+\\]","").matches(reLOCALVARIABLE)){
+                                dataPlaceHolder = VAR.get(placeHolder[1].replace("#", "").replaceAll("\\[[ \\t0-9]+\\].*", ""));                                
                                 if (dataPlaceHolder == null){
                                     JOptionPane.showMessageDialog(null, "Error Matching Variables- Ensure correct script details");
                                     System.err.println("Error Matching Variables- Ensure correct script details");
@@ -428,6 +432,11 @@ public class SourceEntry {
         m.put("JL", 160);
         m.put("LOOP", 150);
         
+        m.put("BE,b",680); // S7300_instruction_list.pdf P61
+        m.put("BEU,b",680);   
+        m.put("BEC,b",680); 
+        
+        m.put("POP,b",680);
         
     /*
      * <sup>1</sup>: Different calculation when evaluating an A Etc. with a signal
