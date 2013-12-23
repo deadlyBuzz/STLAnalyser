@@ -38,6 +38,9 @@ public class SourceEntry {
     public static final String reJUMPSTATEMENT  = "(J[ULCOZNP]|JCN|JNB|JBI|JNBI|JOS|JPZ|JMZ|JUO|LOOP)";
     public static final String reCALLSTATEMENT  = "(CALL|UC|CC)";
     public static final String reARRAYSTATEMENT = ".*ARRAY\\s*\\[[0-9]+\\s+\\.+\\s[0-9]+\\s\\].*";
+    public static final String reARRAYCLEAR     = "(\\[[ \\t0-9]+\\]\\s+)?;";
+    public static final String reLOADADDRESS    = "\\s+LAR(1|2).*";
+    public static final String reCLEANLINE      = "(.*);(\\s*//.*)?";
     
     
     /**
@@ -180,7 +183,7 @@ public class SourceEntry {
                                 }
                             }
                                                             
-                        String put = VAR.put(placeHolder[0].trim(), resolveMemory(placeHolder[1].replaceAll(";", "").trim())); // Clear out any trailing colons.                                           
+                        String put = VAR.put(placeHolder[0].trim(), resolveMemory(placeHolder[1].replaceAll("(\\[[ \\t0-9]+\\]\\s+)?;", "").trim())); // Clear out any trailing colons.                                           
                     }
                     break;
 /*----------*/  case 3 : // NETWORKANALYSIS
@@ -227,12 +230,36 @@ public class SourceEntry {
                         StateMachine = UNKNOWN;
                         break;
                     }
-                    //<<<< Still to do...                                                                              
-                    // 1 - See how to encode the Direct and Indirect memory access into the encoding.
+                    
+                    // Loading address register X.
+                    // This should be treated as a separate entity TBF.
+                   if(stringLine.matches(reLOADADDRESS)) {
+                       placeHolder = stringLine.replaceAll(reCLEANLINE, "$1").split(" "); // remove all comments from the line - clean source.
+                       try{
+                           if(placeHolder[1].matches("P#.*")){ // if we're passing a pointer to a specific variable.
+                               placeHolder[1] = ",m";
+                           }
+                           else{
+                               placeHolder[1] = placeHolder[1].replace("([a-zA-Z]+)[0-9]+", "$1");
+                               //throw new IllegalArgumentException();
+                           }
+                           sourceLineEntries.add(new lineEntry(stringLine,i,mGet(placeHolder[0]+","+placeHolder[1]),lineEntry.CODE_SOURCE));
+                       }
+                       catch(ArrayIndexOutOfBoundsException e){
+                           if(placeHolder.length<2) {// this is done as the statement is a standalone LAR1
+                               sourceLineEntries.add(new lineEntry(stringLine,i,mGet(placeHolder[0]+",m"),lineEntry.CODE_SOURCE));
+                               break;
+                            }
+                           System.out.println("<<<< IndirectAddressing: exception accessing placeholder on entry>" + stringLine);
+                       }
+                       break;
+                   }
+                    
                                         
                     // If we're here - This is a Valid Line to process.
-                    placeHolder = stringLine.trim().replaceAll(";", "").split("\\s+"); // split via any whitespace characters.
-
+                    placeHolder = stringLine.trim().replaceAll(reCLEANLINE, "$1").split("\\s+"); // split via any whitespace characters and remove any trailing comments.
+                    //placeHolder = stringLine.trim().replaceAll(";", "").split("\\s+"); // split via any whitespace characters and remove any trailing comments.
+                    
                     try{
                         if(placeHolder.length>1){
                             //placeHolder[1] = placeHolder[1].trim().replaceAll("\\[[0-9\\s]+\\]","");                             
@@ -245,6 +272,7 @@ public class SourceEntry {
                                 }
                                 else
                                     placeHolder[1] = dataPlaceHolder;                                                    
+                                sourceLineEntries.add(new lineEntry(stringLine,i,mGet(placeHolder[0]+placeHolder[1]),lineEntry.CODE_SOURCE));
                             }
 
                             // -------- We're here this is a genuine sourcecode entry, - Now check what the statement has consisted of. --------------
@@ -301,7 +329,7 @@ public class SourceEntry {
          * B = Byte = 8 bits, any data type that takes up 8 bits is accessed as a Byte.
          * S5Time takes up 16 Bits thus is encoded as a Word.
          */
-        memoryTypes.put("BOOL", "b");
+        memoryTypes.put("BOOL", ",b");
         memoryTypes.put("BYTE", ",B");
         memoryTypes.put("INT",",W");
         memoryTypes.put("WORD",",W");
@@ -314,7 +342,7 @@ public class SourceEntry {
         memoryTypes.put("CHAR",",B");
         memoryTypes.put("DATE_AND_TIME","X"); // X = Complex.
         memoryTypes.put("ANY", ",X");
-        memoryTypes.put("STRING", "X");        
+        memoryTypes.put("STRING", ",B"); // Complex but individual access treated as a Byte (Char)       
         memoryTypes.put("ARRAY", "X");        
         memoryTypes.put("STRUCT", "X");
         memoryTypes.put("TIMER", "P"); // P = Parameter.
@@ -438,6 +466,25 @@ public class SourceEntry {
         
         m.put("POP,b",680);
         
+        m.put("+AR1,b",100); // S7300_instruction_list.pdf P48
+        m.put("+AR1,w",120); // S7300_instruction_list.pdf P48
+        m.put("+AR2,b",100); // S7300_instruction_list.pdf P48
+        m.put("+AR2,w",120); // S7300_instruction_list.pdf P48
+        
+        m.put("LAR1,AR2",100); // S7300_instruction_list.pdf P37
+        m.put("LAR1,DBD",210); // S7300_instruction_list.pdf P37
+        m.put("LAR1,DID",400); // S7300_instruction_list.pdf P37
+        m.put("LAR1,LD",210); // S7300_instruction_list.pdf P37
+        m.put("LAR1,MD",210); // S7300_instruction_list.pdf P37
+        m.put("LAR1,ACCU",100); // S7300_instruction_list.pdf P37
+        m.put("LAR1,m",120); // S7300_instruction_list.pdf P37        
+        m.put("LAR2,DBD",210); // S7300_instruction_list.pdf P37
+        m.put("LAR2,DID",400); // S7300_instruction_list.pdf P37
+        m.put("LAR2,LD",210); // S7300_instruction_list.pdf P37
+        m.put("LAR2,MD",210); // S7300_instruction_list.pdf P37
+        m.put("LAR2,ACCU",100); // S7300_instruction_list.pdf P37
+        m.put("LAR2,m",120); // S7300_instruction_list.pdf P37
+
     /*
      * <sup>1</sup>: Different calculation when evaluating an A Etc. with a signal
      * compared with specified conditions. (Compare P22 with P27>

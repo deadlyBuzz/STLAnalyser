@@ -16,6 +16,7 @@ VAR
   arrayCounter : INT ;
   oldDelta : INT ;
   sumTotal : INT ;
+  resultString : STRING[9] ;
   scanArray : ARRAY  [1 .. 100 ] OF //Array of scan times for results
   INT ;
 END_VAR
@@ -27,6 +28,8 @@ TITLE =Select the state in which the program resides
       L     #delta; 
       ==I   ; 
       JC    _end; 
+
+L #resultString[3]
 
 // new value, remember this
       T     #oldDelta; 

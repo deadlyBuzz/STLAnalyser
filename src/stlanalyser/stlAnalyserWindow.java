@@ -53,7 +53,7 @@ public class stlAnalyserWindow extends javax.swing.JFrame {
             }
         });
 
-        debugLinesTF.setText("Debug line separated by Commas.");
+        debugLinesTF.setText("-1");
         debugLinesTF.setToolTipText("");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
