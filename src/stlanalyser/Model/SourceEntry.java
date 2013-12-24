@@ -39,7 +39,7 @@ public class SourceEntry {
     public static final String reCALLSTATEMENT  = "(CALL|UC|CC)";
     public static final String reARRAYSTATEMENT = ".*ARRAY\\s*\\[[0-9]+\\s+\\.+\\s[0-9]+\\s\\].*";
     public static final String reARRAYCLEAR     = "(\\[[ \\t0-9]+\\]\\s+)?;";
-    public static final String reLOADADDRESS    = "\\s+LAR(1|2).*";
+    public static final String reLOADADDRESS    = "\\s*LAR(1|2).*";
     public static final String reCLEANLINE      = "(.*);(\\s*//.*)?";
     
     
@@ -234,10 +234,10 @@ public class SourceEntry {
                     // Loading address register X.
                     // This should be treated as a separate entity TBF.
                    if(stringLine.matches(reLOADADDRESS)) {
-                       placeHolder = stringLine.replaceAll(reCLEANLINE, "$1").split(" "); // remove all comments from the line - clean source.
+                       placeHolder = stringLine.replaceAll(reCLEANLINE, "$1").trim().split("\\s+"); // remove all comments from the line - clean source.
                        try{
                            if(placeHolder[1].matches("P#.*")){ // if we're passing a pointer to a specific variable.
-                               placeHolder[1] = ",m";
+                               placeHolder[1] = "m";
                            }
                            else{
                                placeHolder[1] = placeHolder[1].replace("([a-zA-Z]+)[0-9]+", "$1");
