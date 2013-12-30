@@ -16,6 +16,7 @@ public class SourceEntry {
     private ArrayList<String> sourceLines;
     private ArrayList<lineEntry> sourceLineEntries;
     private Map<String, Integer> m;
+    private Map<String, String> t;
     
     //http://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html
     public static final String reFUNCTIONHEADER = "(FUNCTION|ORGANIZATION)(_BLOCK)?.*";
@@ -41,6 +42,8 @@ public class SourceEntry {
     public static final String reARRAYCLEAR     = "(\\[[ \\t0-9]+\\]\\s+)?;";
     public static final String reLOADADDRESS    = "\\s*LAR(1|2).*";
     public static final String reCLEANLINE      = "(.*);(\\s*//.*)?";
+    public static final String reREGINDIRECT    = "\\[AR.*"; // Register indirect check
+    public static final String reAREAINDIRECT   = "\\[[ML][DW].*"; // Area indirect addressing
     
     
     /**
@@ -100,7 +103,7 @@ public class SourceEntry {
              * Allows me to Break the processing at any line I want to.
              */
             for(int d=0; d<args.length; d++){
-                if(i==Integer.parseInt(args[d]))
+                if(i==Integer.parseInt(args[d])-1)
                     System.out.println("<<<<Debug: "+ stringLine +">>>>");
             }
             switch(StateMachine){                
@@ -272,7 +275,7 @@ public class SourceEntry {
                                 }
                                 else
                                     placeHolder[1] = dataPlaceHolder;                                                    
-                                sourceLineEntries.add(new lineEntry(stringLine,i,mGet(placeHolder[0]+placeHolder[1]),lineEntry.CODE_SOURCE));
+                                sourceLineEntries.add(new lineEntry(stringLine,i,mGet(placeHolder[0]+","+placeHolder[1]),lineEntry.CODE_SOURCE));
                             }
 
                             // -------- We're here this is a genuine sourcecode entry, - Now check what the statement has consisted of. --------------
@@ -286,6 +289,16 @@ public class SourceEntry {
                                                           // AWL_e.PDF P265
                             }
                             else{
+                                // Now check if there is a third item in placeholder representing an indirect address access.                                
+                                if(placeHolder.length==3){ // If there is a third level in placeholder - possibly an Area Internal register.
+                                    if(placeHolder[2].matches(reREGINDIRECT))
+                                        placeHolder[1] = placeHolder[1] + ";airi"; // annotate this with "Address internal, Register Indirect" addressing
+                                    if(placeHolder[2].matches(reAREAINDIRECT))
+                                        placeHolder[1] = placeHolder[1] + ";ai";   // annotate this with "Area Indirect" addressing
+                                }
+                                else
+                                    if(placeHolder[1].matches(reREGINDIRECT))
+                                        placeHolder[1] = "b;acri";    // Annotate this for Area Crossing, Register indirect
                                 placeHolder[1] = IDmemoryType(placeHolder[1]);
                                 sourceLineEntries.add(new lineEntry(stringLine,i,mGet(placeHolder[0]+","+placeHolder[1]),lineEntry.CODE_SOURCE));
                             }
@@ -323,34 +336,12 @@ public class SourceEntry {
     
      private String resolveMemory(String memory){
         String placeHolder;
-        Map<String, String>  memoryTypes= new HashMap<>();
         /*
          * E.G
          * B = Byte = 8 bits, any data type that takes up 8 bits is accessed as a Byte.
          * S5Time takes up 16 Bits thus is encoded as a Word.
-         */
-        memoryTypes.put("BOOL", ",b");
-        memoryTypes.put("BYTE", ",B");
-        memoryTypes.put("INT",",W");
-        memoryTypes.put("WORD",",W");
-        memoryTypes.put("DWORD",",D");
-        memoryTypes.put("DINT",",D");
-        memoryTypes.put("REAL",",D");
-        memoryTypes.put("S5TIME",",W");
-        memoryTypes.put("TIME",",D");
-        memoryTypes.put("DATE",",W");
-        memoryTypes.put("CHAR",",B");
-        memoryTypes.put("DATE_AND_TIME","X"); // X = Complex.
-        memoryTypes.put("ANY", ",X");
-        memoryTypes.put("STRING", ",B"); // Complex but individual access treated as a Byte (Char)       
-        memoryTypes.put("ARRAY", "X");        
-        memoryTypes.put("STRUCT", "X");
-        memoryTypes.put("TIMER", "P"); // P = Parameter.
-        memoryTypes.put("COUNTER", "P"); 
-        memoryTypes.put("POINTER", "P"); 
-        memoryTypes.put("ANY", "P"); // P = Parameter.        
-        
-        placeHolder = memoryTypes.get(memory);     
+         */        
+        placeHolder = t.get(memory);     // T populated once in loadHashMap
         if(placeHolder == null) {
             //JOptionPane.showMessageDialog(null, "Memory Type " + memory + " Not found --> Please adddess.");
             System.out.println("<<<< resolveMemory: Memory Type " + memory + " Not found --> Please adddess.");
@@ -368,6 +359,7 @@ public class SourceEntry {
         //      the event that the details of another PLC are required, it is easier
         //      reference.
         m = new HashMap<>();
+        t = new HashMap<>();
         m.put("L,W", 110); //S7300_Instruction_list.pdf p34
         m.put("L,B", 90);
         m.put("L,D", 120);
@@ -435,8 +427,8 @@ public class SourceEntry {
         m.put("CC,FC",1770);
         m.put("R,b", 80);
         m.put("S,b", 80);        
-        m.put("SET,b",50); // SS German pnemonic, S7300_Instruction_list.pdf P31
-        m.put("CLR,b",50);
+        m.put("SET,b",40); // SS German pnemonic, S7300_Instruction_list.pdf P31
+        m.put("CLR,b",40);
         m.put("NOT,b",50);
         m.put("SD,T", 510); // SS German pnemonic, S7300_Instruction_list.pdf P32
         
@@ -464,7 +456,7 @@ public class SourceEntry {
         m.put("BEU,b",680);   
         m.put("BEC,b",680); 
         
-        m.put("POP,b",680);
+        m.put("POP,b",80); // S7300_instruction_list.pdf P54
         
         m.put("+AR1,b",100); // S7300_instruction_list.pdf P48
         m.put("+AR1,w",120); // S7300_instruction_list.pdf P48
@@ -484,6 +476,32 @@ public class SourceEntry {
         m.put("LAR2,MD",210); // S7300_instruction_list.pdf P37
         m.put("LAR2,ACCU",100); // S7300_instruction_list.pdf P37
         m.put("LAR2,m",120); // S7300_instruction_list.pdf P37
+        
+       m.put("airi", 100); // Area internal, address indirect - S7300_instruction_list.pdf P76
+       m.put("ai", 100); // Area internal, address indirect - S7300_instruction_list.pdf P76
+       m.put("acri",330); // Area crossing, address indirect - assume a Boolean?
+
+        t.put("BOOL", "b");
+        t.put("BYTE", "B");
+        t.put("INT","W");
+        t.put("WORD","W");
+        t.put("DWORD","D");
+        t.put("DINT","D");
+        t.put("REAL","D");
+        t.put("S5TIME","W");
+        t.put("TIME","D");
+        t.put("DATE","W");
+        t.put("CHAR","B");
+        t.put("DATE_AND_TIME","X"); // X = Complex.
+        t.put("ANY", "X");
+        t.put("STRING", "B"); // Complex but individual access treated as a Byte (Char)       
+        t.put("ARRAY", "X");        
+        t.put("STRUCT", "X");
+        t.put("TIMER", "P"); // P = Parameter.
+        t.put("COUNTER", "P"); 
+        t.put("POINTER", "P"); 
+        t.put("ANY", "P"); // P = Parameter.        
+
 
     /*
      * <sup>1</sup>: Different calculation when evaluating an A Etc. with a signal
@@ -508,35 +526,59 @@ public class SourceEntry {
      * @return The Memory Identifier.
      */
     private String IDmemoryType(String Var){
+        String retVal = "";
+        String[] var = Var.split(";");
         // Boolean Local Variable or Memory Flag
-        if(Var.toUpperCase().matches("[LM]"))
-            return "b";
+        if(var[0].toUpperCase().matches("[LM]"))
+            retVal = "b";
         // Constant Timer Variable
-        if(Var.toUpperCase().matches("S5T#.*"))
-            return "K"; // Stored as a Word ???
+        if(var[0].toUpperCase().matches("S5T#.*"))
+            retVal = "K"; // Stored as a Word ???
         // If there is a ";", this is a single command and should be treated as a "b"
-        if(Var.toUpperCase().matches("(;|JNB|JU|JC).*"))
-            return "b";
+        if(var[0].toUpperCase().matches("(;|JNB|JU|JC).*"))
+            retVal = "b";
         // Timers - A Quick and easy (and somewhat Lazy) solution.
-        if(Var.toUpperCase().matches("T"))
-            return "T";
+        if(var[0].toUpperCase().matches("T"))
+            retVal = "T";
+        if(var[0].toUpperCase().matches("a[ci](ri)?"))
+            retVal = var[0];
         //Read is this is a constant value being passed.
-        if(Var.toUpperCase().matches("[0-9\\.]+\\s*;?"))
-            return "K";
-        if(Var.length()>1)
-            return Var.substring(Var.length()-1, Var.length());
+        if(var[0].toUpperCase().matches("[0-9\\.]+\\s*;?"))
+            retVal = "K";
+        if(var[0].toUpperCase().matches("(B|W|2)#[0-9]+#?[A-Fa-f0-9]+\\s*;?"))
+            retVal = "K";        
+        if(var[0].toUpperCase().matches("'.+'"))
+            retVal = "K";        
         
-        //If we've got this far, then this is an unknown address.  Treat it as such.
-        System.out.println("<<<< IDMemoryType:" +Var+"> Unknown Var - Please Address");
-        return Var;
+        if(var.length>1)
+            retVal = var[0].substring(var[0].length()-1, var[0].length());
+        
+        if(retVal.length()==0){//If we've got this far, then this is an unknown address.  Treat it as such.
+            System.out.println("<<<< IDMemoryType:" +Var+"> Unknown Var - Please Address");
+            return Var;
+        }
+        if(var.length>1)
+            return retVal + ";" + var[1];
+        else
+            return retVal;
     }
     
     private int mGet(String getM){
+        String[] getMString = getM.split(";");
+        int retVal;
         int i = 0;
-        if(m.get(getM)==null){
-            System.out.println("<<<< mGet: Could not find "+getM);            
+        if(m.get(getMString[0])==null){
+            System.out.println("<<<< mGet 1: Could not find "+getM);            
             return i;
         }
-        return m.get(getM);
+        retVal = m.get(getMString[0]);
+        if(getMString.length>1){
+            if(m.get(getMString[1])==null){
+                System.out.println("<<<< mGet 2: Could not find "+getM);            
+                return i;
+            }        
+            retVal = retVal + m.get(getMString[1]);
+        }        
+        return retVal;                                
     }
 }

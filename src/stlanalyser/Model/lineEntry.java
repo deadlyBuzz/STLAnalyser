@@ -119,9 +119,9 @@ public class lineEntry {
     
     /** Convenience Methods **/
     public String getStringDetails(){
-        return String.valueOf(this.lineNumber)+ "," +
-                this.lineSource               + "," +
-                String.valueOf(this.lineTime) + "," +
+        return String.valueOf(this.lineNumber)+ "|" +
+                this.lineSource               + "|" +
+                String.valueOf(this.lineTime) + "|  " +
                 typeTable.get(this.lineType);
                 
     }
