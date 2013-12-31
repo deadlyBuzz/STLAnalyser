@@ -1,6 +1,7 @@
 package stlanalyser.Model;
 
 import java.io.PrintStream;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -52,7 +53,8 @@ public class SourceEntry {
     public SourceEntry(){
         sourceLines = new ArrayList<>();        
         sourceLineEntries = new ArrayList<>();
-        loadHashMap(); // populate the hashmap with instructions and times.
+        //loadHashMap(); // populate the hashmap with instructions and times.
+        getDataBaseInfo();
     }
     
     /**
@@ -63,7 +65,8 @@ public class SourceEntry {
     public SourceEntry(String SourceCode){
         sourceLines = new ArrayList<>();        
         sourceLineEntries = new ArrayList<>();
-        loadHashMap(); // populate the hashmap with instructions and times.
+        //loadHashMap(); // populate the hashmap with instructions and times.
+        getDataBaseInfo();
 
         //1 - Break the Source code Entry into individual lines.
         //String sourceCodeArray[] = SourceCode.split("(\\r\\n)");
@@ -350,6 +353,11 @@ public class SourceEntry {
         return placeHolder;
     }
     
+     /**
+      * Load the Hashmaps m & T with static variables hard coded into the source code
+      * Developed with the program.
+      * Handy but a bit outdated.
+      */
     private void loadHashMap(){
         // Time is to be recorded in nanoseconds.
         // This is to accmmodate time of .11us for certain instructions.
@@ -508,12 +516,17 @@ public class SourceEntry {
      * compared with specified conditions. (Compare P22 with P27>
      */
     }
-    
-    public void printDetails(PrintStream s){
+
+    /**
+     * A method that when called will print out all the details of each object in sourceLineEntries
+     * 
+     * @param s the @PrintStream to be used for writing
+     */
+    public void printDetails(PrintStream s){ //<<<< Updated by Java tips
         for(lineEntry a:sourceLineEntries){
             s.println(a.getStringDetails());
         }
-    }
+    } //>>>>
     
     /**
      * This function takes in a Variable and returns the memory type identifier
@@ -567,18 +580,68 @@ public class SourceEntry {
         String[] getMString = getM.split(";");
         int retVal;
         int i = 0;
-        if(m.get(getMString[0])==null){
+        if(m.get(getMString[0].trim())==null){
             System.out.println("<<<< mGet 1: Could not find "+getM);            
             return i;
         }
-        retVal = m.get(getMString[0]);
+        retVal = m.get(getMString[0].trim());
         if(getMString.length>1){
             if(m.get(getMString[1])==null){
                 System.out.println("<<<< mGet 2: Could not find "+getM);            
                 return i;
             }        
-            retVal = retVal + m.get(getMString[1]);
+            retVal = retVal + m.get(getMString[1].trim());
         }        
         return retVal;                                
     }
+    
+    private void getDataBaseInfo(){
+        m = new HashMap<>();
+        t = new HashMap<>();
+        doMConnection(m,"SELECT * from 315Instructions");
+        doTConnection(t,"SELECT * from dataTypes");
+    }
+    
+    public static void doMConnection(Map m,String SQLString){
+        ResultSet rs = null;
+        String path = new java.io.File("c:\\temp\\STLExecTimes.mdb").getAbsolutePath();
+        String db ="jdbc:odbc:Driver={Microsoft Access Driver (*.mdb)};DBQ="+path;
+        try{
+            Class.forName("sun.jdbc.odbc.JdbcOdbcDriver");
+            Statement st; //<<<< Updated by Tips.
+            try (Connection con = DriverManager.getConnection(db)) {
+                st = con.createStatement();
+                rs = st.executeQuery(SQLString);
+                while(rs.next()){
+                    m.put(rs.getString("Syntax"), rs.getInt("Time"));
+                }    
+            }
+            st.close();//>>>>
+        }
+        catch(SQLException | ClassNotFoundException ex){
+            System.err.println("t:"+ex.toString());            
+        }    
+    }
+
+    public static void doTConnection(Map t,String SQLString){
+        ResultSet rs = null;
+        String path = new java.io.File("c:\\temp\\STLExecTimes.mdb").getAbsolutePath();
+        String db ="jdbc:odbc:Driver={Microsoft Access Driver (*.mdb)};DBQ="+path;
+        try{
+            Class.forName("sun.jdbc.odbc.JdbcOdbcDriver");
+            Statement st; //<<<< Updated by Tips.
+            try (Connection con = DriverManager.getConnection(db)) {
+                st = con.createStatement();
+                rs = st.executeQuery(SQLString);
+                while(rs.next()){
+                    t.put(rs.getString("Name"), rs.getString("type"));
+                }    
+            }
+            st.close();//>>>>
+        }
+        catch(SQLException | ClassNotFoundException ex){
+            System.err.println("m:"+ex.toString());            
+        }    
+    }    
+    
 }
