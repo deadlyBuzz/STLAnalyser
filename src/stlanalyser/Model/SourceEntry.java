@@ -295,13 +295,13 @@ public class SourceEntry {
                                 // Now check if there is a third item in placeholder representing an indirect address access.                                
                                 if(placeHolder.length==3){ // If there is a third level in placeholder - possibly an Area Internal register.
                                     if(placeHolder[2].matches(reREGINDIRECT))
-                                        placeHolder[1] = placeHolder[1] + ";airi"; // annotate this with "Address internal, Register Indirect" addressing
+                                        placeHolder[1] = placeHolder[1] + ";_airi"; // annotate this with "Address internal, Register Indirect" addressing
                                     if(placeHolder[2].matches(reAREAINDIRECT))
-                                        placeHolder[1] = placeHolder[1] + ";ai";   // annotate this with "Area Indirect" addressing
+                                        placeHolder[1] = placeHolder[1] + ";_ai";   // annotate this with "Area Indirect" addressing
                                 }
                                 else
                                     if(placeHolder[1].matches(reREGINDIRECT))
-                                        placeHolder[1] = "b;acri";    // Annotate this for Area Crossing, Register indirect
+                                        placeHolder[1] = "b;_acri";    // Annotate this for Area Crossing, Register indirect
                                 placeHolder[1] = IDmemoryType(placeHolder[1]);
                                 sourceLineEntries.add(new lineEntry(stringLine,i,mGet(placeHolder[0]+","+placeHolder[1]),lineEntry.CODE_SOURCE));
                             }
@@ -562,36 +562,49 @@ public class SourceEntry {
             retVal = "K";        
         if(var[0].toUpperCase().matches("'.+'"))
             retVal = "K";        
+         // instance or not Data block access - additional delay
+        if(var[0].toUpperCase().matches("D[IB]\\w"))
+            retVal = var[0].substring(var[0].length()-1, var[0].length()) + ";_pqdb"; // Partially qualified DB(I) access
+         
+        // To be enabled afterwards - I/O requires a different delay set.
+        //if(var[0].toUpperCase().matches("P?(IQ)\\w?"))
+        //    retVal = var[0].substring(var[0].length()-1, var[0].length()) + ";ioacc"; // Partially qualified DB(I) access        
         
-        if(var.length>1)
-            retVal = var[0].substring(var[0].length()-1, var[0].length());
+        //if(var.length>1) // Leave this alone for now - it seems to work
+        //    retVal = var[0].substring(var[0].length()-1, var[0].length());
         
         if(retVal.length()==0){//If we've got this far, then this is an unknown address.  Treat it as such.
-            System.out.println("<<<< IDMemoryType:" +Var+"> Unknown Var - Please Address");
-            return Var;
+            //System.out.println("<<<< IDMemoryType:" +Var+"> Unknown Var - Please Address");
+            retVal = var[0].substring(var[0].length()-1, var[0].length());
         }
-        if(var.length>1)
-            return retVal + ";" + var[1];
+        if(var.length>1){            
+            for(int i=1;i<var.length; i++){ // There may be multiple appendages - append each to the end of the identifier.
+                retVal += ";" + var[i];
+            }
+            return retVal;
+        }
         else
             return retVal;
     }
     
+    /**
+     * This function is used to return the delay time for each instruction.
+     * Where multiple delays are separated with a ";", they are all added in this function
+     * Example: L,W;_pqdb;_airi - <B>L</B>oad <B>W</B>ord from a <B>P</B>artially <B>Q</B>ualified <B>D</B>ata<B>B</B>ase using 
+     * <B>A</B>rea <B>C</B>rossing <B>R</B>egister <B>I</B>ndirect addressing.
+     * @param getM This is a String that contains the instruction and addional delay identifers
+     * @return integer containing the delays for the identified parameters
+     */
     private int mGet(String getM){
         String[] getMString = getM.split(";");
-        int retVal;
-        int i = 0;
-        if(m.get(getMString[0].trim())==null){
-            System.out.println("<<<< mGet 1: Could not find "+getM);            
-            return i;
+        int retVal = 0;        
+        for(int i=0; i<getMString.length; i++){
+                if(m.get(getMString[0].trim())==null){
+                    System.out.println("<<<< mGet ["+String.valueOf(i)+"]: Could not find "+getM);            
+                    return i;
+                }
+            retVal += m.get(getMString[i].trim());
         }
-        retVal = m.get(getMString[0].trim());
-        if(getMString.length>1){
-            if(m.get(getMString[1])==null){
-                System.out.println("<<<< mGet 2: Could not find "+getM);            
-                return i;
-            }        
-            retVal = retVal + m.get(getMString[1].trim());
-        }        
         return retVal;                                
     }
     
