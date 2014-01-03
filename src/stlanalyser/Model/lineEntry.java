@@ -16,6 +16,7 @@ public class lineEntry {
     private String lineSource;
     private Integer lineTime;
     private Integer lineType;
+    private String parentBlock;
     
     /**
      * Define Static integers for Line entry Types
@@ -34,6 +35,7 @@ public class lineEntry {
     public static final int CODE_COMMENT       = 11;
     public static final int CODE_SOURCE        = 12;
     public static final int DB_ENTRY           = 13;
+    public static final int CALLFUNCTION       = 14;
     public static final int INVALID_ENTRY      = -1;
     public static final int INCOMPLETE_ENTRY   = -2;
     public static final int EMPTY_LINE         = -3;
@@ -48,6 +50,7 @@ public class lineEntry {
         this.lineSource = "";
         this.lineTime = 0;
         this.lineType = INVALID_ENTRY;        
+        this.parentBlock = "";
         initHashMap();
     }
     
@@ -56,6 +59,7 @@ public class lineEntry {
         this.lineSource = sourceLine;
         this.lineTime = 0;
         this.lineType = INCOMPLETE_ENTRY;
+        this.parentBlock = "";
         initHashMap();
     }
     
@@ -64,6 +68,7 @@ public class lineEntry {
         this.lineSource = sourceLine;
         this.lineTime = 0;
         this.lineType = INCOMPLETE_ENTRY;
+        this.parentBlock = "";
         initHashMap();
     }
     
@@ -72,6 +77,7 @@ public class lineEntry {
         this.lineNumber = lineNumber;
         this.lineSource = sourceLine;
         this.lineType = INCOMPLETE_ENTRY;
+        this.parentBlock = "";
         initHashMap();
     }
     
@@ -80,8 +86,19 @@ public class lineEntry {
         this.lineTime = lineTime;
         this.lineSource = sourceLine;
         this.lineType = lineType;
+        this.parentBlock = "";
         initHashMap();
     }
+    
+    public lineEntry(String sourceLine, Integer lineNumber, Integer lineTime, Integer lineType, String parentBlock){
+        this.lineNumber = lineNumber;
+        this.lineTime = lineTime;
+        this.lineSource = sourceLine;
+        this.lineType = lineType;
+        this.parentBlock = parentBlock;
+        initHashMap();
+        }
+
     
     private void initHashMap(){
         typeTable = new HashMap<>();
@@ -99,6 +116,7 @@ public class lineEntry {
         typeTable.put(11,"CODE_COMMENT");
         typeTable.put(12,"CODE_SOURCE");
         typeTable.put(13,"DB_ENTRY");
+        typeTable.put(14,"CALL FUNCTION");
         typeTable.put(-1,"INVALID_ENTRY");
         typeTable.put(-2,"INCOMPLETE_ENTRY");
         typeTable.put(-3,"EMPTY_LINE");
@@ -109,6 +127,7 @@ public class lineEntry {
     public int getLineTime() { return this.lineTime; }
     public int getLineType() { return this.lineType; }
     public String getLineSource() { return this.lineSource; }
+    public String getParentBlock() { return this.parentBlock;}
     
     
     /** Setters **/
@@ -116,13 +135,15 @@ public class lineEntry {
     public void setLineTime(int lineTime){ this.lineTime = lineTime; }
     public void setLinetype (int lineType){ this.lineType = lineType; }
     public void setLineSource(String lineSource){ this.lineSource = lineSource; }
+    public void setParentBlock(String parentBlock) { this.parentBlock = parentBlock; }
     
     /** Convenience Methods **/
     public String getStringDetails(){
         return String.valueOf(this.lineNumber)+ "|" +
                 this.lineSource               + "|" +
-                String.valueOf(this.lineTime) + "|  " +
-                typeTable.get(this.lineType);
+                String.valueOf(this.lineTime) + "|" +
+                typeTable.get(this.lineType) + "|" +
+                this.parentBlock;
                 
     }
 }

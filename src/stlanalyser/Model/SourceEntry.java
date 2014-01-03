@@ -85,6 +85,7 @@ public class SourceEntry {
      */
     public void processSourceCode(String[] args){
         Integer StateMachine;// = new Integer(0);
+        String blockName = ""; // String to remember the name of the parent block being processed.
         Map<String,String> VAR = new HashMap<>();
         final Integer UNKNOWN           = 0;
         final Integer BLOCKHEADER       = 1;             
@@ -98,9 +99,16 @@ public class SourceEntry {
         //1 - Empty the arraylist to start with.
         sourceLineEntries.clear();
         StateMachine = UNKNOWN;        
+        /**
+         * This loop is where we go through each Line, one entry at a time, check what it is and then 
+         * create a lineEntry object type to represent that time.
+         * it is during this generation we determine the time each instruction is taking up.
+         */
         for(int i=0; i<sourceLines.size(); i++){
             String stringLine = sourceLines.get(i).replaceAll(reLABELID, "$1").trim(); // get rid of any Labels
-            
+            stringLine = stringLine.replaceAll("(.+)//.*", "$1");
+            if(i>0) 
+                sourceLineEntries.get(i-1).setParentBlock(blockName);
             /*
              * Purely for Debug purposes only.
              * Allows me to Break the processing at any line I want to.
@@ -112,8 +120,9 @@ public class SourceEntry {
             switch(StateMachine){                
 /*----------*/  case 0 : //Unknown.
                     if(stringLine.matches(reFUNCTIONHEADER)) {
+                        blockName = stringLine.replaceAll("(FUNCTION|ORGANIZATION)(_BLOCK)?.*((FC|FB|OB|DB)\\s+[0-9]+).*","$3").replaceAll(" ", "");
                         sourceLineEntries.add(new lineEntry(stringLine,i,0,lineEntry.BLOCK_DECLARATION));
-                        StateMachine = BLOCKHEADER;
+                        StateMachine = BLOCKHEADER;                        
                         break;
                     }
                     if(stringLine.matches(reDBHEADER)){
@@ -220,6 +229,7 @@ public class SourceEntry {
                     if(stringLine.matches(reENDFUNCTION)){
                         sourceLineEntries.add(new lineEntry(stringLine,i,0,lineEntry.BLOCK_END));
                         StateMachine = UNKNOWN;
+                        blockName = "";
                         break;
                     }                    
                     
@@ -287,7 +297,8 @@ public class SourceEntry {
                                 sourceLineEntries.add(new lineEntry(stringLine,i,mGet(placeHolder[0]),lineEntry.CODE_SOURCE));
                             // Check that the entry is calling an additional Function Block or DB Call.
                             else if(placeHolder[0].toUpperCase().matches(reCALLSTATEMENT)){
-                                sourceLineEntries.add(new lineEntry(stringLine,i,mGet(placeHolder[0]+","+placeHolder[1]),lineEntry.CODE_SOURCE));
+                                sourceLineEntries.add(new lineEntry(stringLine,i,mGet(placeHolder[0]+","+placeHolder[1]),lineEntry.CALLFUNCTION));
+                                if(stringLine.matches(".*\\(.*")) // If the "CALL" function does not have an open bracket, then then there won't be a close bracket.
                                 StateMachine = BLOCKCALL; // S7300_instruction_list.PDF P59 
                                                           // AWL_e.PDF P265
                             }
@@ -334,6 +345,7 @@ public class SourceEntry {
                     break;
             }
         }
+        sourceLineEntries.get(sourceLineEntries.size()-1).setParentBlock(blockName); // Update the Block name of the last entry
         
     }
     
@@ -608,6 +620,9 @@ public class SourceEntry {
         return retVal;                                
     }
     
+    /**
+     * Convenience function to call the methods that call the data from the database.
+     */
     private void getDataBaseInfo(){
         m = new HashMap<>();
         t = new HashMap<>();
@@ -615,6 +630,12 @@ public class SourceEntry {
         doTConnection(t,"SELECT * from dataTypes");
     }
     
+    /**
+     * Pull the instruction times from the SQL Database defined.
+     * @param m the HashTable in which to place the Data.
+     * @param SQLString The SQL String used to read the Database.
+     */
+
     public static void doMConnection(Map m,String SQLString){
         ResultSet rs = null;
         String path = new java.io.File("c:\\temp\\STLExecTimes.mdb").getAbsolutePath();
@@ -636,6 +657,11 @@ public class SourceEntry {
         }    
     }
 
+    /**
+     * Pull the data <u>T</u>ypes from the SQL Database defined.
+     * @param t the HashTable in which to place the Data.
+     * @param SQLString The SQL String used to read the Database.
+     */
     public static void doTConnection(Map t,String SQLString){
         ResultSet rs = null;
         String path = new java.io.File("c:\\temp\\STLExecTimes.mdb").getAbsolutePath();
@@ -656,5 +682,18 @@ public class SourceEntry {
             System.err.println("m:"+ex.toString());            
         }    
     }    
+    
+    /**
+     * <<<< Here Al.
+     * @return 
+     */
+    public Map getBlockTimes(){
+        Map<String,Integer> func = new HashMap<>();        
+        for(lineEntry a:sourceLineEntries){
+            String[] s = a.getStringDetails().split("|");
+            
+        }
+        return func;
+    }
     
 }
