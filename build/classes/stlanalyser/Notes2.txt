@@ -1,0 +1,926 @@
+FUNCTION FC 1 : VOID
+TITLE =
+VERSION : 0.1
+
+BEGIN
+NETWORK
+TITLE =
+
+      AN    T      1; 
+      =     L      0.0; 
+      A     L      0.0; 
+      BLD   102; 
+      L     S5T#3S; 
+      SD    T      1; 
+      A     L      0.0; 
+      A     M      2.1; 
+      A(    ; 
+      L     MW     8; 
+      L     0; 
+      <>I   ; 
+      )     ; 
+      =     L      0.1; 
+      A     L      0.1; 
+      BLD   102; 
+      =     M      2.0; 
+      A     L      0.1; 
+      JNB   _001; 
+      L     0; 
+      T     MW     8; 
+_001: NOP   0; 
+      A     L      0.0; 
+      A     T      1; 
+      R     M      2.1; 
+END_FUNCTION
+
+FUNCTION FC 3 : VOID
+TITLE =
+VERSION : 0.1
+
+BEGIN
+NETWORK
+TITLE = Network No. 1
+
+      A     M     50.0; 
+      A     M     50.1; 
+      A     M     50.2; 
+      A     M     50.3; 
+      A     M     50.4; 
+      A     M     50.5; 
+      A     M     50.6; 
+      A     M     50.7; 
+      =     M     80.0; 
+NETWORK
+TITLE = Network No. 2
+
+      A     M     50.0; 
+      A     M     52.1; 
+      A     M     52.2; 
+      A     M     52.3; 
+      A     M     52.4; 
+      A     M     52.5; 
+      A     M     52.6; 
+      A     M     52.7; 
+      =     M     80.1; 
+NETWORK
+TITLE = Network No. 3
+
+      A     M     50.0; 
+      A     M     54.1; 
+      A     M     54.2; 
+      A     M     54.3; 
+      A     M     54.4; 
+      A     M     54.5; 
+      A     M     54.6; 
+      A     M     54.7; 
+      =     M     80.2; 
+NETWORK
+TITLE = Network No. 4
+
+      A     M     50.0; 
+      A     M     56.1; 
+      A     M     56.2; 
+      A     M     56.3; 
+      A     M     56.4; 
+      A     M     56.5; 
+      A     M     56.6; 
+      A     M     56.7; 
+      =     M     80.3; 
+NETWORK
+TITLE = Network No. 5
+
+      A     M     50.0; 
+      A     M     58.1; 
+      A     M     58.2; 
+      A     M     58.3; 
+      A     M     58.4; 
+      A     M     58.5; 
+      A     M     58.6; 
+      A     M     58.7; 
+      =     M     80.4; 
+NETWORK
+TITLE = Network No. 6
+
+      A     M     50.0; 
+      A     M     60.1; 
+      A     M     60.2; 
+      A     M     60.3; 
+      A     M     60.4; 
+      A     M     60.5; 
+      A     M     60.6; 
+      A     M     60.7; 
+      =     M     80.5; 
+NETWORK
+TITLE = Network No. 7
+
+      A     M     50.0; 
+      A     M     62.1; 
+      A     M     62.2; 
+      A     M     62.3; 
+      A     M     62.4; 
+      A     M     62.5; 
+      A     M     62.6; 
+      A     M     62.7; 
+      =     M     80.6; 
+NETWORK
+TITLE = Network No. 8
+
+      A     M     50.0; 
+      A     M     64.1; 
+      A     M     64.2; 
+      A     M     64.3; 
+      A     M     64.4; 
+      A     M     64.5; 
+      A     M     64.6; 
+      A     M     64.7; 
+      =     M     80.7; 
+END_FUNCTION
+
+FUNCTION FC 4 : VOID
+TITLE =
+VERSION : 0.1
+
+BEGIN
+NETWORK
+TITLE = Network No. 1
+
+      O     M     50.0; 
+      O     M     50.1; 
+      O     M     50.2; 
+      O     M     50.3; 
+      O     M     50.4; 
+      O     M     50.5; 
+      O     M     50.6; 
+      O     M     50.7; 
+      =     M     80.0; 
+NETWORK
+TITLE = Network No. 2
+
+      O     M     50.0; 
+      O     M     52.1; 
+      O     M     52.2; 
+      O     M     52.3; 
+      O     M     52.4; 
+      O     M     52.5; 
+      O     M     52.6; 
+      O     M     52.7; 
+      =     M     80.1; 
+NETWORK
+TITLE = Network No. 3
+
+      O     M     50.0; 
+      O     M     54.1; 
+      O     M     54.2; 
+      O     M     54.3; 
+      O     M     54.4; 
+      O     M     54.5; 
+      O     M     54.6; 
+      O     M     54.7; 
+      =     M     80.2; 
+NETWORK
+TITLE = Network No. 4
+
+      O     M     50.0; 
+      O     M     56.1; 
+      O     M     56.2; 
+      O     M     56.3; 
+      O     M     56.4; 
+      O     M     56.5; 
+      O     M     56.6; 
+      O     M     56.7; 
+      =     M     80.3; 
+NETWORK
+TITLE = Network No. 5
+
+      O     M     50.0; 
+      O     M     58.1; 
+      O     M     58.2; 
+      O     M     58.3; 
+      O     M     58.4; 
+      O     M     58.5; 
+      O     M     58.6; 
+      O     M     58.7; 
+      =     M     80.4; 
+NETWORK
+TITLE = Network No. 6
+
+      O     M     50.0; 
+      O     M     60.1; 
+      O     M     60.2; 
+      O     M     60.3; 
+      O     M     60.4; 
+      O     M     60.5; 
+      O     M     60.6; 
+      O     M     60.7; 
+      =     M     80.5; 
+NETWORK
+TITLE = Network No. 7
+
+      O     M     50.0; 
+      O     M     62.1; 
+      O     M     62.2; 
+      O     M     62.3; 
+      O     M     62.4; 
+      O     M     62.5; 
+      O     M     62.6; 
+      O     M     62.7; 
+      =     M     80.6; 
+NETWORK
+TITLE = Network No. 8
+
+      O     M     50.0; 
+      O     M     64.1; 
+      O     M     64.2; 
+      O     M     64.3; 
+      O     M     64.4; 
+      O     M     64.5; 
+      O     M     64.6; 
+      O     M     64.7; 
+      =     M     80.7; 
+END_FUNCTION
+
+FUNCTION_BLOCK FB 1
+TITLE =
+VERSION : 0.1
+
+
+VAR_INPUT
+  lastScan : INT ;	//Last scan in mS
+  delta : INT ;	//An integer data that changes to indicate to the block a new value recieved
+END_VAR
+VAR_OUTPUT
+  avgScan : INT ;	//Average scan of the last 100 scans
+  fbState : INT ;	//State machine to indicate where the function block is.
+  resultsOK : BOOL ;	//Flag to indicate that the results being recieved are ok
+END_VAR
+VAR
+  arrayCounter : INT ;	//A counter that represents ow many items have been recorded
+  oldDelta : INT ;	//a variavle that represents the old value of delta to detect a change in value
+  sumTotal : INT ;	
+  scanArray : ARRAY  [1 .. 100 ] OF //Array of scan times for results
+  INT ;	
+END_VAR
+BEGIN
+NETWORK
+TITLE =Select the state in which the program resides
+// ---- Check if anew value has been detected ----
+      L     #oldDelta; 
+      L     #delta; 
+      ==I   ; 
+      JC    _end; 
+
+// new value, remember this
+      T     #oldDelta; 
+
+// check the state array initial step?
+      L     #fbState; 
+      L     0; 
+      ==I   ; 
+      JC    init; 
+
+//---- Check if er're building the array list ----
+      POP   ; 
+      L     1; 
+      ==I   ; 
+      JC    _bld; 
+
+// ---- Check that we're running the FIFO ----
+      POP   ; 
+      L     2; 
+      ==I   ; 
+      JC    _cyc; 
+NETWORK
+TITLE =initial Step
+
+init: NOP   0; 
+//OPN   DI     1
+//---- reset variables ----
+      CLR   ; 
+      =     #resultsOK; 
+      L     0; 
+      T     #avgScan; 
+      L     1; 
+      T     #arrayCounter; 
+
+//---- Loop through the scanarray and populate with Zeroes ----      
+      LAR1  P##scanArray; 
+loop: L     B#16#AC; 
+      T     DIW [AR1,P#0.0]; 
+      L     100; 
+      L     #arrayCounter; 
+      <=I   ; 
+
+      JC    lpEn; 
+      L     16; //<<< 16 Bits - 1 Word
+      +AR1  ; 
+
+      L     1; 
+      L     #arrayCounter; 
+      +I    ; 
+      T     #arrayCounter; 
+      JU    loop; 
+lpEn: NOP   0; 
+
+//---- Next state - build the list ----
+      L     1; 
+      T     #fbState; 
+
+//---- Reset arraycount afterwards ----
+      L     0; 
+      T     #arrayCounter; 
+
+NETWORK
+TITLE =Building the initial list
+
+_bld: NOP   0; 
+//OPN   DI     1
+      CLR   ; 
+      =     #resultsOK; 
+
+//---- new value - load pointer and place new value into the correct location
+      LAR1  P##scanArray; 
+      L     #arrayCounter; 
+      L     16; //<<< 16 Bits - 1 Word
+      *I    ; 
+      +AR1  ; 
+
+      L     #lastScan; 
+      T     DIW [AR1,P#0.0]; 
+
+//---- increment counter ----
+      L     #arrayCounter; 
+      L     1; 
+      +I    ; 
+      T     #arrayCounter; 
+      L     100; 
+      >=I   ; 
+      JCN   _end; 
+//---- If we're here - The list is populated ----
+
+      L     2; 
+      T     #fbState; 
+NETWORK
+TITLE =one off sumtotal calculation
+//Add all 100 samples in the scanarray array
+//Can be done once, see average calculation for other calculation method
+      L     #scanArray[1]; 
+      L     #scanArray[2]; 
+      +I    ; 
+      L     #scanArray[3]; 
+      +I    ; 
+      L     #scanArray[4]; 
+      +I    ; 
+      L     #scanArray[5]; 
+      +I    ; 
+      L     #scanArray[6]; 
+      +I    ; 
+      L     #scanArray[7]; 
+      +I    ; 
+      L     #scanArray[8]; 
+      +I    ; 
+      L     #scanArray[9]; 
+      +I    ; 
+      L     #scanArray[10]; 
+      +I    ; 
+      L     #scanArray[11]; 
+      +I    ; 
+      L     #scanArray[12]; 
+      +I    ; 
+      L     #scanArray[13]; 
+      +I    ; 
+      L     #scanArray[14]; 
+      +I    ; 
+      L     #scanArray[15]; 
+      +I    ; 
+      L     #scanArray[16]; 
+      +I    ; 
+      L     #scanArray[17]; 
+      +I    ; 
+      L     #scanArray[18]; 
+      +I    ; 
+      L     #scanArray[19]; 
+      +I    ; 
+      L     #scanArray[20]; 
+      +I    ; 
+      L     #scanArray[21]; 
+      +I    ; 
+      L     #scanArray[22]; 
+      +I    ; 
+      L     #scanArray[23]; 
+      +I    ; 
+      L     #scanArray[24]; 
+      +I    ; 
+      L     #scanArray[25]; 
+      +I    ; 
+      L     #scanArray[26]; 
+      +I    ; 
+      L     #scanArray[27]; 
+      +I    ; 
+      L     #scanArray[28]; 
+      +I    ; 
+      L     #scanArray[29]; 
+      +I    ; 
+      L     #scanArray[30]; 
+      +I    ; 
+      L     #scanArray[31]; 
+      +I    ; 
+      L     #scanArray[32]; 
+      +I    ; 
+      L     #scanArray[33]; 
+      +I    ; 
+      L     #scanArray[34]; 
+      +I    ; 
+      L     #scanArray[35]; 
+      +I    ; 
+      L     #scanArray[36]; 
+      +I    ; 
+      L     #scanArray[37]; 
+      +I    ; 
+      L     #scanArray[38]; 
+      +I    ; 
+      L     #scanArray[39]; 
+      +I    ; 
+      L     #scanArray[40]; 
+      +I    ; 
+      L     #scanArray[41]; 
+      +I    ; 
+      L     #scanArray[42]; 
+      +I    ; 
+      L     #scanArray[43]; 
+      +I    ; 
+      L     #scanArray[44]; 
+      +I    ; 
+      L     #scanArray[45]; 
+      +I    ; 
+      L     #scanArray[46]; 
+      +I    ; 
+      L     #scanArray[47]; 
+      +I    ; 
+      L     #scanArray[48]; 
+      +I    ; 
+      L     #scanArray[49]; 
+      +I    ; 
+      L     #scanArray[50]; 
+      +I    ; 
+      L     #scanArray[51]; 
+      +I    ; 
+      L     #scanArray[52]; 
+      +I    ; 
+      L     #scanArray[53]; 
+      +I    ; 
+      L     #scanArray[54]; 
+      +I    ; 
+      L     #scanArray[55]; 
+      +I    ; 
+      L     #scanArray[56]; 
+      +I    ; 
+      L     #scanArray[57]; 
+      +I    ; 
+      L     #scanArray[58]; 
+      +I    ; 
+      L     #scanArray[59]; 
+      +I    ; 
+      L     #scanArray[60]; 
+      +I    ; 
+      L     #scanArray[61]; 
+      +I    ; 
+      L     #scanArray[62]; 
+      +I    ; 
+      L     #scanArray[63]; 
+      +I    ; 
+      L     #scanArray[64]; 
+      +I    ; 
+      L     #scanArray[65]; 
+      +I    ; 
+      L     #scanArray[66]; 
+      +I    ; 
+      L     #scanArray[67]; 
+      +I    ; 
+      L     #scanArray[68]; 
+      +I    ; 
+      L     #scanArray[69]; 
+      +I    ; 
+      L     #scanArray[70]; 
+      +I    ; 
+      L     #scanArray[71]; 
+      +I    ; 
+      L     #scanArray[72]; 
+      +I    ; 
+      L     #scanArray[73]; 
+      +I    ; 
+      L     #scanArray[74]; 
+      +I    ; 
+      L     #scanArray[75]; 
+      +I    ; 
+      L     #scanArray[76]; 
+      +I    ; 
+      L     #scanArray[77]; 
+      +I    ; 
+      L     #scanArray[78]; 
+      +I    ; 
+      L     #scanArray[79]; 
+      +I    ; 
+      L     #scanArray[80]; 
+      +I    ; 
+      L     #scanArray[81]; 
+      +I    ; 
+      L     #scanArray[82]; 
+      +I    ; 
+      L     #scanArray[83]; 
+      +I    ; 
+      L     #scanArray[84]; 
+      +I    ; 
+      L     #scanArray[85]; 
+      +I    ; 
+      L     #scanArray[86]; 
+      +I    ; 
+      L     #scanArray[87]; 
+      +I    ; 
+      L     #scanArray[88]; 
+      +I    ; 
+      L     #scanArray[89]; 
+      +I    ; 
+      L     #scanArray[90]; 
+      +I    ; 
+      L     #scanArray[91]; 
+      +I    ; 
+      L     #scanArray[92]; 
+      +I    ; 
+      L     #scanArray[93]; 
+      +I    ; 
+      L     #scanArray[94]; 
+      +I    ; 
+      L     #scanArray[95]; 
+      +I    ; 
+      L     #scanArray[96]; 
+      +I    ; 
+      L     #scanArray[97]; 
+      +I    ; 
+      L     #scanArray[98]; 
+      +I    ; 
+      L     #scanArray[99]; 
+      +I    ; 
+      L     #scanArray[100]; 
+      +I    ; 
+      T     #sumTotal; 
+
+//---- scanArray is now set up - arraycounter purpose changes ----
+      L     0; 
+      T     #arrayCounter; 
+      JU    _avg; 
+NETWORK
+TITLE =FIFO Operation - Shift the data in the array
+
+_cyc: NOP   0; 
+      S     #resultsOK; 
+//---- set the address point to the oldest entry ----
+      L     #arrayCounter; 
+      L     16; 
+      *I    ; 
+      LAR1  P##scanArray; 
+      +AR1  ; // Address register now points to the oldest entry
+      L     #sumTotal; 
+      L     DIW [AR1,P#0.0]; // oldest entry
+      -I    ; // remove oldest entry
+      L     #lastScan; // current entry
+
+      T     DIW [AR1,P#0.0]; // replace oldest entry
+      +I    ; // add the newest entry
+      T     #sumTotal; //add new entry to sumtotal
+
+// ---- Increment the pointer to point to the next element - the next oldest ----
+      L     1; 
+      L     #arrayCounter; 
+      +I    ; 
+      T     #arrayCounter; 
+      L     100; 
+      >=I   ; 
+      JCN   _avg; 
+      L     0; 
+      T     #arrayCounter; 
+
+NETWORK
+TITLE =Calculate the rolling avareage
+
+_avg: NOP   0; 
+      L     #sumTotal; 
+      L     100; 
+      /I    ; 
+      T     #avgScan; 
+
+NETWORK
+TITLE =END OPeration - Finish the cycle
+
+_end: BE    ; 
+
+END_FUNCTION_BLOCK
+
+DATA_BLOCK DB 1
+TITLE =
+VERSION : 0.1
+
+ FB 1
+BEGIN
+   lastScan := 0; 
+   delta := 0; 
+   avgScan := 0; 
+   fbState := 0; 
+   resultsOK := FALSE; 
+   arrayCounter := 0; 
+   oldDelta := 0; 
+   sumTotal := 0; 
+   scanArray[1] := 0; 
+   scanArray[2] := 0; 
+   scanArray[3] := 0; 
+   scanArray[4] := 0; 
+   scanArray[5] := 0; 
+   scanArray[6] := 0; 
+   scanArray[7] := 0; 
+   scanArray[8] := 0; 
+   scanArray[9] := 0; 
+   scanArray[10] := 0; 
+   scanArray[11] := 0; 
+   scanArray[12] := 0; 
+   scanArray[13] := 0; 
+   scanArray[14] := 0; 
+   scanArray[15] := 0; 
+   scanArray[16] := 0; 
+   scanArray[17] := 0; 
+   scanArray[18] := 0; 
+   scanArray[19] := 0; 
+   scanArray[20] := 0; 
+   scanArray[21] := 0; 
+   scanArray[22] := 0; 
+   scanArray[23] := 0; 
+   scanArray[24] := 0; 
+   scanArray[25] := 0; 
+   scanArray[26] := 0; 
+   scanArray[27] := 0; 
+   scanArray[28] := 0; 
+   scanArray[29] := 0; 
+   scanArray[30] := 0; 
+   scanArray[31] := 0; 
+   scanArray[32] := 0; 
+   scanArray[33] := 0; 
+   scanArray[34] := 0; 
+   scanArray[35] := 0; 
+   scanArray[36] := 0; 
+   scanArray[37] := 0; 
+   scanArray[38] := 0; 
+   scanArray[39] := 0; 
+   scanArray[40] := 0; 
+   scanArray[41] := 0; 
+   scanArray[42] := 0; 
+   scanArray[43] := 0; 
+   scanArray[44] := 0; 
+   scanArray[45] := 0; 
+   scanArray[46] := 0; 
+   scanArray[47] := 0; 
+   scanArray[48] := 0; 
+   scanArray[49] := 0; 
+   scanArray[50] := 0; 
+   scanArray[51] := 0; 
+   scanArray[52] := 0; 
+   scanArray[53] := 0; 
+   scanArray[54] := 172; 
+   scanArray[55] := 0; 
+   scanArray[56] := 0; 
+   scanArray[57] := 0; 
+   scanArray[58] := 0; 
+   scanArray[59] := 0; 
+   scanArray[60] := 0; 
+   scanArray[61] := 0; 
+   scanArray[62] := 0; 
+   scanArray[63] := 0; 
+   scanArray[64] := 0; 
+   scanArray[65] := 0; 
+   scanArray[66] := 0; 
+   scanArray[67] := 0; 
+   scanArray[68] := 0; 
+   scanArray[69] := 0; 
+   scanArray[70] := 0; 
+   scanArray[71] := 0; 
+   scanArray[72] := 0; 
+   scanArray[73] := 0; 
+   scanArray[74] := 0; 
+   scanArray[75] := 0; 
+   scanArray[76] := 0; 
+   scanArray[77] := 0; 
+   scanArray[78] := 0; 
+   scanArray[79] := 0; 
+   scanArray[80] := 0; 
+   scanArray[81] := 0; 
+   scanArray[82] := 0; 
+   scanArray[83] := 0; 
+   scanArray[84] := 0; 
+   scanArray[85] := 0; 
+   scanArray[86] := 0; 
+   scanArray[87] := 0; 
+   scanArray[88] := 0; 
+   scanArray[89] := 0; 
+   scanArray[90] := 0; 
+   scanArray[91] := 0; 
+   scanArray[92] := 0; 
+   scanArray[93] := 0; 
+   scanArray[94] := 0; 
+   scanArray[95] := 0; 
+   scanArray[96] := 0; 
+   scanArray[97] := 0; 
+   scanArray[98] := 0; 
+   scanArray[99] := 0; 
+   scanArray[100] := 0; 
+END_DATA_BLOCK
+
+FUNCTION FC 2 : VOID
+TITLE =
+VERSION : 0.1
+
+
+VAR_INPUT
+  noCalls : INT ;	
+END_VAR
+VAR_TEMP
+  actCalls : INT ;	
+END_VAR
+BEGIN
+NETWORK
+TITLE =
+
+      A     M     33.4; 
+      JC    htbt; 
+      SET   ; 
+      A     M     33.3; 
+      JC    para; 
+NETWORK
+TITLE =
+
+      L     0; 
+      T     #actCalls; 
+lp1:  CALL FC     3 ;
+      L     1; 
+      L     #actCalls; 
+      +I    ; 
+      T     #actCalls; 
+      L     #noCalls; 
+      <I    ; 
+      JC    lp1; 
+      L     #actCalls; 
+      T     MW    42; 
+      JU    end1; 
+
+
+NETWORK
+TITLE =
+
+para: L     0; 
+      T     #actCalls; 
+lp2:  CALL FC     4 ;
+      L     1; 
+      L     #actCalls; 
+      +I    ; 
+      T     #actCalls; 
+      L     #noCalls; 
+      <I    ; 
+      JC    lp2; 
+      L     #actCalls; 
+      T     MW    42; 
+      JU    end1; 
+NETWORK
+TITLE =
+
+htbt: L     0; 
+      T     #actCalls; 
+lp3:  CALL FC     1 ;
+      L     1; 
+      L     #actCalls; 
+      +I    ; 
+      T     #actCalls; 
+      L     #noCalls; 
+      <I    ; 
+      JC    lp3; 
+      L     #actCalls; 
+      T     MW    42; 
+end1: NOP   0; 
+
+END_FUNCTION
+
+ORGANIZATION_BLOCK OB 1
+TITLE = "Main Program Sweep (Cycle)"
+VERSION : 0.1
+
+
+VAR_TEMP
+  OB1_EV_CLASS : BYTE ;	//Bits 0-3 = 1 (Coming event), Bits 4-7 = 1 (Event class 1)
+  OB1_SCAN_1 : BYTE ;	//1 (Cold restart scan 1 of OB 1), 3 (Scan 2-n of OB 1)
+  OB1_PRIORITY : BYTE ;	//1 (Priority of 1 is lowest)
+  OB1_OB_NUMBR : BYTE ;	//1 (Organization block 1, OB1)
+  OB1_RESERVED_1 : BYTE ;	//Reserved for system
+  OB1_RESERVED_2 : BYTE ;	//Reserved for system
+  OB1_PREV_CYCLE : INT ;	//Cycle time of previous OB1 scan (milliseconds)
+  OB1_MIN_CYCLE : INT ;	//Minimum cycle time of OB1 (milliseconds)
+  OB1_MAX_CYCLE : INT ;	//Maximum cycle time of OB1 (milliseconds)
+  OB1_DATE_TIME : DATE_AND_TIME ;	//Date and time OB1 started
+END_VAR
+BEGIN
+NETWORK
+TITLE =
+
+      CALL FC     2 (
+           noCalls                  := MW    40);
+
+
+
+NETWORK
+TITLE =Dummy Update for Scan counter.
+
+//      A     "scanCounterInc"
+//      JCN   nope
+//      L     4800
+//     L     "scanCounter"
+//      >=I   
+//      JCN   nInc
+//      L     1
+//      +I    
+//      T     "scanCounter"
+//      JU    nope
+//nInc: L     1
+//      T     "scanCounter"
+//nope: CLR   
+//      =     "scanCounterInc"
+
+NETWORK
+TITLE =control actual scan time
+
+      L     #OB1_PREV_CYCLE; 
+      T     MW    10; 
+
+      L     4800; 
+      L     MW    12; 
+      >=I   ; 
+      JCN   nInc; 
+      L     1; 
+      +I    ; 
+      T     MW    12; 
+      JU    nope; 
+nInc: L     1; 
+      T     MW    12; 
+nope: NOP   0; 
+
+NETWORK
+TITLE =Call FB1
+
+
+      A     M      2.5; 
+      JNB   _001; 
+      CALL FB     1 , DB     1 (
+           lastScan                 := MW    10,
+           delta                    := MW    12,
+           avgScan                  := MW    14,
+           fbState                  := MW    16,
+           resultsOK                := M      2.4);
+_001: NOP   0; 
+END_ORGANIZATION_BLOCK
+
+ORGANIZATION_BLOCK OB 121
+TITLE = "Programming Error"
+VERSION : 0.1
+
+
+VAR_TEMP
+  OB121_EV_CLASS : BYTE ;	//16#25, Event class 2, Entering event state, Internal fault event
+  OB121_SW_FLT : BYTE ;	//16#XX Software programming fault
+  OB121_PRIORITY : BYTE ;	//X = Priority of OB where fault occured (Priority of 1 is lowest)
+  OB121_OB_NUMBR : BYTE ;	//121 (Organization block 121, OB121)
+  OB121_BLK_TYPE : BYTE ;	//16#88/8A/8B/8C/8E Type of block fault occured in
+  OB121_RESERVED_1 : BYTE ;	//Reserved for system
+  OB121_FLT_REG : WORD ;	//16#XX Specific register that caused fault
+  OB121_BLK_NUM : WORD ;	//Number of block that programming fault occured in
+  OB121_PRG_ADDR : WORD ;	//Address in block where programming fault occured
+  OB121_DATE_TIME : DATE_AND_TIME ;	//Date and time OB121 started
+END_VAR
+BEGIN
+NETWORK
+TITLE =
+
+      A     M      2.6; 
+      JC    _end; 
+      L     #OB121_EV_CLASS; 
+      T     MB   110; 
+      L     #OB121_SW_FLT; 
+      T     MB   111; 
+      L     #OB121_PRIORITY; 
+      T     MB   112; 
+      L     #OB121_OB_NUMBR; 
+      T     MB   113; 
+      L     #OB121_BLK_TYPE; 
+      T     MB   114; 
+      L     #OB121_FLT_REG; 
+      T     MW   118; 
+      L     #OB121_BLK_NUM; 
+      T     MW   120; 
+      L     #OB121_PRG_ADDR; 
+      T     MW   122; 
+      S     M      2.6; 
+_end: NOP   0; 
+END_ORGANIZATION_BLOCK
+
