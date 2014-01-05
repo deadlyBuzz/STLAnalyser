@@ -125,10 +125,9 @@ public class lineEntry {
     /** Getters **/
     public int getLineNumber() { return this.lineNumber; }
     public int getLineTime() { return this.lineTime; }
-    public int getLineType() { return this.lineType; }
+    public int getLineType() { return this.lineType; }   
     public String getLineSource() { return this.lineSource; }
-    public String getParentBlock() { return this.parentBlock;}
-    
+    public String getParentBlock() { return this.parentBlock;}    
     
     /** Setters **/
     public void setLineNumber(int lineNumber){ this.lineNumber = lineNumber; }

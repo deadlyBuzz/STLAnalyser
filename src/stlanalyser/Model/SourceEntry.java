@@ -688,11 +688,34 @@ public class SourceEntry {
      * @return 
      */
     public Map getBlockTimes(){
-        Map<String,Integer> func = new HashMap<>();        
-        for(lineEntry a:sourceLineEntries){
-            String[] s = a.getStringDetails().split("|");
-            
-        }
+        Map<String,Double> func = new HashMap<>();                
+        ArrayList<String> incompleteBlock = new ArrayList<>(); // Represents the number of incomplete blocks
+        String currentBlock;
+        String previousBlock = "";        
+        boolean incompleteDetected = false;
+        Double currentMax = 0.0;
+        // Go through the entire source code and build a list of functions and associated times.
+        do{
+            for(lineEntry a:sourceLineEntries){
+                String[] s = a.getStringDetails().split("|");
+                currentBlock = a.getParentBlock();
+                if(!currentBlock.equalsIgnoreCase(previousBlock)){ // This is a new Block
+                    if(!previousBlock.isEmpty()){ // Should only be the case on the first entry.
+                        func.put(previousBlock, currentMax);                
+                        currentMax = 0.0;
+                    }
+                }
+                if(a.getLineType() == lineEntry.CALLFUNCTION){
+                        String functionCalled = a.getLineSource().replaceAll("\\s*CALL([\\w\\s]+)[\\(\\,]{0,1}.*", "$1").replaceAll("\\s","");
+                    if(func.get(functionCalled)==null)
+                        incompleteBlock.add(functionCalled);
+                    else
+                        a.setLineTime(a.getLineTime()+func.get(functionCalled).intValue());
+                }
+                currentMax += Double.valueOf(a.getLineTime());
+                previousBlock = currentBlock; // To remember a new Block.            
+            }
+        }while(incompleteBlock.size()>0);
         return func;
     }
     
