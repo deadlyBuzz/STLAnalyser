@@ -16,6 +16,7 @@ public class SourceEntry {
     // Global Variables 
     private ArrayList<String> sourceLines;
     private ArrayList<lineEntry> sourceLineEntries;
+    private ArrayList<blockClass> blockList;
     private Map<String, Integer> m;
     private Map<String, String> t;
     
@@ -689,33 +690,40 @@ public class SourceEntry {
      */
     public Map getBlockTimes(){
         Map<String,Double> func = new HashMap<>();                
-        ArrayList<String> incompleteBlock = new ArrayList<>(); // Represents the number of incomplete blocks
+        Map<String,Integer> vRef = new HashMap<>();
+        ArrayList<String> blockNames = new ArrayList<>(); // Represents the complete list of Block Names used in the program.        
+        blockList = new ArrayList<>();
         String currentBlock;
         String previousBlock = "";        
         boolean incompleteDetected = false;
         Double currentMax = 0.0;
-        // Go through the entire source code and build a list of functions and associated times.
-        do{
-            for(lineEntry a:sourceLineEntries){
-                String[] s = a.getStringDetails().split("|");
-                currentBlock = a.getParentBlock();
-                if(!currentBlock.equalsIgnoreCase(previousBlock)){ // This is a new Block
-                    if(!previousBlock.isEmpty()){ // Should only be the case on the first entry.
-                        func.put(previousBlock, currentMax);                
-                        currentMax = 0.0;
-                    }
-                }
-                if(a.getLineType() == lineEntry.CALLFUNCTION){
-                        String functionCalled = a.getLineSource().replaceAll("\\s*CALL([\\w\\s]+)[\\(\\,]{0,1}.*", "$1").replaceAll("\\s","");
-                    if(func.get(functionCalled)==null)
-                        incompleteBlock.add(functionCalled);
-                    else
-                        a.setLineTime(a.getLineTime()+func.get(functionCalled).intValue());
-                }
-                currentMax += Double.valueOf(a.getLineTime());
-                previousBlock = currentBlock; // To remember a new Block.            
+        
+        // Go through the entire source code and build a list of blocks using the lineEntries.        
+        //(This could have been done as sourceLineEntries was being built but thsi would have complicated the program) AC
+        for(lineEntry a:sourceLineEntries){            
+            currentBlock = a.getParentBlock();
+            if(!currentBlock.equalsIgnoreCase(previousBlock)){ // This is a new Block
+                blockNames.add(currentBlock);
+                blockList.add(new blockClass());                
+                blockList.get(blockList.size()-1).setName(currentBlock);
+                vRef.put(currentBlock, blockList.size()-1); // A vertical reference of where to find each Function.
             }
-        }while(incompleteBlock.size()>0);
+            blockList.get(blockList.size()-1).addLine(a);            
+        }
+        
+        // we now have a list of BlockCall Objects.  Now we have to check which ones are missing functions
+        for(blockClass b:blockList){
+            if(!b.isComplete()){ // if it's complete = we don't really Care.
+                String[] missingList = b.getMissingFunctions().split("|");
+                for(String s:missingList){
+                    <<<<
+                }
+            }
+                
+            
+        }
+        
+        
         return func;
     }
     
