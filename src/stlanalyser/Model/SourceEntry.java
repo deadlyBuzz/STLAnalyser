@@ -715,15 +715,17 @@ public class SourceEntry {
         for(blockClass b:blockList){
             if(!b.isComplete()){ // if it's complete = we don't really Care.
                 String[] missingList = b.getMissingFunctions().split("|");
-                for(String s:missingList){
-                    <<<<
-                }
+                for(String s:missingList){ // go through each Function missing in the Block.
+                    if(vRef.get(s)==null){ // The Function being called is not available                        
+                        JOptionPane.showMessageDialog(null, "Function '"+s+"' Not available", "Function Not Available", JOptionPane.WARNING_MESSAGE, null);
+                    }
+                    else{
+                        if(blockList.get(vRef.get(s)).isComplete())
+                            b.addFunctionTime(s, blockList.get(vRef.get(s)).getExecutionTime());                        
+                    }
+                }                        
             }
-                
-            
         }
-        
-        
         return func;
     }
     
