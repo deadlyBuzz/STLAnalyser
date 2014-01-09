@@ -132,6 +132,7 @@ public class SourceEntry {
                         break;
                     }
                     sourceLineEntries.add(new lineEntry(stringLine,i,0,lineEntry.EMPTY_LINE));
+                    blockName = "";
                     break;
 /*----------*/  case 1 : //BlockHeader
                     // 1st Line - This is Definitley a Block Declaration.
@@ -230,7 +231,6 @@ public class SourceEntry {
                     if(stringLine.matches(reENDFUNCTION)){
                         sourceLineEntries.add(new lineEntry(stringLine,i,0,lineEntry.BLOCK_END));
                         StateMachine = UNKNOWN;
-                        blockName = "";
                         break;
                     }                    
                     
@@ -364,170 +364,6 @@ public class SourceEntry {
             placeHolder = "b";
         }        
         return placeHolder;
-    }
-    
-     /**
-      * Load the Hashmaps m & T with static variables hard coded into the source code
-      * Developed with the program.
-      * Handy but a bit outdated.
-      */
-    private void loadHashMap(){
-        // Time is to be recorded in nanoseconds.
-        // This is to accmmodate time of .11us for certain instructions.
-        // until i come up with a better way of doing this, this is how it;s done.
-        // NOTE:  The instruction times here are all derived for the S7-315 controller.
-        //      The page numbers are included in the comments in groups such that in 
-        //      the event that the details of another PLC are required, it is easier
-        //      reference.
-        m = new HashMap<>();
-        t = new HashMap<>();
-        m.put("L,W", 110); //S7300_Instruction_list.pdf p34
-        m.put("L,B", 90);
-        m.put("L,D", 120);
-        m.put("L,K", 90);  // Constant Values, all the same regardless of type
-        m.put("T", 800);
-        m.put("L,C", 450); // C= Counter
-        m.put("LC,C", 1090); // Loading a counter value with a BCD Value
-        m.put("LC,T", 1090); // Loading a Timer value with BCD
-        m.put("=,b", 80);
-        m.put("A,b",50); //S7300_Instruction_list.pdf p22<sup>1</sup>
-        m.put("O,b", 50);
-        m.put("AN,b",50); //S7300_Instruction_list.pdf p22<sup>1</sup>
-        m.put("ON,b", 50);
-        m.put("A,T",230);
-        m.put("A,C",100);
-        m.put("A(,b", 120);
-        m.put("AN,T",230);
-        m.put("AN,C",100);
-        m.put("AN(,b", 120);
-        m.put("O(,b",120);
-        m.put("ON(,b",120);
-        m.put("<>I,b",200); // S7300_instruction_list.PDF P49
-        m.put(">=I,b", 200);
-        m.put(">I,b", 200);
-        m.put("<=I,b", 200);
-        m.put("<I,b", 200);
-        m.put("==I,b", 200);
-        m.put("<>D,b",180); // S7300_instruction_list.PDF P49
-        m.put(">=D,b", 180);
-        m.put(">D,b", 180);
-        m.put("<=D,b", 180);
-        m.put("<D,b", 180);
-        m.put("==D,b", 180);
-        m.put("<>R,b",670); // S7300_instruction_list.PDF P49
-        m.put(">=R,b", 670);
-        m.put(">R,b", 670);
-        m.put("<=R,b", 670);
-        m.put("<R,b", 670);
-        m.put("==R,b", 670);
-
-        m.put("+I,b", 100); // S7300_instruction_list.PDF P43
-        m.put("+D,b", 90); 
-        m.put("+R,b", 440); 
-        m.put("-I,b", 100); // S7300_instruction_list.PDF P43
-        m.put("-D,b", 90); 
-        m.put("-R,b", 440); 
-        m.put("*I,b", 120); // S7300_instruction_list.PDF P43
-        m.put("*D,b", 90); 
-        m.put("*R,b", 440); 
-        m.put("/I,b", 220); // S7300_instruction_list.PDF P44
-        m.put("/D,b", 210); 
-        m.put("/R,b", 1930);         
-        m.put("MOD,b", 180);
-        m.put("),b", 120);
-        //m.put("BLD", 0); // Transferred to Comment
-        m.put("JNB,b",160); // S7300_instruction_list.PDF P64
-        m.put("T,B",80); // S7300_Instruction_list.pdf P36
-        m.put("T,W",90);
-        m.put("T,D",110);
-        m.put("CALL,FB",2050); // S7300_instruction_list.PDF P60
-        m.put("CALL,FC",2030);
-        m.put("UC,FB",1590);
-        m.put("UC,FC",1770);
-        m.put("CC,FB",1590);
-        m.put("CC,FC",1770);
-        m.put("R,b", 80);
-        m.put("S,b", 80);        
-        m.put("SET,b",40); // SS German pnemonic, S7300_Instruction_list.pdf P31
-        m.put("CLR,b",40);
-        m.put("NOT,b",50);
-        m.put("SD,T", 510); // SS German pnemonic, S7300_Instruction_list.pdf P32
-        
-        // Jump entries - different scenario.
-        m.put("JC", 160); //s7300_instruction_list.pdf P64
-        m.put("JCN", 160);
-        m.put("JCB", 160);
-        m.put("JNB", 160);
-        m.put("JBI", 160);
-        m.put("JBIN", 160);
-        m.put("JO", 160);
-        m.put("JOS", 160);
-        m.put("JUO", 160);
-        m.put("JZ", 160);
-        m.put("JP", 210);
-        m.put("JM", 210);
-        m.put("JN", 160);
-        m.put("JMZ", 160);
-        m.put("JPZ", 160);
-        m.put("JU", 160);
-        m.put("JL", 160);
-        m.put("LOOP", 150);
-        
-        m.put("BE,b",680); // S7300_instruction_list.pdf P61
-        m.put("BEU,b",680);   
-        m.put("BEC,b",680); 
-        
-        m.put("POP,b",80); // S7300_instruction_list.pdf P54
-        
-        m.put("+AR1,b",100); // S7300_instruction_list.pdf P48
-        m.put("+AR1,w",120); // S7300_instruction_list.pdf P48
-        m.put("+AR2,b",100); // S7300_instruction_list.pdf P48
-        m.put("+AR2,w",120); // S7300_instruction_list.pdf P48
-        
-        m.put("LAR1,AR2",100); // S7300_instruction_list.pdf P37
-        m.put("LAR1,DBD",210); // S7300_instruction_list.pdf P37
-        m.put("LAR1,DID",400); // S7300_instruction_list.pdf P37
-        m.put("LAR1,LD",210); // S7300_instruction_list.pdf P37
-        m.put("LAR1,MD",210); // S7300_instruction_list.pdf P37
-        m.put("LAR1,ACCU",100); // S7300_instruction_list.pdf P37
-        m.put("LAR1,m",120); // S7300_instruction_list.pdf P37        
-        m.put("LAR2,DBD",210); // S7300_instruction_list.pdf P37
-        m.put("LAR2,DID",400); // S7300_instruction_list.pdf P37
-        m.put("LAR2,LD",210); // S7300_instruction_list.pdf P37
-        m.put("LAR2,MD",210); // S7300_instruction_list.pdf P37
-        m.put("LAR2,ACCU",100); // S7300_instruction_list.pdf P37
-        m.put("LAR2,m",120); // S7300_instruction_list.pdf P37
-        
-       m.put("airi", 100); // Area internal, address indirect - S7300_instruction_list.pdf P76
-       m.put("ai", 100); // Area internal, address indirect - S7300_instruction_list.pdf P76
-       m.put("acri",330); // Area crossing, address indirect - assume a Boolean?
-
-        t.put("BOOL", "b");
-        t.put("BYTE", "B");
-        t.put("INT","W");
-        t.put("WORD","W");
-        t.put("DWORD","D");
-        t.put("DINT","D");
-        t.put("REAL","D");
-        t.put("S5TIME","W");
-        t.put("TIME","D");
-        t.put("DATE","W");
-        t.put("CHAR","B");
-        t.put("DATE_AND_TIME","X"); // X = Complex.
-        t.put("ANY", "X");
-        t.put("STRING", "B"); // Complex but individual access treated as a Byte (Char)       
-        t.put("ARRAY", "X");        
-        t.put("STRUCT", "X");
-        t.put("TIMER", "P"); // P = Parameter.
-        t.put("COUNTER", "P"); 
-        t.put("POINTER", "P"); 
-        t.put("ANY", "P"); // P = Parameter.        
-
-
-    /*
-     * <sup>1</sup>: Different calculation when evaluating an A Etc. with a signal
-     * compared with specified conditions. (Compare P22 with P27>
-     */
     }
 
     /**
@@ -702,30 +538,48 @@ public class SourceEntry {
         //(This could have been done as sourceLineEntries was being built but thsi would have complicated the program) AC
         for(lineEntry a:sourceLineEntries){            
             currentBlock = a.getParentBlock();
-            if(!currentBlock.equalsIgnoreCase(previousBlock)){ // This is a new Block
-                blockNames.add(currentBlock);
-                blockList.add(new blockClass());                
-                blockList.get(blockList.size()-1).setName(currentBlock);
-                vRef.put(currentBlock, blockList.size()-1); // A vertical reference of where to find each Function.
+            if(a.getParentBlock().length()>1){ // Ignore All unknown or blank entries.
+                if(!currentBlock.equalsIgnoreCase(previousBlock)){ // This is a new Block
+                    blockNames.add(currentBlock);
+                    blockList.add(new blockClass());                
+                    blockList.get(blockList.size()-1).setName(currentBlock);
+                    vRef.put(currentBlock, blockList.size()-1); // A vertical reference of where to find each Function.
+                    previousBlock = currentBlock;
+                }
+                blockList.get(blockList.size()-1).addLine(a);            
             }
-            blockList.get(blockList.size()-1).addLine(a);            
         }
         
         // we now have a list of BlockCall Objects.  Now we have to check which ones are missing functions
-        for(blockClass b:blockList){
-            if(!b.isComplete()){ // if it's complete = we don't really Care.
-                String[] missingList = b.getMissingFunctions().split("|");
-                for(String s:missingList){ // go through each Function missing in the Block.
-                    if(vRef.get(s)==null){ // The Function being called is not available                        
-                        JOptionPane.showMessageDialog(null, "Function '"+s+"' Not available", "Function Not Available", JOptionPane.WARNING_MESSAGE, null);
-                    }
-                    else{
-                        if(blockList.get(vRef.get(s)).isComplete())
-                            b.addFunctionTime(s, blockList.get(vRef.get(s)).getExecutionTime());                        
-                    }
-                }                        
+        int noLoops = 1;        
+        boolean allComplete = true;
+        do{
+           System.out.println("Completing Blocks - Iteration "+String.valueOf(noLoops)+".");
+           noLoops++;   
+           allComplete = true; // Assume they are all true by default.
+            for(blockClass b:blockList){
+                if(!b.isComplete()){ // if it's already complete = we don't really Care.
+                    String[] missingList = b.getMissingFunctions().split(",");
+                    for(String s:missingList){ // go through each Function missing in the Block.
+                        if(vRef.get(s)==null){ // The Function being called is not available                        
+                            JOptionPane.showMessageDialog(null, "Function '"+s+"' Not available", "Function Not Available", JOptionPane.WARNING_MESSAGE, null);
+                            System.out.println("getBlockTimes: Function '"+s+"' Not available> Substituting for Zero.");
+                            b.addFunctionTime(s, 0.0); // For now - Add an empty function.
+                        }
+                        else{
+                            if(blockList.get(vRef.get(s)).isComplete())
+                                b.addFunctionTime(s, blockList.get(vRef.get(s)).getExecutionTime());                        
+                            else
+                                System.out.println("getBlockTimes: Function '"+s+" Still registering incomplete");
+                        }
+                    }                        
+                }
+                if(b.isComplete())
+                    func.put(b.getName(), b.getExecutionTime()); // only if this is complete will it be added.               
+                else
+                    allComplete = false; // Check if this is still incomplete - if so - will need another Pass.
             }
-        }
+        }while((noLoops<blockList.size())&!allComplete);
         return func;
     }
     

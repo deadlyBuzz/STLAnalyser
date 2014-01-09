@@ -47,6 +47,8 @@ public class blockClass {
     
     public void setName(String name){ this.Name = name; }
     public void setType(String type){ this.Type = type; }
+    public String getName() { return this.Name; }
+    public String getType() { return this.Type; }
         
     public lineEntry getLine(int lineNo) {
         if(lines.get(lineNo)==null)
@@ -55,16 +57,20 @@ public class blockClass {
             return lines.get(lineNo);
     }
     
-    public String getMissingFunctions(){
-        String placeHolder = "";
+    public String getMissingFunctions(){        
         ArrayList<String> fnList = new ArrayList<>();
         fnList.add(missingFunctions.get(0).fnName); // Add the first function as per default
+        String placeHolder = missingFunctions.get(0).fnName;
         boolean found = false;
         for(MissingFnStruct a:missingFunctions){
+            found = false;
             for(int i=0;i<fnList.size();i++)
                 if(fnList.get(i).equalsIgnoreCase(a.fnName))
                     found = true;
-            if(!found){ fnList.add(a.fnName); placeHolder+="|"+a.fnName;}
+            if(!found){ 
+                fnList.add(a.fnName); 
+                placeHolder+=","+a.fnName;
+            }
         }        
         return placeHolder;
     }
@@ -83,8 +89,12 @@ public class blockClass {
                 lines.get(missingFunctions.get(i).lineNo).setLineTime(tempTime+time.intValue());
                 // Remove this function from the List.
                 missingFunctions.remove(i);
+                i--;
             }
         }
+        // Once we've added a function - check if there are any more functiosn to be checked.
+        // if not, this function is now complete.
+        complete = missingFunctions.isEmpty();                
     }
     
     private class MissingFnStruct{

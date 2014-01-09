@@ -4,6 +4,8 @@
  */
 package stlanalyser;
 
+import java.util.Map;
+import java.util.LinkedHashMap;
 import stlanalyser.Model.SourceEntry;
 
 /**
@@ -88,11 +90,13 @@ public class stlAnalyserWindow extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void goButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_goButtonActionPerformed
-        // TODO add your handling code here:
+        // TODO add your handling code here:        
         SourceEntry source = new SourceEntry(dataEntryTA.getText());
-        String debugLines[] = debugLinesTF.getText().split(",");
-        source.processSourceCode(debugLines);
+        String debugLines[] = debugLinesTF.getText().split(",");        
+        source.processSourceCode(debugLines);        
         source.printDetails(System.out);
+        LinkedHashMap tempMap = new LinkedHashMap(source.getBlockTimes());        
+        System.out.println("Map:"+tempMap.toString());
         System.out.println("Done.");
     }//GEN-LAST:event_goButtonActionPerformed
 
