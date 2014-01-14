@@ -14,6 +14,11 @@ package stlanalyser.Model;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.io.*;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import static stlanalyser.Model.SourceEntry.reLABELID;
 
 public class blockClass {
     private String Name;
@@ -31,14 +36,15 @@ public class blockClass {
         totalTime = 0.0;
         functions = new ArrayList<>();
         missingFunctions= new ArrayList<>();
-        lines = new HashMap<>();
+        lines = new LinkedHashMap<>();
     }
     
     public void addLine(lineEntry line){
         lines.put(line.getLineNumber(), line);
         totalTime += line.getLineTime();
         if(line.getLineType() == lineEntry.CALLFUNCTION){
-            String functionCalled = line.getLineSource().replaceAll("\\s*CALL([\\w\\s]+)[\\(\\,]{0,1}.*", "$1").replaceAll("\\s","");
+            String functionCalled = line.getLineSource().replaceAll(reLABELID, "$1").trim();
+            functionCalled = functionCalled.replaceAll("\\s*CALL([\\w\\s]+)[\\(\\,]{0,1}.*", "$1").replaceAll("\\s","");
             missingFunctions.add(new MissingFnStruct(line.getLineNumber(), functionCalled));
         }        
         if(line.getLineType()==lineEntry.BLOCK_END)
@@ -97,6 +103,29 @@ public class blockClass {
         complete = missingFunctions.isEmpty();                
     }
     
+    /**
+     * Function when called will iterate through each entry in the Block
+     * and output each entry to the valid PrintStream provided.
+     * @param validStream PrintStream that will be used to write the Data.
+     */
+    public void printBlockDetails(PrintStream validStream, int printOption){
+        validStream.println("\r\nPrinting Block" + this.Name + "\r\n");
+        String jumpLabel = new String();
+//        Set entrySet = lines.entrySet();
+//        Iterator it = entrySet.iterator();        
+//        while(it.hasNext()){            
+            
+//       }
+        Set<Integer> keys = lines.keySet();
+        for(Integer k:keys){
+            // This will iterate through each lineEntry.
+            String sourceLine = lines.get(k).getLineSource();            
+//            if(sourceLine.matches(SourceEntry.reLABELID+SourceEntry.reJUMPSTATEMENT))
+ //               jumpLabel+=sourceLine.replaceAll(SourceEntry.reJUMPSTATEMENT, "$1");
+            validStream.println(lines.get(k).getStringDetails());
+        }
+    }
+    
     private class MissingFnStruct{
         public int lineNo;
         public String fnName;
@@ -104,6 +133,6 @@ public class blockClass {
             this.lineNo= lineNo;
             this.fnName = fnName;
         }
-    }
+    }        
 
 }

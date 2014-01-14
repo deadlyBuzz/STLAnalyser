@@ -96,6 +96,7 @@ public class stlAnalyserWindow extends javax.swing.JFrame {
         source.processSourceCode(debugLines);        
         source.printDetails(System.out);
         LinkedHashMap tempMap = new LinkedHashMap(source.getBlockTimes());        
+        source.printBlockDetails(System.out);
         System.out.println("Map:"+tempMap.toString());
         System.out.println("Done.");
     }//GEN-LAST:event_goButtonActionPerformed
