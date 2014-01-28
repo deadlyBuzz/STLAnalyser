@@ -36,7 +36,7 @@ public class SourceEntry {
     public static final String reSYMBOLICNAMES  = "\"[\\w_]+\"";
     public static final String reENDFUNCTION    = "END_FUNCTION.*";
     public static final String reNOPSTATEMENT   = "NOP\\s+\\d+.*"; // NOP any whitespace, any digit
-    public static final String reLABELID        = "[a-zA-Z_]\\w{0,3}:\\s*(.*);";
+    public static final String reLABELID        = "([a-zA-Z_]\\w{0,3}):\\s*(.*);";
     public static final String reBLDSTATEMENT   = "BLD\\s+.*";
     public static final String reJUMPSTATEMENT  = "(J[ULCOZNP]|JCN|JNB|JBI|JNBI|JOS|JPZ|JMZ|JUO|LOOP)";
     public static final String reCALLSTATEMENT  = "(CALL|UC|CC)";
@@ -107,7 +107,7 @@ public class SourceEntry {
          */
         for(int i=0; i<sourceLines.size(); i++){            
             String rawStringLine = sourceLines.get(i); // get rid of any Labels
-            String stringLine = rawStringLine.replaceAll(reLABELID, "$1").trim();
+            String stringLine = rawStringLine.replaceAll(reLABELID, "$2").trim();
             stringLine = stringLine.replaceAll("(.+)//.*", "$1");
             if(i>0) 
                 sourceLineEntries.get(i-1).setParentBlock(blockName);
