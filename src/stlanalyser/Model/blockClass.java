@@ -28,6 +28,7 @@ public class blockClass {
     private ArrayList<String> functions;         // List of functions called from this block
     private ArrayList<MissingFnStruct> missingFunctions;  // List of Missing functions 
     private Map<Integer,lineEntry> lines;
+    private ArrayList<simpleJumpLabels> jumpLabels;
     
     public blockClass(){
         Name = "";
@@ -111,19 +112,18 @@ public class blockClass {
     public void printBlockDetails(PrintStream validStream, int printOption){
         validStream.println("\r\nPrinting Block" + this.Name + "\r\n");
         String jumpLabel = new String();
-//        Set entrySet = lines.entrySet();
-//        Iterator it = entrySet.iterator();        
-//        while(it.hasNext()){            
-            
-//       }
         Set<Integer> keys = lines.keySet();
         for(Integer k:keys){
             // This will iterate through each lineEntry.
             String sourceLine = lines.get(k).getLineSource();            
-//            if(sourceLine.matches(SourceEntry.reLABELID+SourceEntry.reJUMPSTATEMENT))
- //               jumpLabel+=sourceLine.replaceAll(SourceEntry.reJUMPSTATEMENT, "$1");
             validStream.println(lines.get(k).getStringDetails());
         }
+    }
+    
+    public ArrayList<simpleJumpLabels> processJumpLabels(){
+        jumpLabels = new ArrayList<>();
+        
+        return jumpLabels;
     }
     
     private class MissingFnStruct{
@@ -134,89 +134,11 @@ public class blockClass {
             this.fnName = fnName;
         }
     }        
-    
-    /**
-     * A Class that represents a Jump Label.
-     * This should be able to generate a list of Jumps available 
-     * within the program.
-     */
-    private static class jumpLabel{
-        public int startLine;
-        public int endLine;
-        public String name;
-        public String label;
-        public int type;
         
-        // Constants for convenience access.
-        public final int LOOP   = 0;
-        public final int JUMP   = 1;
-        public final int START  = 0;
-        public final int END    = 1;
-        
-        /**
-         * Constructor - Construct a jumpLabel object when given all the required parameters.
-         * @param startLine  &quot;int&quot; representing the line the Jump label starts on.
-         * @param endLine &quot;int&quot; representing the line the Jump label finishes on.         
-         * @param label a &quot;String&quot; that contains the actual Jump Label being used.
-         */        
-        public jumpLabel(int startLine, int endLine, String label){
-            this.startLine = startLine;
-            this.endLine = endLine;
-            this.label = label;
-            
-            if(startLine > endLine){
-                type = LOOP;
-                this.name = String.valueOf(endLine) + this.label;
-            }
-            else{
-                type = JUMP;
-                this.name = String.valueOf(startLine) + this.label;
-            }            
-        }
-        
-        /**
-         * Another constructor where we can take a single label and line Number
-         * create a partially qualified jump label.
-         * @param lineNo
-         * @param jumpLabel
-         * @param lineType 
-         */
-        public jumpLabel(int lineNo, String label, int lineType){
-            if(lineType==START){
-                this.startLine = lineNo;                            
-                this.name = String.valueOf(lineNo)+label;
-                this.type = JUMP;
-            }
-            else{
-                this.endLine = lineNo;
-                this.type = LOOP;
-            }
-            this.label = label;
-        }
-        
-        /**
-         * A Convenience method that returns the components of this jumpLabel in a
-         * comma separated list.
-         * @return a String variable representing the data in the Jump Label in a comma separated list.
-         */
-        public String getLabel(){
-            return this.name + String.valueOf(this.endLine)+","+String.valueOf(this.startLine);
-        }
-        
-        public void setLine(int lineNo, int lineType){
-            if(lineType == START){
-                this.startLine = lineNo;
-                this.name = this.name.concat(String.valueOf(lineNo));
-            }
-            else
-                this.endLine = lineNo;
-        }
-    }
-    
     /**
      * Simple class to represent the Jump Labels in the program.
      */
-    private class simpleJumpLabels{
+    public class simpleJumpLabels{
         public int line;
         public String label;
         public int type;
@@ -242,10 +164,33 @@ public class blockClass {
         }
     }
     
-    
+    /**
+     * This function is the function that builds the internal list of jumpLabel
+     * objects and 
+     * @return T
+     */
     public ArrayList<String> getJumpLabels(){
-        
-        return new ArrayList<String>();
+        ArrayList<String> jumpLineMarkers = new ArrayList<>();
+        Set<Integer> keys = lines.keySet();
+        for(Integer k:keys){
+            // This will iterate through each lineEntry.
+            String sourceLine = lines.get(k).getLineSource().trim();
+            if(sourceLine.replaceAll(SourceEntry.reLABELID, "$2").matches(SourceEntry.reJUMPSTATEMENT+" .*")){
+                String jumpTo = sourceLine.replaceAll(SourceEntry.reLABELID, "$2");
+                jumpTo = jumpTo.replaceAll(SourceEntry.reJUMPSTATEMENT+"(.*)","$2");
+                jumpTo = jumpTo.replaceAll("(.+);?\\w*(//.*)?", "$1").trim();                
+                jumpLineMarkers.add("Jump:"+String.valueOf(lines.get(k).getLineNumber())+"|"+jumpTo);
+            }
+                
+            if(sourceLine.matches(SourceEntry.reLABELID)){
+                String labelMarker = sourceLine.replaceAll(SourceEntry.reLABELID, "$1");
+                labelMarker = labelMarker.replaceAll(SourceEntry.reJUMPSTATEMENT+" .*", "$1").trim();
+                jumpLineMarkers.add("Label:"+String.valueOf(lines.get(k).getLineNumber())+"|"+labelMarker);
+            }
+        }
+        for(String a:jumpLineMarkers)
+            System.out.println("-"+a);
+        return jumpLineMarkers;
     }
 
 }

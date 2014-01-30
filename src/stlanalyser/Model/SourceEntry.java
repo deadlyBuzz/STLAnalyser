@@ -38,7 +38,7 @@ public class SourceEntry {
     public static final String reNOPSTATEMENT   = "NOP\\s+\\d+.*"; // NOP any whitespace, any digit
     public static final String reLABELID        = "([a-zA-Z_]\\w{0,3}):\\s*(.*);";
     public static final String reBLDSTATEMENT   = "BLD\\s+.*";
-    public static final String reJUMPSTATEMENT  = "(J[ULCOZNP]|JCN|JNB|JBI|JNBI|JOS|JPZ|JMZ|JUO|LOOP)";
+    public static final String reJUMPSTATEMENT  = "(JCN|JNB|JBI|JNBI|JOS|JPZ|JMZ|JUO|LOOP|J[ULCOZNP])";
     public static final String reCALLSTATEMENT  = "(CALL|UC|CC)";
     public static final String reARRAYSTATEMENT = ".*ARRAY\\s*\\[[0-9]+\\s+\\.+\\s[0-9]+\\s\\].*";
     public static final String reARRAYCLEAR     = "(\\[[ \\t0-9]+\\]\\s+)?;";
@@ -597,4 +597,12 @@ public class SourceEntry {
         return func;
     }
     
+    /**
+     * Let this be a test method to call other WIP Methods for calling.
+     * Can be removed afterwards.
+     */
+    public void testMethod(){
+        for(blockClass b:blockList)
+            b.getJumpLabels();
+    }
 }

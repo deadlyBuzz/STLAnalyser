@@ -19,6 +19,7 @@ public class stlAnalyserWindow extends javax.swing.JFrame {
      */
     public stlAnalyserWindow() {
         initComponents();
+        this.setTitle("STL Analyser Window.");        
     }
     
     public void setDebugStatus(boolean enabled){
@@ -94,9 +95,10 @@ public class stlAnalyserWindow extends javax.swing.JFrame {
         SourceEntry source = new SourceEntry(dataEntryTA.getText());
         String debugLines[] = debugLinesTF.getText().split(",");        
         source.processSourceCode(debugLines);        
-        source.printDetails(System.out);
+        //source.printDetails(System.out); // This is referencinbg the output of the SourceEntry object
         LinkedHashMap tempMap = new LinkedHashMap(source.getBlockTimes());        
-        source.printBlockDetails(System.out);
+        source.printBlockDetails(System.out); //this is referencing the output of each BlockList object
+        source.testMethod(); // Test Method- Comment out when not using... or don't... I dont care. ;-)
         System.out.println("Map:"+tempMap.toString());
         System.out.println("Done.");
     }//GEN-LAST:event_goButtonActionPerformed
