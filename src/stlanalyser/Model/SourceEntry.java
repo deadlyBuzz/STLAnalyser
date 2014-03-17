@@ -29,8 +29,8 @@ public class SourceEntry {
     public static final String reBEGIN          = "BEGIN";
     public static final String reNETWORK        = "NETWORK";
     public static final String reCOMMENT        = "\\/\\/.*"; // Any line starting with "//" is a comment.
-    public static final String reBLOCKDETAILS   = "(AUTHOR|FAMILY|NAME)";
-    public static final String reVARBEGIN       = "VAR(_INPUT|_OUTPUT|_TEMP)?";
+    public static final String reBLOCKDETAILS   = "(AUTHOR|FAMILY|NAME)\\s*:.*";
+    public static final String reVARBEGIN       = "VAR(_INPUT|_OUTPUT|_TEMP|_IN_OUT)?";
     public static final String reVAREND         = "END_VAR";
     public static final String reLOCALVARIABLE  = "#[\\w_]+";
     public static final String reSYMBOLICNAMES  = "\"[\\w_]+\"";
@@ -46,6 +46,7 @@ public class SourceEntry {
     public static final String reCLEANLINE      = "(.*);(\\s*//.*)?";
     public static final String reREGINDIRECT    = "\\[AR.*"; // Register indirect check
     public static final String reAREAINDIRECT   = "\\[[ML][DW].*"; // Area indirect addressing
+    public static final String reFBIdBlock = "\\s*(S?F[BC])\\s+\\d+";
     
     
     /**
@@ -105,16 +106,20 @@ public class SourceEntry {
          * create a lineEntry object type to represent that time.
          * it is during this generation we determine the time each instruction is taking up.
          */
-        for(int i=0; i<sourceLines.size(); i++){            
+        for(int i=0; i<sourceLines.size(); i++){                        
             String rawStringLine = sourceLines.get(i); // get rid of any Labels
             String stringLine = rawStringLine.replaceAll(reLABELID, "$2").trim();
             stringLine = stringLine.replaceAll("(.+)//.*", "$1");
             if(i>0) 
                 sourceLineEntries.get(i-1).setParentBlock(blockName);
+
             /*
              * Purely for Debug purposes only.
              * Allows me to Break the processing at any line I want to.
              */
+            if(Integer.parseInt(args[0])>0)
+                System.out.println(sourceLines.get(i));
+                
             for(int d=0; d<args.length; d++){
                 if(i==Integer.parseInt(args[d])-1)
                     System.out.println("<<<<Debug: "+ stringLine +">>>>");
@@ -188,19 +193,26 @@ public class SourceEntry {
                     }
                     else{
                         sourceLineEntries.add(new lineEntry(rawStringLine,i,0,lineEntry.VAR_DECLARE));                        
+                        // Remove any attributes from the entries until we know what is happening?
+                        stringLine = stringLine.replaceAll("(.*)\\{.*\\}(.*)", "$1$2"); // Turn something like   "WORD_1_REPLY { S7_dynamic := 'true' }: WORD ;" into "WORD_1_REPLY : WORD ;"
                         String[] placeHolder =  stringLine.split(":");                        
                         if(placeHolder.length<2){ // if there is no Colon in the entry... why?
-                                if(memData.get(memData.size()-1).matches(reARRAYSTATEMENT)){ // if the last entry was an Array Declare
-                                        String[] datPlaceHolder = new String[]{"",""};                                        
-                                        datPlaceHolder[1] = placeHolder[0].replace(";", "").trim(); // build a new "PlaceHolder"
-                                        datPlaceHolder[0] = memData.get(memData.size()-1);
-                                        datPlaceHolder[0] = datPlaceHolder[0].substring(0, datPlaceHolder[0].indexOf(":"));
-                                        //datPlaceHolder[0] = datPlaceHolder[0].replace("(.*):(.*)", "$1:");
-                                        placeHolder = datPlaceHolder;
-                                        memData.remove(memData.size()-1); //When finished - Remove the last string item.
+                            try{    
+                                if(memData.get(memData.size()-1).matches(reARRAYSTATEMENT)){ // if the last entry was an Array Declare                                
+                                    String[] datPlaceHolder = new String[]{"",""};                                        
+                                    datPlaceHolder[1] = placeHolder[0].replace(";", "").trim(); // build a new "PlaceHolder"
+                                    datPlaceHolder[0] = memData.get(memData.size()-1);
+                                    datPlaceHolder[0] = datPlaceHolder[0].substring(0, datPlaceHolder[0].indexOf(":"));
+                                    //datPlaceHolder[0] = datPlaceHolder[0].replace("(.*):(.*)", "$1:");
+                                    placeHolder = datPlaceHolder;
+                                    memData.remove(memData.size()-1); //When finished - Remove the last string item.
                                 }
                             }
-                                                            
+                            catch(ArrayIndexOutOfBoundsException AIOOBE){
+                                System.err.println(AIOOBE);
+                                System.err.println("Vardeclare error: " + stringLine);
+                            }
+                        }                                                            
                         String put = VAR.put(placeHolder[0].trim(), resolveMemory(placeHolder[1].replaceAll("(\\[[ \\t0-9]+\\]\\s+)?;", "").trim())); // Clear out any trailing colons.                                           
                     }
                     break;
@@ -358,7 +370,11 @@ public class SourceEntry {
          * B = Byte = 8 bits, any data type that takes up 8 bits is accessed as a Byte.
          * S5Time takes up 16 Bits thus is encoded as a Word.
          */        
-        placeHolder = t.get(memory);     // T populated once in loadHashMap
+        if(memory.matches(reFBIdBlock))
+            placeHolder = memory.replaceAll(reFBIdBlock, "$1");
+        else
+            placeHolder = t.get(memory);     // T populated once in loadHashMap
+        
         if(placeHolder == null) {
             //JOptionPane.showMessageDialog(null, "Memory Type " + memory + " Not found --> Please adddess.");
             System.out.println("<<<< resolveMemory: Memory Type " + memory + " Not found --> Please adddess.");
@@ -405,10 +421,10 @@ public class SourceEntry {
         String retVal = "";
         String[] var = Var.split(";");
         // Boolean Local Variable or Memory Flag
-        if(var[0].toUpperCase().matches("[LM]"))
+        if(var[0].toUpperCase().matches("[LMXIQE]"))
             retVal = "b";
         // Constant Timer Variable
-        if(var[0].toUpperCase().matches("S5T#.*"))
+        if(var[0].toUpperCase().matches("(S5)?T#.*"))
             retVal = "K"; // Stored as a Word ???
         // If there is a ";", this is a single command and should be treated as a "b"
         if(var[0].toUpperCase().matches("(;|JNB|JU|JC).*"))
@@ -426,9 +442,17 @@ public class SourceEntry {
         if(var[0].toUpperCase().matches("'.+'"))
             retVal = "K";        
          // instance or not Data block access - additional delay
-        if(var[0].toUpperCase().matches("D[IB]\\w"))
-            retVal = var[0].substring(var[0].length()-1, var[0].length()) + ";_pqdb"; // Partially qualified DB(I) access
-         
+        if(var[0].toUpperCase().matches("D[IB]\\w")){
+            retVal = var[0].substring(var[0].length()-1, var[0].length());
+            if(retVal.toUpperCase().matches("[LMXIQE]"))
+                retVal = "b";                    
+            retVal = retVal + ";_pqdb"; // Partially qualified DB(I) access
+        }
+        if(var[0].toUpperCase().matches("D[IB][0-9]+\\.DB\\W")){
+            retVal = var[0].substring(var[0].length()-1);
+            if(retVal.matches("[LMXIQE]"))
+                retVal = "b";
+        }
         // To be enabled afterwards - I/O requires a different delay set.
         //if(var[0].toUpperCase().matches("P?(IQ)\\w?"))
         //    retVal = var[0].substring(var[0].length()-1, var[0].length()) + ";ioacc"; // Partially qualified DB(I) access        
@@ -463,7 +487,7 @@ public class SourceEntry {
         int retVal = 0;        
         for(int i=0; i<getMString.length; i++){
                 if(m.get(getMString[0].trim())==null){
-                    System.out.println("<<<< mGet ["+String.valueOf(i)+"]: Could not find "+getM);            
+                    System.out.println("<<<< mGet ["+String.valueOf(i)+"]: Could not find \""+getM+"\", Please update Database. ");            
                     return i;
                 }
             retVal += m.get(getMString[i].trim());

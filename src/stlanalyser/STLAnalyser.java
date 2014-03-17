@@ -4,8 +4,6 @@
  */
 package stlanalyser;
 
-import stlanalyser.Model.SourceEntry;
-
 /**
  *
  * @author Alan Curley

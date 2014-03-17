@@ -179,6 +179,7 @@ public class blockClass {
                 String jumpTo = sourceLine.replaceAll(SourceEntry.reLABELID, "$2");
                 jumpTo = jumpTo.replaceAll(SourceEntry.reJUMPSTATEMENT+"(.*)","$2");
                 jumpTo = jumpTo.replaceAll("(.+);?\\w*(//.*)?", "$1").trim();                
+                jumpTo = jumpTo.replaceAll(";", "");
                 jumpLineMarkers.add("Jump:"+String.valueOf(lines.get(k).getLineNumber())+"|"+jumpTo);
             }
                 
@@ -189,7 +190,7 @@ public class blockClass {
             }
         }
         for(String a:jumpLineMarkers)
-            System.out.println("-"+a);
+            System.out.println(this.Name+"-"+a);
         return jumpLineMarkers;
     }
 
