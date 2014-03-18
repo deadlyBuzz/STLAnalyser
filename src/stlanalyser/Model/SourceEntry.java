@@ -142,7 +142,7 @@ public class SourceEntry {
                     break;
 /*----------*/  case 1 : //BlockHeader
                     // 1st Line - This is Definitley a Block Declaration.
-                    if(stringLine.length()<1){
+                    if(stringLine.replaceAll("(.*)\\{.*\\}(.*)", "$1$2").length()<1){ // Attributes may be associated with the Block, that once removed will throw AIOOBE.
                         sourceLineEntries.add(new lineEntry(" ",i,0,lineEntry.EMPTY_LINE));
                         break;                        
                     }
@@ -213,7 +213,13 @@ public class SourceEntry {
                                 System.err.println("Vardeclare error: " + stringLine);
                             }
                         }                                                            
-                        String put = VAR.put(placeHolder[0].trim(), resolveMemory(placeHolder[1].replaceAll("(\\[[ \\t0-9]+\\]\\s+)?;", "").trim())); // Clear out any trailing colons.                                           
+                        try{
+                            String put = VAR.put(placeHolder[0].trim(), resolveMemory(placeHolder[1].replaceAll("(\\[[ \\t0-9]+\\]\\s+)?;", "").trim())); // Clear out any trailing colons.                                           
+                        }
+                        catch(ArrayIndexOutOfBoundsException AIOOBE){
+                            System.err.println(AIOOBE.getMessage());
+                            System.err.println("<<<< procHeader error@"+"I-"+ String.valueOf(i)+":" + String.valueOf(placeHolder.length)+";"+stringLine + ".");
+                        }
                     }
                     break;
 /*----------*/  case 3 : // NETWORKANALYSIS
@@ -302,7 +308,14 @@ public class SourceEntry {
                                 }
                                 else
                                     placeHolder[1] = dataPlaceHolder;                                                    
-                                sourceLineEntries.add(new lineEntry(rawStringLine,i,mGet(placeHolder[0]+","+placeHolder[1]),lineEntry.CODE_SOURCE));
+                                if(placeHolder[0].toUpperCase().matches(reCALLSTATEMENT)){
+                                    sourceLineEntries.add(new lineEntry(rawStringLine,i,mGet(placeHolder[0]+","+placeHolder[1]),lineEntry.CALLFUNCTION));
+                                    if(stringLine.matches(".*\\(.*")) // If the "CALL" function does not have an open bracket, then then there won't be a close bracket.
+                                        StateMachine = BLOCKCALL; // S7300_instruction_list.PDF P59 
+                                                          // AWL_e.PDF P265
+                                }
+                                else
+                                    sourceLineEntries.add(new lineEntry(rawStringLine,i,mGet(placeHolder[0]+","+placeHolder[1]),lineEntry.CODE_SOURCE));
                             }
 
                             // -------- We're here this is a genuine sourcecode entry, - Now check what the statement has consisted of. --------------
@@ -420,6 +433,10 @@ public class SourceEntry {
     private String IDmemoryType(String Var){
         String retVal = "";
         String[] var = Var.split(";");
+        // Status word operation
+        if(var[0].toUpperCase().matches("(OV|RLO|BR|OS|CC)"))
+            retVal = "b";
+        
         // Boolean Local Variable or Memory Flag
         if(var[0].toUpperCase().matches("[LMXIQE]"))
             retVal = "b";
@@ -435,7 +452,7 @@ public class SourceEntry {
         if(var[0].toUpperCase().matches("a[ci](ri)?"))
             retVal = var[0];
         //Read is this is a constant value being passed.
-        if(var[0].toUpperCase().matches("[0-9\\.]+\\s*;?"))
+        if(var[0].toUpperCase().matches("-?[0-9\\.]+\\s*;?"))
             retVal = "K";
         if(var[0].toUpperCase().matches("(B|W|2)#[0-9]+#?[A-Fa-f0-9]+\\s*;?"))
             retVal = "K";        
@@ -448,7 +465,7 @@ public class SourceEntry {
                 retVal = "b";                    
             retVal = retVal + ";_pqdb"; // Partially qualified DB(I) access
         }
-        if(var[0].toUpperCase().matches("D[IB][0-9]+\\.DB\\W")){
+        if(var[0].toUpperCase().matches("D[IB][0-9]+\\.DB\\w")){
             retVal = var[0].substring(var[0].length()-1);
             if(retVal.matches("[LMXIQE]"))
                 retVal = "b";
