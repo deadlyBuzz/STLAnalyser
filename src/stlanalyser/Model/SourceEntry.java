@@ -21,32 +21,6 @@ public class SourceEntry {
     private Map<String, String> t;
     
     //http://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html
-    public static final String reFUNCTIONHEADER = "(FUNCTION|ORGANIZATION)(_BLOCK)?.*";
-    public static final String reDBHEADER       = "DATA_BLOCK.*";
-    public static final String reBLOCKFOOTER    = "END_(ORGANIZATION|DATA|FUNCTION)(_BLOCK)?";
-    public static final String reTITLELINE      = "TITLE =.*"; // Title will always be only one line.
-    public static final String reVERSIONLINE    = "VERSION : \\d+\\.\\d+";
-    public static final String reBEGIN          = "BEGIN";
-    public static final String reNETWORK        = "NETWORK";
-    public static final String reCOMMENT        = "\\/\\/.*"; // Any line starting with "//" is a comment.
-    public static final String reBLOCKDETAILS   = "(AUTHOR|FAMILY|NAME)\\s*:.*";
-    public static final String reVARBEGIN       = "VAR(_INPUT|_OUTPUT|_TEMP|_IN_OUT)?";
-    public static final String reVAREND         = "END_VAR";
-    public static final String reLOCALVARIABLE  = "#[\\w_]+";
-    public static final String reSYMBOLICNAMES  = "\"[\\w_]+\"";
-    public static final String reENDFUNCTION    = "END_FUNCTION.*";
-    public static final String reNOPSTATEMENT   = "NOP\\s+\\d+.*"; // NOP any whitespace, any digit
-    public static final String reLABELID        = "([a-zA-Z_]\\w{0,3}):\\s*(.*);";
-    public static final String reBLDSTATEMENT   = "BLD\\s+.*";
-    public static final String reJUMPSTATEMENT  = "(JCN|JNB|JBI|JNBI|JOS|JPZ|JMZ|JUO|LOOP|J[ULCOZNP])";
-    public static final String reCALLSTATEMENT  = "(CALL|UC|CC)";
-    public static final String reARRAYSTATEMENT = ".*ARRAY\\s*\\[[0-9]+\\s+\\.+\\s[0-9]+\\s\\].*";
-    public static final String reARRAYCLEAR     = "(\\[[ \\t0-9]+\\]\\s+)?;";
-    public static final String reLOADADDRESS    = "\\s*LAR(1|2).*";
-    public static final String reCLEANLINE      = "(.*);(\\s*//.*)?";
-    public static final String reREGINDIRECT    = "\\[AR.*"; // Register indirect check
-    public static final String reAREAINDIRECT   = "\\[[ML][DW].*"; // Area indirect addressing
-    public static final String reFBIdBlock = "\\s*(S?F[BC])\\s+\\d+";
     
     
     /**
@@ -108,7 +82,7 @@ public class SourceEntry {
          */
         for(int i=0; i<sourceLines.size(); i++){                        
             String rawStringLine = sourceLines.get(i); // get rid of any Labels
-            String stringLine = rawStringLine.replaceAll(reLABELID, "$2").trim();
+            String stringLine = rawStringLine.replaceAll(regExes.LABELID, "$2").trim();
             stringLine = stringLine.replaceAll("(.+)//.*", "$1");
             if(i>0) 
                 sourceLineEntries.get(i-1).setParentBlock(blockName);
@@ -126,13 +100,13 @@ public class SourceEntry {
             }
             switch(StateMachine){                
 /*----------*/  case 0 : //Unknown.
-                    if(stringLine.matches(reFUNCTIONHEADER)) {
+                    if(stringLine.matches(regExes.FUNCTIONHEADER)) {
                         blockName = stringLine.replaceAll("(FUNCTION|ORGANIZATION)(_BLOCK)?.*((FC|FB|OB|DB)\\s+[0-9]+).*","$3").replaceAll(" ", "");
                         sourceLineEntries.add(new lineEntry(stringLine,i,0,lineEntry.BLOCK_DECLARATION));
                         StateMachine = BLOCKHEADER;                        
                         break;
                     }
-                    if(stringLine.matches(reDBHEADER)){
+                    if(stringLine.matches(regExes.DBHEADER)){
                         sourceLineEntries.add(new lineEntry(rawStringLine,i,0,lineEntry.BLOCK_DECLARATION));
                         StateMachine = DATABLOCK;
                         break;
@@ -146,47 +120,47 @@ public class SourceEntry {
                         sourceLineEntries.add(new lineEntry(" ",i,0,lineEntry.EMPTY_LINE));
                         break;                        
                     }
-                    if(stringLine.matches(reTITLELINE)){
+                    if(stringLine.matches(regExes.TITLELINE)){
                         sourceLineEntries.add(new lineEntry(rawStringLine,i,0,lineEntry.BLOCK_TITLE));
                         break;
                     }
-                    if(stringLine.matches(reVERSIONLINE)){
+                    if(stringLine.matches(regExes.VERSIONLINE)){
                         sourceLineEntries.add(new lineEntry(rawStringLine,i,0,lineEntry.BLOCK_VERSION));
                         break;                        
                     }
-                    if(stringLine.matches(reCOMMENT)){
+                    if(stringLine.matches(regExes.COMMENT)){
                         sourceLineEntries.add(new lineEntry(rawStringLine,i,0,lineEntry.BLOCK_COMMENT));
                         break;                        
                     }
-                    if(stringLine.matches(reBLOCKDETAILS)){
+                    if(stringLine.matches(regExes.BLOCKDETAILS)){
                         sourceLineEntries.add(new lineEntry(rawStringLine,i,0,lineEntry.BLOCK_COMMENT));
                         break;
                     }
-                    if(stringLine.matches(reBEGIN)){
+                    if(stringLine.matches(regExes.BEGIN)){
                         sourceLineEntries.add(new lineEntry(rawStringLine,i,0,lineEntry.BEGIN));
                         StateMachine = NETWORKANALYSIS;
                         break;
                     }
-                    if(stringLine.matches(reVARBEGIN)){
+                    if(stringLine.matches(regExes.VARBEGIN)){
                         sourceLineEntries.add(new lineEntry(rawStringLine,i,0,lineEntry.VAR_HEADER));
                         StateMachine = VARDECLARE;
                         break;
                     }                    
 /*----------*/  case 2 : //VARDECLARE   
-                    if(stringLine.matches(reVAREND)){
+                    if(stringLine.matches(regExes.VAREND)){
                         sourceLineEntries.add(new lineEntry(rawStringLine,i,0,lineEntry.VAR_FOOTER));
                         break;
                     }
-                    else if(stringLine.matches(reVARBEGIN)){
+                    else if(stringLine.matches(regExes.VARBEGIN)){
                         sourceLineEntries.add(new lineEntry(rawStringLine,i,0,lineEntry.VAR_HEADER));
                         break;
                     }
-                    else if(stringLine.matches(reBEGIN)){
+                    else if(stringLine.matches(regExes.BEGIN)){
                         sourceLineEntries.add(new lineEntry(rawStringLine,i,0,lineEntry.BEGIN));
                         StateMachine = NETWORKANALYSIS;
                         break;
                     }
-                    else if(stringLine.matches(reARRAYSTATEMENT)){
+                    else if(stringLine.matches(regExes.ARRAYSTATEMENT)){
                         memData.add(stringLine);
                         sourceLineEntries.add(new lineEntry(rawStringLine,i,0,lineEntry.VAR_DECLARE));
                         break;
@@ -198,7 +172,7 @@ public class SourceEntry {
                         String[] placeHolder =  stringLine.split(":");                        
                         if(placeHolder.length<2){ // if there is no Colon in the entry... why?
                             try{    
-                                if(memData.get(memData.size()-1).matches(reARRAYSTATEMENT)){ // if the last entry was an Array Declare                                
+                                if(memData.get(memData.size()-1).matches(regExes.ARRAYSTATEMENT)){ // if the last entry was an Array Declare                                
                                     String[] datPlaceHolder = new String[]{"",""};                                        
                                     datPlaceHolder[1] = placeHolder[0].replace(";", "").trim(); // build a new "PlaceHolder"
                                     datPlaceHolder[0] = memData.get(memData.size()-1);
@@ -227,17 +201,17 @@ public class SourceEntry {
                     String dataPlaceHolder;
 
                     // Comments (Just like this one)
-                    if(stringLine.matches(reCOMMENT)){
+                    if(stringLine.matches(regExes.COMMENT)){
                         sourceLineEntries.add(new lineEntry(rawStringLine,i,0,lineEntry.CODE_COMMENT));
                         break;
                     }
                     // NETWORK identifer signifying the start of a network
-                    if(stringLine.matches(reNETWORK)){
+                    if(stringLine.matches(regExes.NETWORK)){
                         sourceLineEntries.add(new lineEntry(rawStringLine,i,0,lineEntry.NETWORK_DECLARE));
                         break;
                     }
                     // TITLE = defining the title of the network - always here though sometimes blank
-                    if(stringLine.matches(reTITLELINE)){
+                    if(stringLine.matches(regExes.TITLELINE)){
                         sourceLineEntries.add(new lineEntry(rawStringLine,i,0,lineEntry.NETWORK_TITLE));
                         break;                        
                     }
@@ -247,21 +221,21 @@ public class SourceEntry {
                         break;                        
                     }
                     // END_FUNCTION Declaration indicating the end if a function block or function call.
-                    if(stringLine.matches(reENDFUNCTION)){
+                    if(stringLine.matches(regExes.ENDFUNCTION)){
                         sourceLineEntries.add(new lineEntry(rawStringLine,i,0,lineEntry.BLOCK_END));
                         StateMachine = UNKNOWN;
                         break;
                     }                    
                     
                     // NOP Function - No Operation, Used for Constructing Calls etc.
-                    if((stringLine.matches(reNOPSTATEMENT))|(stringLine.matches(reBLDSTATEMENT))){
+                    if((stringLine.matches(regExes.NOPSTATEMENT))|(stringLine.matches(regExes.BLDSTATEMENT))){
                     //if(stringLine.matches(reNOPSTATEMENT)){
                         sourceLineEntries.add(new lineEntry(rawStringLine,i,0,lineEntry.CODE_SOURCE));
                         break;
                     }
                     
                     // If this is a Footer - Push back to "unknown" to search for another title.
-                    if(stringLine.matches(reBLOCKFOOTER)){
+                    if(stringLine.matches(regExes.BLOCKFOOTER)){
                         sourceLineEntries.add(new lineEntry(rawStringLine,i,0,lineEntry.BLOCK_END));
                         StateMachine = UNKNOWN;
                         break;
@@ -269,8 +243,8 @@ public class SourceEntry {
                     
                     // Loading address register X.
                     // This should be treated as a separate entity TBF.
-                   if(stringLine.matches(reLOADADDRESS)) {
-                       placeHolder = stringLine.replaceAll(reCLEANLINE, "$1").trim().split("\\s+"); // remove all comments from the line - clean source.
+                   if(stringLine.matches(regExes.LOADADDRESS)) {
+                       placeHolder = stringLine.replaceAll(regExes.CLEANLINE, "$1").trim().split("\\s+"); // remove all comments from the line - clean source.
                        try{
                            if(placeHolder[1].matches("P#.*")){ // if we're passing a pointer to a specific variable.
                                placeHolder[1] = "m";
@@ -293,67 +267,84 @@ public class SourceEntry {
                     
                                         
                     // If we're here - This is a Valid Line to process.
-                    placeHolder = stringLine.trim().replaceAll(reCLEANLINE, "$1").split("\\s+"); // split via any whitespace characters and remove any trailing comments.
-                    //placeHolder = stringLine.trim().replaceAll(";", "").split("\\s+"); // split via any whitespace characters and remove any trailing comments.
+                    placeHolder = stringLine.trim().replaceAll(regExes.CLEANLINE, "$1").split("\\s+"); // split via any whitespace characters and remove any trailing comments.
                     
+                    S7Statement statment = new S7Statement();
+                    // ---- The Entry has now been divided into it's constituent parts.
+                    // This may be 1, 2, 3 or more parts.
+                    // Typically, this is limited to 3, a Statement, a memory type and an address.
+                    // AN M  0.0 which is broken down into [0]AN [1]M  [2]0.0
+                    // This can also be a single command such as an "AW" command
+                    // AW which is broken into [0]AW
+                    // !!!Labels have been removed from stringLine which is used to generate placeHolder!!!
+                    // This Block will build each statement from the data required and then use this
+                    // statement to build the lineEntry.
+                   
+                    //Start by checking the first item.... this should be a command variable.                    
                     try{
-                        if(placeHolder.length>1){
-                            //placeHolder[1] = placeHolder[1].trim().replaceAll("\\[[0-9\\s]+\\]","");                             
-                            if (placeHolder[1].trim().replaceAll("\\[[0-9\\s]+\\]","").matches(reLOCALVARIABLE)){
-                                dataPlaceHolder = VAR.get(placeHolder[1].replace("#", "").replaceAll("\\[[ \\t0-9]+\\].*", ""));                                
-                                if (dataPlaceHolder == null){
-                                    JOptionPane.showMessageDialog(null, "Error Matching Variables- Ensure correct script details");
-                                    System.err.println("Error Matching Variables- Ensure correct script details");
-                                    System.exit(0);
-                                }
-                                else
-                                    placeHolder[1] = dataPlaceHolder;                                                    
-                                if(placeHolder[0].toUpperCase().matches(reCALLSTATEMENT)){
-                                    sourceLineEntries.add(new lineEntry(rawStringLine,i,mGet(placeHolder[0]+","+placeHolder[1]),lineEntry.CALLFUNCTION));
-                                    if(stringLine.matches(".*\\(.*")) // If the "CALL" function does not have an open bracket, then then there won't be a close bracket.
-                                        StateMachine = BLOCKCALL; // S7300_instruction_list.PDF P59 
-                                                          // AWL_e.PDF P265
-                                }
-                                else
-                                    sourceLineEntries.add(new lineEntry(rawStringLine,i,mGet(placeHolder[0]+","+placeHolder[1]),lineEntry.CODE_SOURCE));
-                            }
-
-                            // -------- We're here this is a genuine sourcecode entry, - Now check what the statement has consisted of. --------------
-                            // Check that the entry is a Jump statement in which the key part of the statement is the Jump function.
-                            else if(placeHolder[0].matches(reJUMPSTATEMENT))
-                                sourceLineEntries.add(new lineEntry(rawStringLine,i,mGet(placeHolder[0]),lineEntry.CODE_SOURCE));
-                            // Check that the entry is calling an additional Function Block or DB Call.
-                            else if(placeHolder[0].toUpperCase().matches(reCALLSTATEMENT)){
-                                sourceLineEntries.add(new lineEntry(rawStringLine,i,mGet(placeHolder[0]+","+placeHolder[1]),lineEntry.CALLFUNCTION));
-                                if(stringLine.matches(".*\\(.*")) // If the "CALL" function does not have an open bracket, then then there won't be a close bracket.
-                                StateMachine = BLOCKCALL; // S7300_instruction_list.PDF P59 
-                                                          // AWL_e.PDF P265
+                        if(placeHolder[0].toUpperCase().matches(regExes.JUMPSTATEMENT)){ // This is a Jump Statement.
+                            statment.command= placeHolder[0];   
+                            statment.arg1 = "b"; // for all jumps, assume a boolean.
+                        }
+                        else if(placeHolder[0].toUpperCase().matches(regExes.CALLSTATEMENT)){
+                            statment.command = placeHolder[0];
+                            statment.arg1 = placeHolder[1];
+                            if(!(statment.arg1.toUpperCase().matches(regExes.LOCALVARIABLE))){                                
+                                statment.arg2 = placeHolder[2];                     // Keep in memory what SFC/SFB this is, we can address this later if we need.                             
                             }
                             else{
-                                // Now check if there is a third item in placeholder representing an indirect address access.                                
-                                if(placeHolder.length==3){ // If there is a third level in placeholder - possibly an Area Internal register.
-                                    if(placeHolder[2].matches(reREGINDIRECT))
-                                        placeHolder[1] = placeHolder[1] + ";_airi"; // annotate this with "Address internal, Register Indirect" addressing
-                                    if(placeHolder[2].matches(reAREAINDIRECT))
-                                        placeHolder[1] = placeHolder[1] + ";_ai";   // annotate this with "Area Indirect" addressing
-                                }
-                                else
-                                    if(placeHolder[1].matches(reREGINDIRECT))
-                                        placeHolder[1] = "b;_acri";    // Annotate this for Area Crossing, Register indirect
-                                placeHolder[1] = IDmemoryType(placeHolder[1]);
-                                sourceLineEntries.add(new lineEntry(rawStringLine,i,mGet(placeHolder[0]+","+placeHolder[1]),lineEntry.CODE_SOURCE));
+                                
+                                statment.arg1 += ";_pa";                            // Tag to accomodate the additional delay for parameter access.                                
+                            }
+                                
+                            statment.blockType = lineEntry.CALLFUNCTION;
+                            //sourceLineEntries.add(new lineEntry(rawStringLine,i,mGet(placeHolder[0]+","+placeHolder[1]),lineEntry.CALLFUNCTION));
+                            if(stringLine.matches(".*\\(.*")) // If the "CALL" function does not have an open bracket, then then there won't be a close bracket.
+                                StateMachine = BLOCKCALL; // S7300_instruction_list.PDF P59                                                       // AWL_e.PDF P265
+                        }
+                        else if(placeHolder[0].toUpperCase().matches(regExes.LOADADDRESS)){
+                            statment.command = placeHolder[0]; // Load the LAR1. LAR2 command into the Argument.
+                            if(placeHolder.length>1){ // If there is an  argument provided for the command.                                
+                                if(placeHolder[1].toUpperCase().matches(regExes.POINTERCONSTANT))
+                                    
+                                statment.arg1 = placeHolder[1];
                             }
                         }
-                        else
-                            sourceLineEntries.add(new lineEntry(rawStringLine,i,mGet(placeHolder[0]+",b"),lineEntry.CODE_SOURCE));                       
-                    }
-                    catch(ArrayIndexOutOfBoundsException e){
-                        System.err.println("<<<< Error processing entry:"+String.valueOf(i)+" " + stringLine);
-                    }
+                        else if(placeHolder.length == 1){ // If this is a single command acting on ACCU
+                            statment.command = placeHolder[0];
+                            statment.arg1 = "b";
+                        }
+                        else{                             // Default command.
+                            statment.command = placeHolder[0];
+                            statment.arg1 = placeHolder[1];
+                            if(placeHolder.length>2)
+                                statment.arg2 = placeHolder[2];
+                        }
+                        
+                        // ==== Now, to see if arg1 (if any) needs updating =====
+                        if(statment.arg1.toUpperCase().replaceAll("\\[[0-9\\s]+\\]","").matches(regExes.LOCALVARIABLE)){
+                            dataPlaceHolder = VAR.get(statment.arg1.replace("#", "").replaceAll("\\[[ \\t0-9]+\\].*", ""));                                
+                            if(dataPlaceHolder == null){                                
+                                JOptionPane.showMessageDialog(null, "Error Matching Variables- Ensure correct script details\n"+statment.getDetails());
+                                System.err.println("Error Matching Variables- Ensure correct script details\n"+statment.getDetails());                                
+                            }
+                            else
+                                statment.arg1 = dataPlaceHolder;
+                        }
+                        else if(statment.arg1.toUpperCase().matches("P#.*")){// pointer variable
+                            statment.arg1 = "m";
+                        }
+                        
+                            
+                    } catch (ArrayIndexOutOfBoundsException AIOOBE){
+                        System.err.println("<<<< Decision Engine: Possible misconstructed statement.");
+                        System.err.println("\t"+ stringLine);
+                        System.err.println(AIOOBE.getMessage());
+                    }                                            
 
                     break;
 /*----------*/  case 4 : //DATA BLOCK
-                    if(stringLine.matches(reBLOCKFOOTER)){ // All Entries are Data points only until the end of the Block.
+                    if(stringLine.matches(regExes.BLOCKFOOTER)){ // All Entries are Data points only until the end of the Block.
                         StateMachine = UNKNOWN;
                         sourceLineEntries.add(new lineEntry(rawStringLine,i,0,lineEntry.BLOCK_END));
                         break;
@@ -383,8 +374,8 @@ public class SourceEntry {
          * B = Byte = 8 bits, any data type that takes up 8 bits is accessed as a Byte.
          * S5Time takes up 16 Bits thus is encoded as a Word.
          */        
-        if(memory.matches(reFBIdBlock))
-            placeHolder = memory.replaceAll(reFBIdBlock, "$1");
+        if(memory.matches(regExes.FBIdBlock))
+            placeHolder = memory.replaceAll(regExes.FBIdBlock, "$1");
         else
             placeHolder = t.get(memory);     // T populated once in loadHashMap
         
@@ -645,5 +636,22 @@ public class SourceEntry {
     public void testMethod(){
         for(blockClass b:blockList)
             b.getJumpLabels();
+    }
+    
+    private class S7Statement{
+        public String command;
+        public String arg1;
+        public String arg2;
+        public int blockType;
+        public S7Statement(){
+            command = "";
+            arg1 = "";
+            arg2 = "";
+            blockType = -1;
+        }
+        
+        public String getDetails(){
+            return command + "," + arg1 + "," + arg2 + ";";
+        }
     }
 }
