@@ -197,6 +197,8 @@ public class SourceEntry {
                     }
                     break;
 /*----------*/  case 3 : // NETWORKANALYSIS
+
+                    /*<<<< Decision Engine >>>>*/
                     String[] placeHolder;
                     String dataPlaceHolder;
 
@@ -241,30 +243,6 @@ public class SourceEntry {
                         break;
                     }
                     
-                    // Loading address register X.
-                    // This should be treated as a separate entity TBF.
-                   if(stringLine.matches(regExes.LOADADDRESS)) {
-                       placeHolder = stringLine.replaceAll(regExes.CLEANLINE, "$1").trim().split("\\s+"); // remove all comments from the line - clean source.
-                       try{
-                           if(placeHolder[1].matches("P#.*")){ // if we're passing a pointer to a specific variable.
-                               placeHolder[1] = "m";
-                           }
-                           else{
-                               placeHolder[1] = placeHolder[1].replace("([a-zA-Z]+)[0-9]+", "$1");
-                               //throw new IllegalArgumentException();
-                           }
-                           sourceLineEntries.add(new lineEntry(rawStringLine,i,mGet(placeHolder[0]+","+placeHolder[1]),lineEntry.CODE_SOURCE));
-                       }
-                       catch(ArrayIndexOutOfBoundsException e){
-                           if(placeHolder.length<2) {// this is done as the statement is a standalone LAR1
-                               sourceLineEntries.add(new lineEntry(rawStringLine,i,mGet(placeHolder[0]+",m"),lineEntry.CODE_SOURCE));
-                               break;
-                            }
-                           System.out.println("<<<< IndirectAddressing: exception accessing placeholder on entry>" + stringLine);
-                       }
-                       break;
-                   }
-                    
                                         
                     // If we're here - This is a Valid Line to process.
                     placeHolder = stringLine.trim().replaceAll(regExes.CLEANLINE, "$1").split("\\s+"); // split via any whitespace characters and remove any trailing comments.
@@ -295,46 +273,22 @@ public class SourceEntry {
                             else{
                                 
                                 statment.arg1 += ";_pa";                            // Tag to accomodate the additional delay for parameter access.                                
-                            }
-                                
+                            }                                
                             statment.blockType = lineEntry.CALLFUNCTION;
                             //sourceLineEntries.add(new lineEntry(rawStringLine,i,mGet(placeHolder[0]+","+placeHolder[1]),lineEntry.CALLFUNCTION));
                             if(stringLine.matches(".*\\(.*")) // If the "CALL" function does not have an open bracket, then then there won't be a close bracket.
                                 StateMachine = BLOCKCALL; // S7300_instruction_list.PDF P59                                                       // AWL_e.PDF P265
                         }
-                        else if(placeHolder[0].toUpperCase().matches(regExes.LOADADDRESS)){
-                            statment.command = placeHolder[0]; // Load the LAR1. LAR2 command into the Argument.
-                            if(placeHolder.length>1){ // If there is an  argument provided for the command.                                
-                                if(placeHolder[1].toUpperCase().matches(regExes.POINTERCONSTANT))
-                                    
-                                statment.arg1 = placeHolder[1];
-                            }
-                        }
-                        else if(placeHolder.length == 1){ // If this is a single command acting on ACCU
-                            statment.command = placeHolder[0];
-                            statment.arg1 = "b";
-                        }
+                        // for everything else the same format applies...
                         else{                             // Default command.
                             statment.command = placeHolder[0];
-                            statment.arg1 = placeHolder[1];
-                            if(placeHolder.length>2)
-                                statment.arg2 = placeHolder[2];
+                            statment.arg1 = IDMemoryType(placeHolder,statment.arg1,VAR);
                         }
+                        if(statment.blockType<0)
+                            statment.blockType = lineEntry.CODE_SOURCE;
                         
-                        // ==== Now, to see if arg1 (if any) needs updating =====
-                        if(statment.arg1.toUpperCase().replaceAll("\\[[0-9\\s]+\\]","").matches(regExes.LOCALVARIABLE)){
-                            dataPlaceHolder = VAR.get(statment.arg1.replace("#", "").replaceAll("\\[[ \\t0-9]+\\].*", ""));                                
-                            if(dataPlaceHolder == null){                                
-                                JOptionPane.showMessageDialog(null, "Error Matching Variables- Ensure correct script details\n"+statment.getDetails());
-                                System.err.println("Error Matching Variables- Ensure correct script details\n"+statment.getDetails());                                
-                            }
-                            else
-                                statment.arg1 = dataPlaceHolder;
-                        }
-                        else if(statment.arg1.toUpperCase().matches("P#.*")){// pointer variable
-                            statment.arg1 = "m";
-                        }
-                        
+                        sourceLineEntries.add(new lineEntry(rawStringLine,i,mGet(statment.command+","+statment.arg1),statment.blockType));
+                                                
                             
                     } catch (ArrayIndexOutOfBoundsException AIOOBE){
                         System.err.println("<<<< Decision Engine: Possible misconstructed statement.");
@@ -483,6 +437,57 @@ public class SourceEntry {
     }
     
     /**
+     *  This is another version of IDMemoryType that takes in the entire 
+     * "PlaceHolder" array and the current string for the statement.
+     * @param placeHolder The Array of statements from the Sourceline
+     * @param Statement The Statement that contains already defined variables
+     * @param VAR A Map that contains the List of Local Variables
+     * @return The MemoryType and additional Appendages.
+     */
+    private String IDMemoryType(String[] placeHolder, String Statement,Map VAR){
+        //Go through each item in placeHolder.
+        for(int i=1;i<placeHolder.length;i++){            
+            if(placeHolder[i].matches(regExes.DIRECTADDRESSING)){ // E.G "L MW 5.0"
+                Statement = placeHolder[i].replaceAll(regExes.DIRECTADDRESSING, "$1");
+                if(Statement.equalsIgnoreCase(""))// If there is no preceding item - E.G M 5.1, this is Boolean.
+                    Statement = "b";
+            }
+            else if(placeHolder[i].matches(regExes.POINTERCONSTANT))
+                Statement = "d";
+            else if(placeHolder[i].matches(regExes.REGISTERINDIRECTAREACROSSING)){
+                if(Statement.matches(regExes.DIRECTADDRESSING)) // If a memory area has already been specified
+                    Statement += ";_riai";                       // Tag Register Indirect, Area Internal.
+                else                                            // Otherwise
+                    Statement += ";_riac";                       // Tag Register Indirect, Area Crossing.
+            }
+            else if(placeHolder[i].matches(regExes.MEMORYINDIRECT)){
+                if(Statement.matches(regExes.DIRECTADDRESSING))
+                    Statement += ";_mi";
+            }
+            else if(placeHolder[i].matches(regExes.FULLYQUALIFIEDDBACCESS)){
+                Statement = placeHolder[i].replaceAll(regExes.FULLYQUALIFIEDDBACCESS, "$2");
+                if(Statement.equalsIgnoreCase("X"))
+                        Statement = "b";
+            }
+            else if(placeHolder[i].matches(regExes.LOCALVARIABLE)){ // Check if this is a Local variable
+                placeHolder[i] = placeHolder[i].replaceAll(regExes.LOCALCLEAN, "$1"); // Clean out any array brackets etc. if required.
+                Statement = varGet(VAR, placeHolder[i]);          // if so, Get the Memory type from the parameter list
+                Statement += ";_pa";                                // and Tag this for Parameter access.
+            }
+
+            else{ // Error.  Stay here.  We can remove this if we need to.
+                String messageString = "<<<< IDMemoryType(s[],s):"+Statement + ":"+String.valueOf(i)+">";
+                for(String s:placeHolder)
+                    messageString+=","+s;
+                JOptionPane.showMessageDialog(null, messageString, "oops", JOptionPane.ERROR_MESSAGE);
+                System.err.println(messageString);
+                System.exit(0);
+            }
+        }
+        return Statement;
+    }
+    
+    /**
      * This function is used to return the delay time for each instruction.
      * Where multiple delays are separated with a ";", they are all added in this function
      * Example: L,W;_pqdb;_airi - <B>L</B>oad <B>W</B>ord from a <B>P</B>artially <B>Q</B>ualified <B>D</B>ata<B>B</B>ase using 
@@ -494,7 +499,7 @@ public class SourceEntry {
         String[] getMString = getM.split(";");
         int retVal = 0;        
         for(int i=0; i<getMString.length; i++){
-                if(m.get(getMString[0].trim())==null){
+                if(m.get(getMString[i].trim())==null){
                     System.out.println("<<<< mGet ["+String.valueOf(i)+"]: Could not find \""+getM+"\", Please update Database. ");            
                     return i;
                 }
@@ -533,7 +538,7 @@ public class SourceEntry {
                     m.put(rs.getString("Syntax"), rs.getInt("Time"));
                 }    
             }
-            st.close();//>>>>
+            st.close();
         }
         catch(SQLException | ClassNotFoundException ex){
             System.err.println("t:"+ex.toString());            
@@ -559,7 +564,7 @@ public class SourceEntry {
                     t.put(rs.getString("Name"), rs.getString("type"));
                 }    
             }
-            st.close();//>>>>
+            st.close();
         }
         catch(SQLException | ClassNotFoundException ex){
             System.err.println("m:"+ex.toString());            
@@ -567,7 +572,8 @@ public class SourceEntry {
     }    
     
     /**
-     * <<<< Here Al.
+     * Gets the Block times from the Database and returns a Hashmap
+     * of Strings representing Functions versus times.
      * @return 
      */
     public Map getBlockTimes(){
@@ -629,6 +635,21 @@ public class SourceEntry {
         return func;
     }
     
+    /**
+     * Performs the Function to "Get" the local string type from the VAR map.
+     * @param key The name of the variable being sought.
+     * @return The Type for this variable
+     */
+    public static String varGet(Map VAR, String keyString){
+        String tempString = (String)VAR.get(keyString);
+        tempString = tempString.replaceAll(regExes.ARRAYCLEAN, "$1"); // remove any "#" marks that identify the variable.
+        if(tempString==null){
+            JOptionPane.showMessageDialog(null, "<<<<varGet: Error Matching Variables: "+keyString,"oops",JOptionPane.ERROR_MESSAGE);
+            System.err.println("<<<<varGet: Error Matching Variables: "+keyString);
+            System.exit(0);
+        }
+        return tempString;       
+    }
     /**
      * Let this be a test method to call other WIP Methods for calling.
      * Can be removed afterwards.

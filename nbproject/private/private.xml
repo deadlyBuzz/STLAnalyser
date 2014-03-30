@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
-    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="8">
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="9">
         <file>
             <url>src/stlanalyser/Model/blockClass.java</url>
             <bookmark id="6">
@@ -21,17 +21,17 @@
             <url>src/stlanalyser/Model/SourceEntry.java</url>
             <bookmark id="4">
                 <name/>
-                <line>266</line>
+                <line>245</line>
                 <key/>
             </bookmark>
             <bookmark id="8">
                 <name/>
-                <line>336</line>
+                <line>290</line>
                 <key/>
             </bookmark>
-            <bookmark id="5">
+            <bookmark id="9">
                 <name/>
-                <line>547</line>
+                <line>438</line>
                 <key/>
             </bookmark>
         </file>
