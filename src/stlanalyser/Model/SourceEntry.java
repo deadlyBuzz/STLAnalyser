@@ -274,15 +274,17 @@ public class SourceEntry {
                                 
                                 statment.arg1 += ";_pa";                            // Tag to accomodate the additional delay for parameter access.                                
                             }                                
-                            statment.blockType = lineEntry.CALLFUNCTION;
-                            //sourceLineEntries.add(new lineEntry(rawStringLine,i,mGet(placeHolder[0]+","+placeHolder[1]),lineEntry.CALLFUNCTION));
+                            statment.blockType = lineEntry.CALLFUNCTION;                            
                             if(stringLine.matches(".*\\(.*")) // If the "CALL" function does not have an open bracket, then then there won't be a close bracket.
                                 StateMachine = BLOCKCALL; // S7300_instruction_list.PDF P59                                                       // AWL_e.PDF P265
                         }
                         // for everything else the same format applies...
                         else{                             // Default command.
                             statment.command = placeHolder[0];
-                            statment.arg1 = IDMemoryType(placeHolder,statment.arg1,VAR);
+                            if(placeHolder.length>1)        // If this only contains a single command - Declare operation on a "b"oolean
+                                statment.arg1 = IDMemoryType(placeHolder,statment.arg1,VAR);
+                            else
+                                statment.arg1 = "b";
                         }
                         if(statment.blockType<0)
                             statment.blockType = lineEntry.CODE_SOURCE;
@@ -453,9 +455,16 @@ public class SourceEntry {
                     Statement = "b";
             }
             else if(placeHolder[i].matches(regExes.POINTERCONSTANT))
-                Statement = "d";
+                if(placeHolder[0].matches(regExes.LOADADDRESS))
+                    Statement = "m";
+                else
+                    Statement = "d";
             else if(placeHolder[i].matches(regExes.REGISTERINDIRECTAREACROSSING)){
-                if(Statement.matches(regExes.DIRECTADDRESSING)) // If a memory area has already been specified
+                if(i==1)
+                    Statement = "b;_riac";
+                else if((placeHolder[i-1].matches(regExes.DIRECTADDRESSING))|
+                        (placeHolder[i-1].matches(regExes.PARTIALLYQUALIFIEDDBACCESS))|
+                        (placeHolder[i-1].matches(regExes.FULLYQUALIFIEDDBACCESS))) // If a memory area has already been specified
                     Statement += ";_riai";                       // Tag Register Indirect, Area Internal.
                 else                                            // Otherwise
                     Statement += ";_riac";                       // Tag Register Indirect, Area Crossing.
@@ -469,12 +478,23 @@ public class SourceEntry {
                 if(Statement.equalsIgnoreCase("X"))
                         Statement = "b";
             }
+            else if(placeHolder[i].matches(regExes.PARTIALLYQUALIFIEDDBACCESS)){
+                Statement = placeHolder[i].replaceAll(regExes.PARTIALLYQUALIFIEDDBACCESS, "$1");
+                if(Statement.equalsIgnoreCase("X"))
+                    Statement = "b";
+                Statement += ";_pqdb";
+            }
             else if(placeHolder[i].matches(regExes.LOCALVARIABLE)){ // Check if this is a Local variable
                 placeHolder[i] = placeHolder[i].replaceAll(regExes.LOCALCLEAN, "$1"); // Clean out any array brackets etc. if required.
                 Statement = varGet(VAR, placeHolder[i]);          // if so, Get the Memory type from the parameter list
                 Statement += ";_pa";                                // and Tag this for Parameter access.
             }
-
+            else if((placeHolder[i].matches(regExes.TIMERCONSTANT))|
+                    (placeHolder[i].matches(regExes.RADIXCONSTANT))|
+                    (placeHolder[i].matches(regExes.STRINGCONSTANT))|
+                    ((placeHolder[i].matches(regExes.VALUECONSTANT))&(i==1))){
+                Statement = "K";
+            }
             else{ // Error.  Stay here.  We can remove this if we need to.
                 String messageString = "<<<< IDMemoryType(s[],s):"+Statement + ":"+String.valueOf(i)+">";
                 for(String s:placeHolder)
@@ -641,8 +661,8 @@ public class SourceEntry {
      * @return The Type for this variable
      */
     public static String varGet(Map VAR, String keyString){
-        String tempString = (String)VAR.get(keyString);
-        tempString = tempString.replaceAll(regExes.ARRAYCLEAN, "$1"); // remove any "#" marks that identify the variable.
+        String tempString = keyString.replaceAll(regExes.ARRAYCLEAN, "$1"); // remove any "#" marks that identify the variable.                
+        tempString = (String)VAR.get(tempString);
         if(tempString==null){
             JOptionPane.showMessageDialog(null, "<<<<varGet: Error Matching Variables: "+keyString,"oops",JOptionPane.ERROR_MESSAGE);
             System.err.println("<<<<varGet: Error Matching Variables: "+keyString);

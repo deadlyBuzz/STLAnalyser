@@ -36,7 +36,7 @@ public static final String DBHEADER        =  "DATA_BLOCK.*";
 /**  Defines a Local Variable that starts with a "#" 
  *   Regex String: <br/>"#[\\w_]+"; 
  */
-    public static final String LOCALVARIABLE   =  "#[\\w_]+";
+    public static final String LOCALVARIABLE   =  "#[\\w_\\[\\]]+";
 /**  Regex String: <br/>"\"[\\w_]+\""; **/
     public static final String SYMBOLICNAMES   =  "\"[\\w_]+\"";
 /**  Regex String: <br/>"END_FUNCTION.*"; **/
@@ -68,7 +68,7 @@ public static final String DBHEADER        =  "DATA_BLOCK.*";
 /** Pointer Constant 
  * Regex String: <br/>"P##?\\w"; 
  */
-    public static final String POINTERCONSTANT  =  "P##?\\w";
+    public static final String POINTERCONSTANT  =  "P##?\\w+";
     
     /**
      * Quick and dirty regex for removing the "#" from in front of a variable name.\n
@@ -91,14 +91,28 @@ public static final String DBHEADER        =  "DATA_BLOCK.*";
         
     /** Memory Indirect, E.G A M[MD 2] <br/> Regex String: <br/>"\\d+\\[[MLIQ].*" **/
     public static final String MEMORYINDIRECT = "\\[[MLIQ].*";
-    /**  Regex String: <br/>"[TC]"; **/
+    /**  Regex String: "[TC]"; **/
     public static final String TIMERSANDCOUNTERS  =  "[TC]";
     
     /**  Register indirect - Area Crossing <br/> E.G L [AR1,P#0.0] <br/> Regex String: <br/>"\\[AR[12],P#\\d\\+.\\d\\]"; **/
-    public static final String REGISTERINDIRECTAREACROSSING  =  "\\[AR[12],P#\\d\\+.\\d\\]";
+    public static final String REGISTERINDIRECTAREACROSSING  =  "\\[AR[12],P#\\d+.\\d\\]";
     
-    /**  Regex String: <br/>"D[BI](\\d+)\\.DB(\\w)"; **/
+    /**  Regex String: D[BI](\\d+)\\.DB(\\w); **/
     public static final String FULLYQUALIFIEDDBACCESS  =  "D[BI](\\d+)\\.DB(\\w)";
-    /**  Regex String: <br/>""; **/
-    public static final String PARTIALLYQUALIFIEDDBACCESS  =  "";
+    /**  Regex String: "D[BI](\\d+)"; **/
+    public static final String PARTIALLYQUALIFIEDDBACCESS  =  "D[BI](\\w+)";
+    
+    /** Timer constant.<br/>\n Regex String: (S5)?T#.* */
+    public static final String TIMERCONSTANT = "(S5)?T#.*";
+    
+    /** Value constant.<br/> \n Regex String: -?[0-9\\.]+\\s*;? */
+    public static final String VALUECONSTANT = "-?[0-9\\.]+\\s*;?";
+    
+    /** Radix Constant (E.G B#16#FFFF is Base 16 constant)<br/>
+     * Regex String: (B|W|2)#[0-9]+#?[A-Fa-f0-9]+\\s*;?
+     */
+    public static final String RADIXCONSTANT = "(B|W|2)#[0-9]+#?[A-Fa-f0-9]+\\s*;?";
+    
+    /** String constant <br/> Regex String: '.+' */
+    public static final String STRINGCONSTANT = "'.+'";
 }
