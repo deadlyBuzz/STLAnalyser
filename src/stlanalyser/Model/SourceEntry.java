@@ -498,6 +498,8 @@ public class SourceEntry {
                     ((placeHolder[i].matches(regExes.VALUECONSTANT))&(i==1))){
                 Statement = "K";
             }
+            else if((placeHolder[i].matches(regExes.STATUSWORDBITS))&(i==1))
+                Statement = "b";
             else if((placeHolder[i].matches(regExes.VALUECONSTANT))&(i==2))
                 Statement = Statement; // Do nothing.            
             else{ // Error.  Stay here.  We can remove this if we need to.

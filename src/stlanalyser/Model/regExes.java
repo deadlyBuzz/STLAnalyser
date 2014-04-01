@@ -48,7 +48,7 @@ public static final String DBHEADER        =  "DATA_BLOCK.*";
 /**  Regex String: <br/>"BLD\\s+.*"; **/
     public static final String BLDSTATEMENT    =  "BLD\\s+.*";
 /**  Regex String: <br/>"(JCN|JNB|JBI|JNBI|JOS|JPZ|JMZ|JUO|LOOP|J[ULCOZNP])"; **/
-    public static final String JUMPSTATEMENT   =  "(JCN|JNB|JBI|JNBI|JOS|JPZ|JMZ|JUO|LOOP|J[ULCOZNP])";
+    public static final String JUMPSTATEMENT   =  "(JCN|JCB|JNB|JBI|JNBI|JOS|JPZ|JMZ|JUO|LOOP|J[ULCOZNP])";
 /**  Regex String: <br/>"(CALL|UC|CC)"; **/
     public static final String CALLSTATEMENT   =  "(CALL|UC|CC)";
 /**  Regex String: <br/>".*ARRAY\\s*\\[[0-9]+\\s+\\.+\\s[0-9]+\\s\\].*"; **/
@@ -115,4 +115,10 @@ public static final String DBHEADER        =  "DATA_BLOCK.*";
     
     /** String constant <br/> Regex String: '.+' */
     public static final String STRINGCONSTANT = "'.+'";
+    
+    /** Status words, Such as Overflow (OV) Stored OverFlow (OS) etc.<br/>
+     *  More detail can be found in s7300_instruction_list.pdf P13 <br/>
+     * Regex Syntax: (OV|RLO|BR|OS|CC) 
+     */
+    public static final String STATUSWORDBITS = "(OV|RLO|BR|OS|CC)";
 }
