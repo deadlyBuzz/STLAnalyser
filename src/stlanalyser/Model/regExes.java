@@ -92,7 +92,7 @@ public static final String DBHEADER        =  "DATA_BLOCK.*";
     /** Memory Indirect, E.G A M[MD 2] <br/> Regex String: <br/>"\\d+\\[[MLIQ].*" **/
     public static final String MEMORYINDIRECT = "\\[[MLIQ].*";
     /**  Regex String: "[TC]"; **/
-    public static final String TIMERSANDCOUNTERS  =  "[TC]";
+    public static final String TIMERSANDCOUNTERS  =  "([TC])";
     
     /**  Register indirect - Area Crossing <br/> E.G L [AR1,P#0.0] <br/> Regex String: <br/>"\\[AR[12],P#\\d\\+.\\d\\]"; **/
     public static final String REGISTERINDIRECTAREACROSSING  =  "\\[AR[12],P#\\d+.\\d\\]";

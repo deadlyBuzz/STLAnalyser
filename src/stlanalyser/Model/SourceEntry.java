@@ -454,6 +454,9 @@ public class SourceEntry {
                 if(Statement.equalsIgnoreCase(""))// If there is no preceding item - E.G M 5.1, this is Boolean.
                     Statement = "b";
             }
+            else if(placeHolder[i].matches(regExes.TIMERSANDCOUNTERS)) // If this is a timer or a counter.
+                Statement = placeHolder[i];
+            
             else if(placeHolder[i].matches(regExes.POINTERCONSTANT))
                 if(placeHolder[0].matches(regExes.LOADADDRESS))
                     Statement = "m";
@@ -495,6 +498,8 @@ public class SourceEntry {
                     ((placeHolder[i].matches(regExes.VALUECONSTANT))&(i==1))){
                 Statement = "K";
             }
+            else if((placeHolder[i].matches(regExes.VALUECONSTANT))&(i==2))
+                Statement = Statement; // Do nothing.            
             else{ // Error.  Stay here.  We can remove this if we need to.
                 String messageString = "<<<< IDMemoryType(s[],s):"+Statement + ":"+String.valueOf(i)+">";
                 for(String s:placeHolder)
