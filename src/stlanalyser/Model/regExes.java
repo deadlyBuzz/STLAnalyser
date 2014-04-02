@@ -53,6 +53,8 @@ public static final String DBHEADER        =  "DATA_BLOCK.*";
     public static final String CALLSTATEMENT   =  "(CALL|UC|CC)";
 /**  Regex String: <br/>".*ARRAY\\s*\\[[0-9]+\\s+\\.+\\s[0-9]+\\s\\].*"; **/
     public static final String ARRAYSTATEMENT  =  ".*ARRAY\\s*\\[[0-9]+\\s+\\.+\\s[0-9]+\\s\\].*";
+/** String Declaration from the Block header<br/> Regex String: .* : STRING\\W+\\[\\d+\\W*\\]; */    
+    public static final String STRINGDECLARE = "\\W*STRING\\W+\\[\\d+\\W*\\];?";
 /**  Regex String: <br/>"(\\[[ \\t0-9]+\\]\\s+)?;"; **/
     public static final String ARRAYCLEAR      =  "(\\[[ \\t0-9]+\\]\\s+)?;";
 /**  Regex String: <br/>"LAR(1|2).*"; **/
@@ -64,14 +66,14 @@ public static final String DBHEADER        =  "DATA_BLOCK.*";
 /**  Regex String: <br/>"\\[[ML][DW].*"; // Area indirect addressing **/
     public static final String AREAINDIRECT    =  "\\[[ML][DW].*"; // Area indirect addressing
 /**  Regex String: <br/>"\\s*(S?F[BC])\\s+\\d+"; **/
-    public static final String FBIdBlock  =  "\\s*(S?F[BC])\\s+\\d+";
+    public static final String FBIdBlock  =  "\\s*(S?F[BC])\\s+(\\d+)";
 /** Pointer Constant 
  * Regex String: <br/>"P##?\\w"; 
  */
     public static final String POINTERCONSTANT  =  "P##?\\w+";
     
     /**
-     * Quick and dirty regex for removing the "#" from in front of a variable name.\n
+     * Quick and dirty Regex for removing the "#" from in front of a variable name.\n
      * Regex String: "#?(.*)"
      * 
      */
@@ -111,7 +113,7 @@ public static final String DBHEADER        =  "DATA_BLOCK.*";
     /** Radix Constant (E.G B#16#FFFF is Base 16 constant)<br/>
      * Regex String: (B|W|2)#[0-9]+#?[A-Fa-f0-9]+\\s*;?
      */
-    public static final String RADIXCONSTANT = "(B|W|2)#[0-9]+#?[A-Fa-f0-9]+\\s*;?";
+    public static final String RADIXCONSTANT = "(B|W|2|D)W?#[0-9]+#?[A-Fa-f0-9]+\\s*;?";
     
     /** String constant <br/> Regex String: '.+' */
     public static final String STRINGCONSTANT = "'.+'";
@@ -121,4 +123,7 @@ public static final String DBHEADER        =  "DATA_BLOCK.*";
      * Regex Syntax: (OV|RLO|BR|OS|CC) 
      */
     public static final String STATUSWORDBITS = "(OV|RLO|BR|OS|CC)";
+    
+    /** Open DB Command <br/> Regex String: OPN*/
+    public static final String OPENDBCOMMAND = "OPN";
 }

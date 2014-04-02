@@ -271,12 +271,21 @@ public class SourceEntry {
                                 statment.arg2 = placeHolder[2];                     // Keep in memory what SFC/SFB this is, we can address this later if we need.                             
                             }
                             else{
-                                
+                                statment.arg1 = IDMemoryType(placeHolder,statment.arg1,VAR); // This is a local variable - Find out what it is.                               
+                                // Replace the Named instance of the Block being called with the actual Block being called.
+                                Replace the Named instance of the Block
+                                This is happening as when the block times are resolved in the BlockClass, 
+                                each Block is working off the local alias of the block instead of the Block
+                                name.  E.G #controlinstance instead of FB 105.
                                 statment.arg1 += ";_pa";                            // Tag to accomodate the additional delay for parameter access.                                
                             }                                
                             statment.blockType = lineEntry.CALLFUNCTION;                            
                             if(stringLine.matches(".*\\(.*")) // If the "CALL" function does not have an open bracket, then then there won't be a close bracket.
                                 StateMachine = BLOCKCALL; // S7300_instruction_list.PDF P59                                                       // AWL_e.PDF P265
+                        }
+                        else if(placeHolder[0].toUpperCase().matches(regExes.OPENDBCOMMAND)){  // OPEN Command for DB or DI 
+                            statment.command = placeHolder[0];
+                            statment.arg1 = placeHolder[1];
                         }
                         // for everything else the same format applies...
                         else{                             // Default command.
@@ -332,6 +341,8 @@ public class SourceEntry {
          */        
         if(memory.matches(regExes.FBIdBlock))
             placeHolder = memory.replaceAll(regExes.FBIdBlock, "$1");
+        else if(memory.matches(regExes.STRINGDECLARE))// Treat all strings as Bytes.  Any Access will be individual characters = bytes.
+            placeHolder = "B";
         else
             placeHolder = t.get(memory);     // T populated once in loadHashMap
         
@@ -490,8 +501,10 @@ public class SourceEntry {
             else if(placeHolder[i].matches(regExes.LOCALVARIABLE)){ // Check if this is a Local variable
                 placeHolder[i] = placeHolder[i].replaceAll(regExes.LOCALCLEAN, "$1"); // Clean out any array brackets etc. if required.
                 Statement = varGet(VAR, placeHolder[i]);          // if so, Get the Memory type from the parameter list
-                Statement += ";_pa";                                // and Tag this for Parameter access.
+                //Statement += ";_pa";                                // and Tag this for Parameter access.
             }
+            else if(placeHolder[i].matches("\\("))
+                Statement = Statement; // Do nothing - ignore this entry as the Bracket does nothing.
             else if((placeHolder[i].matches(regExes.TIMERCONSTANT))|
                     (placeHolder[i].matches(regExes.RADIXCONSTANT))|
                     (placeHolder[i].matches(regExes.STRINGCONSTANT))|
