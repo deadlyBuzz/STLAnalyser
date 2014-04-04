@@ -44,7 +44,7 @@ public static final String DBHEADER        =  "DATA_BLOCK.*";
 /**  Regex String: <br/>"NOP\\s+\\d+.*"; // NOP any whitespace, any digit **/
     public static final String NOPSTATEMENT    =  "NOP\\s+\\d+.*"; // NOP any whitespace, any digit
 /**  Regex String: <br/>"([a-zA-Z_]\\w{0,3}):\\s*(.*);"; **/
-    public static final String LABELID         =  "([a-zA-Z_]\\w{0,3}):\\s*(.*);";
+    public static final String LABELID         =  "([a-zA-Z_]\\w{0,3}):\\s*(.*)(;|\\()";
 /**  Regex String: <br/>"BLD\\s+.*"; **/
     public static final String BLDSTATEMENT    =  "BLD\\s+.*";
 /**  Regex String: <br/>"(JCN|JNB|JBI|JNBI|JOS|JPZ|JMZ|JUO|LOOP|J[ULCOZNP])"; **/
@@ -58,7 +58,7 @@ public static final String DBHEADER        =  "DATA_BLOCK.*";
 /**  Regex String: <br/>"(\\[[ \\t0-9]+\\]\\s+)?;"; **/
     public static final String ARRAYCLEAR      =  "(\\[[ \\t0-9]+\\]\\s+)?;";
 /**  Regex String: <br/>"LAR(1|2).*"; **/
-    public static final String LOADADDRESS     =  "LAR(1|2).*";
+    public static final String LOADTRANSFERADDRESS     =  "[LT]AR(1|2).*";
 /**  Cannot replicate in comments but is used to clean the line of trailing colons and comments **/
     public static final String CLEANLINE       =  "(.*);(\\s*//.*)?";
 /**  Regex String: <br/>"\\[AR.*"; // Register indirect check **/
@@ -70,7 +70,7 @@ public static final String DBHEADER        =  "DATA_BLOCK.*";
 /** Pointer Constant 
  * Regex String: <br/>"P##?\\w"; 
  */
-    public static final String POINTERCONSTANT  =  "P##?\\w+";
+    public static final String POINTERCONSTANT  =  "P##?[\\w.]+";
     
     /**
      * Quick and dirty Regex for removing the "#" from in front of a variable name.\n
@@ -89,7 +89,7 @@ public static final String DBHEADER        =  "DATA_BLOCK.*";
     /* ---- Typically used in IDMemory Function ----- */ 
 
     /**  Regex String: <br/>"[LMIQ](.*)"; **/
-    public static final String DIRECTADDRESSING  =  "[LMIQ](.*)";
+    public static final String DIRECTADDRESSING  =  "P?[LMIQb](.*)"; // include "b" incase the boolean has already been identified.
         
     /** Memory Indirect, E.G A M[MD 2] <br/> Regex String: <br/>"\\d+\\[[MLIQ].*" **/
     public static final String MEMORYINDIRECT = "\\[[MLIQ].*";
@@ -104,11 +104,17 @@ public static final String DBHEADER        =  "DATA_BLOCK.*";
     /**  Regex String: "D[BI](\\d+)"; **/
     public static final String PARTIALLYQUALIFIEDDBACCESS  =  "D[BI](\\w+)";
     
-    /** Timer constant.<br/>\n Regex String: (S5)?T#.* */
+    /** Timer constant.<br/> Regex String: (S5)?T#.* */
     public static final String TIMERCONSTANT = "(S5)?T#.*";
     
+    /** Counter Constant <br/> Regex String: C#[\\d\\.]+ */
+    public static final String COUNTERCONSTANT = "C#[\\d\\.]+";
+    
+    /** Byte constant <br/> regex String: L#[0-9]+ */
+    public static final String BYTECONSTANT = "L#[0-9]+";
+    
     /** Value constant.<br/> \n Regex String: -?[0-9\\.]+\\s*;? */
-    public static final String VALUECONSTANT = "-?[0-9\\.]+\\s*;?";
+    public static final String VALUECONSTANT = "-?[0-9\\.e\\+]+\\s*;?";
     
     /** Radix Constant (E.G B#16#FFFF is Base 16 constant)<br/>
      * Regex String: (B|W|2)#[0-9]+#?[A-Fa-f0-9]+\\s*;?

@@ -84,6 +84,10 @@ public class SourceEntry {
             String rawStringLine = sourceLines.get(i); // get rid of any Labels
             String stringLine = rawStringLine.replaceAll(regExes.LABELID, "$2").trim();
             stringLine = stringLine.replaceAll("(.+)//.*", "$1");
+            
+            if(rawStringLine.replaceAll(regExes.LABELID,"$3").equalsIgnoreCase("(")) // reappend the open bracket so the block transfer parameters are ignored.
+                stringLine += " (";
+            
             if(i>0) 
                 sourceLineEntries.get(i-1).setParentBlock(blockName);
 
@@ -273,10 +277,13 @@ public class SourceEntry {
                             else{
                                 statment.arg1 = IDMemoryType(placeHolder,statment.arg1,VAR); // This is a local variable - Find out what it is.                               
                                 // Replace the Named instance of the Block being called with the actual Block being called.
-                                Replace the Named instance of the Block
+                               rawStringLine = rawStringLine.replaceAll("#"+placeHolder[1], statment.arg1);
+                               statment.arg1 = statment.arg1.replaceAll("(S?F[BC])\\W+\\d+", "$1");
+                                
+                                /**Replace the Named instance of the Block
                                 This is happening as when the block times are resolved in the BlockClass, 
                                 each Block is working off the local alias of the block instead of the Block
-                                name.  E.G #controlinstance instead of FB 105.
+                                name.  E.G #controlinstance instead of FB 105.*/
                                 statment.arg1 += ";_pa";                            // Tag to accomodate the additional delay for parameter access.                                
                             }                                
                             statment.blockType = lineEntry.CALLFUNCTION;                            
@@ -340,7 +347,7 @@ public class SourceEntry {
          * S5Time takes up 16 Bits thus is encoded as a Word.
          */        
         if(memory.matches(regExes.FBIdBlock))
-            placeHolder = memory.replaceAll(regExes.FBIdBlock, "$1");
+            placeHolder = memory.replaceAll(regExes.FBIdBlock, "$1 $2");
         else if(memory.matches(regExes.STRINGDECLARE))// Treat all strings as Bytes.  Any Access will be individual characters = bytes.
             placeHolder = "B";
         else
@@ -459,6 +466,9 @@ public class SourceEntry {
      */
     private String IDMemoryType(String[] placeHolder, String Statement,Map VAR){
         //Go through each item in placeHolder.
+        String tagString = "";  // Tags should be appended to the end.
+                              // allow the loop to buils the tagList and 
+                              // append it to the returnString at the end.
         for(int i=1;i<placeHolder.length;i++){            
             if(placeHolder[i].matches(regExes.DIRECTADDRESSING)){ // E.G "L MW 5.0"
                 Statement = placeHolder[i].replaceAll(regExes.DIRECTADDRESSING, "$1");
@@ -469,23 +479,25 @@ public class SourceEntry {
                 Statement = placeHolder[i];
             
             else if(placeHolder[i].matches(regExes.POINTERCONSTANT))
-                if(placeHolder[0].matches(regExes.LOADADDRESS))
+                if(placeHolder[0].matches(regExes.LOADTRANSFERADDRESS))
                     Statement = "m";
                 else
-                    Statement = "d";
+                    Statement = "D";
             else if(placeHolder[i].matches(regExes.REGISTERINDIRECTAREACROSSING)){
                 if(i==1)
                     Statement = "b;_riac";
                 else if((placeHolder[i-1].matches(regExes.DIRECTADDRESSING))|
                         (placeHolder[i-1].matches(regExes.PARTIALLYQUALIFIEDDBACCESS))|
                         (placeHolder[i-1].matches(regExes.FULLYQUALIFIEDDBACCESS))) // If a memory area has already been specified
-                    Statement += ";_riai";                       // Tag Register Indirect, Area Internal.
+                    tagString += ";_riai";                       // Tag Register Indirect, Area Internal.
                 else                                            // Otherwise
-                    Statement += ";_riac";                       // Tag Register Indirect, Area Crossing.
+                    tagString +=";_riac";                       // Tag Register Indirect, Area Crossing.
             }
             else if(placeHolder[i].matches(regExes.MEMORYINDIRECT)){
-                if(Statement.matches(regExes.DIRECTADDRESSING))
-                    Statement += ";_mi";
+                if(Statement.matches(regExes.DIRECTADDRESSING)){
+                    tagString += ";_mi";
+                    break;  // Finish the loop as the next item (if it is one) is rubbish
+                }
             }
             else if(placeHolder[i].matches(regExes.FULLYQUALIFIEDDBACCESS)){
                 Statement = placeHolder[i].replaceAll(regExes.FULLYQUALIFIEDDBACCESS, "$2");
@@ -496,7 +508,7 @@ public class SourceEntry {
                 Statement = placeHolder[i].replaceAll(regExes.PARTIALLYQUALIFIEDDBACCESS, "$1");
                 if(Statement.equalsIgnoreCase("X"))
                     Statement = "b";
-                Statement += ";_pqdb";
+                tagString += ";_pqdb";
             }
             else if(placeHolder[i].matches(regExes.LOCALVARIABLE)){ // Check if this is a Local variable
                 placeHolder[i] = placeHolder[i].replaceAll(regExes.LOCALCLEAN, "$1"); // Clean out any array brackets etc. if required.
@@ -506,7 +518,9 @@ public class SourceEntry {
             else if(placeHolder[i].matches("\\("))
                 Statement = Statement; // Do nothing - ignore this entry as the Bracket does nothing.
             else if((placeHolder[i].matches(regExes.TIMERCONSTANT))|
+                    (placeHolder[i].matches(regExes.COUNTERCONSTANT))| // Assume a Timers and COUNTER are "K".  takes up a word. S7prv54_e.pdf P A-53 (553)
                     (placeHolder[i].matches(regExes.RADIXCONSTANT))|
+                    (placeHolder[i].matches(regExes.BYTECONSTANT))|
                     (placeHolder[i].matches(regExes.STRINGCONSTANT))|
                     ((placeHolder[i].matches(regExes.VALUECONSTANT))&(i==1))){
                 Statement = "K";
@@ -524,7 +538,7 @@ public class SourceEntry {
                 System.exit(0);
             }
         }
-        return Statement;
+        return Statement+tagString;
     }
     
     /**
