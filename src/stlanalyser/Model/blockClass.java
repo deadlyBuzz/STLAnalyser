@@ -44,7 +44,7 @@ public class blockClass {
         lines.put(line.getLineNumber(), line);
         totalTime += line.getLineTime();
         if(line.getLineType() == lineEntry.CALLFUNCTION){
-            String functionCalled = line.getLineSource().replaceAll(reLABELID, "$2").trim();
+            String functionCalled = line.getLineSource().replaceAll(regExes.LABELID, "$2").trim();
             functionCalled = functionCalled.replaceAll("\\s*CALL([\\w\\s]+)[\\(\\,]{0,1}.*", "$1").replaceAll("\\s","");
             missingFunctions.add(new MissingFnStruct(line.getLineNumber(), functionCalled));
         }        
@@ -152,12 +152,12 @@ public class blockClass {
         }
         
         public simpleJumpLabels(lineEntry line){
-            if(line.getLineSource().matches(SourceEntry.reLABELID)){
-                this.label = line.getLineSource().replaceAll(SourceEntry.reLABELID, "$2").trim();
+            if(line.getLineSource().matches(regExes.LABELID)){
+                this.label = line.getLineSource().replaceAll(regExes.LABELID, "$2").trim();
                 this.type = STARTLABEL;
             }
-            else if(line.getLineSource().matches(SourceEntry.reJUMPSTATEMENT+"(.*)(//.*)?")){
-                this.label = line.getLineSource().replaceAll(SourceEntry.reLABELID, "$2").trim();
+            else if(line.getLineSource().matches(regExes.JUMPSTATEMENT+"(.*)(//.*)?")){
+                this.label = line.getLineSource().replaceAll(regExes.LABELID, "$2").trim();
                 this.type = ENDLABEL;
             }
             this.line = line.getLineNumber();
@@ -175,17 +175,17 @@ public class blockClass {
         for(Integer k:keys){
             // This will iterate through each lineEntry.
             String sourceLine = lines.get(k).getLineSource().trim();
-            if(sourceLine.replaceAll(SourceEntry.reLABELID, "$2").matches(SourceEntry.reJUMPSTATEMENT+" .*")){
-                String jumpTo = sourceLine.replaceAll(SourceEntry.reLABELID, "$2");
-                jumpTo = jumpTo.replaceAll(SourceEntry.reJUMPSTATEMENT+"(.*)","$2");
+            if(sourceLine.replaceAll(regExes.LABELID, "$2").matches(regExes.JUMPSTATEMENT+" .*")){
+                String jumpTo = sourceLine.replaceAll(regExes.LABELID, "$2");
+                jumpTo = jumpTo.replaceAll(regExes.JUMPSTATEMENT+"(.*)","$2");
                 jumpTo = jumpTo.replaceAll("(.+);?\\w*(//.*)?", "$1").trim();                
                 jumpTo = jumpTo.replaceAll(";", "");
                 jumpLineMarkers.add("Jump:"+String.valueOf(lines.get(k).getLineNumber())+"|"+jumpTo);
             }
                 
-            if(sourceLine.matches(SourceEntry.reLABELID)){
-                String labelMarker = sourceLine.replaceAll(SourceEntry.reLABELID, "$1");
-                labelMarker = labelMarker.replaceAll(SourceEntry.reJUMPSTATEMENT+" .*", "$1").trim();
+            if(sourceLine.matches(regExes.LABELID)){
+                String labelMarker = sourceLine.replaceAll(regExes.LABELID, "$1");
+                labelMarker = labelMarker.replaceAll(regExes.JUMPSTATEMENT+" .*", "$1").trim();
                 jumpLineMarkers.add("Label:"+String.valueOf(lines.get(k).getLineNumber())+"|"+labelMarker);
             }
         }
