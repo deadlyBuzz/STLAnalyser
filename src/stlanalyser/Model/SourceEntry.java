@@ -515,6 +515,9 @@ public class SourceEntry {
                 Statement = varGet(VAR, placeHolder[i]);          // if so, Get the Memory type from the parameter list
                 //Statement += ";_pa";                                // and Tag this for Parameter access.
             }
+            else if(placeHolder[i].matches(regExes.DOTEXTENSIONACCESS)){ //If this is an FB or UDT type access.
+                Statement = IDDotExes(placeHolder[i]);
+            }
             else if(placeHolder[i].matches("\\("))
                 Statement = Statement; // Do nothing - ignore this entry as the Bracket does nothing.
             else if((placeHolder[i].matches(regExes.TIMERCONSTANT))|
@@ -530,7 +533,7 @@ public class SourceEntry {
             else if((placeHolder[i].matches(regExes.VALUECONSTANT))&(i==2))
                 Statement = Statement; // Do nothing.            
             else{ // Error.  Stay here.  We can remove this if we need to.
-                String messageString = "<<<< IDMemoryType(s[],s):"+Statement + ":"+String.valueOf(i)+">";
+                String messageString = "<<<< IDMemoryType(s[],s,v):"+Statement + ":"+String.valueOf(i)+">";
                 for(String s:placeHolder)
                     messageString+=","+s;
                 JOptionPane.showMessageDialog(null, messageString, "oops", JOptionPane.ERROR_MESSAGE);
@@ -711,6 +714,16 @@ public class SourceEntry {
     public void testMethod(){
         for(blockClass b:blockList)
             b.getJumpLabels();
+    }
+    
+    /**
+     * This function will take the existing dot extension variable
+     * and identify it against known data.
+     * @param variable
+     * @return A a flag representing the data type the variable represents.
+     */
+    public String IDDotExes(String variable){
+        return "p"; // for the moment - return a placeholder
     }
     
     private class S7Statement{

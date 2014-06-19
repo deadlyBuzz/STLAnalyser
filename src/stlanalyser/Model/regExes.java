@@ -132,4 +132,12 @@ public static final String DBHEADER        =  "DATA_BLOCK.*";
     
     /** Open DB Command <br/> Regex String: OPN*/
     public static final String OPENDBCOMMAND = "OPN";
+    
+    /** 
+     * An Access to a variable through dot extensions, such as found on <br/>
+     * UDTs or Function Blocks.<br/>
+     * E.G A #reset_pulse.Q Where #reset_pulse is a timer SFB 3 (a pulse timer)<br/>
+     * Regex String: (#?\D[\w\[\]]+).+
+     */
+    public static final String DOTEXTENSIONACCESS = "(#?\\D[\\w\\[\\]]+).+";
 }
