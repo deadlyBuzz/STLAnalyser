@@ -36,7 +36,7 @@ public static final String DBHEADER        =  "DATA_BLOCK.*";
 /**  Defines a Local Variable that starts with a "#" 
  *   Regex String: <br/>"#[\\w_]+"; 
  */
-    public static final String LOCALVARIABLE   =  "#[\\w_\\[\\]]+";
+    public static final String LOCALVARIABLE   =  "#[\\w_\\[\\]]+;?";
 /**  Regex String: <br/>"\"[\\w_]+\""; **/
     public static final String SYMBOLICNAMES   =  "\"[\\w_]+\"";
 /**  Regex String: <br/>"END_FUNCTION.*"; **/
@@ -88,8 +88,8 @@ public static final String DBHEADER        =  "DATA_BLOCK.*";
 
     /* ---- Typically used in IDMemory Function ----- */ 
 
-    /**  Regex String: <br/>"[LMIQ](.*)"; **/
-    public static final String DIRECTADDRESSING  =  "P?[LMIQb](.*)"; // include "b" incase the boolean has already been identified.
+    /**  Regex String: <br/>"P?[LMIQb]([^#]*)**/
+    public static final String DIRECTADDRESSING  =  "P?[LMIQb]([^#]*)"; // include "b" incase the boolean has already been identified.
         
     /** Memory Indirect, E.G A M[MD 2] <br/> Regex String: <br/>"\\d+\\[[MLIQ].*" **/
     public static final String MEMORYINDIRECT = "\\[[MLIQ].*";
@@ -110,8 +110,8 @@ public static final String DBHEADER        =  "DATA_BLOCK.*";
     /** Counter Constant <br/> Regex String: C#[\\d\\.]+ */
     public static final String COUNTERCONSTANT = "C#[\\d\\.]+";
     
-    /** Byte constant <br/> regex String: L#[0-9]+ */
-    public static final String BYTECONSTANT = "L#[0-9]+";
+    /** Byte constant <br/> regex String: L#[0-9]+;? */
+    public static final String BYTECONSTANT = "L#[0-9]+;?";
     
     /** Value constant.<br/> \n Regex String: -?[0-9\\.]+\\s*;? */
     public static final String VALUECONSTANT = "-?[0-9\\.e\\+]+\\s*;?";
@@ -137,7 +137,7 @@ public static final String DBHEADER        =  "DATA_BLOCK.*";
      * An Access to a variable through dot extensions, such as found on <br/>
      * UDTs or Function Blocks.<br/>
      * E.G A #reset_pulse.Q Where #reset_pulse is a timer SFB 3 (a pulse timer)<br/>
-     * Regex String: (#?\D[\w\[\]]+).+
+     * Regex String: #?(\D[\w\[\]]+\.+).*
      */
-    public static final String DOTEXTENSIONACCESS = "(#?\\D[\\w\\[\\]]+).+";
+    public static final String DOTEXTENSIONACCESS = "#?(\\D[\\w\\[\\]]+\\.+).*";
 }

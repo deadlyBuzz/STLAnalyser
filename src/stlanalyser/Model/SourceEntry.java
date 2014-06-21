@@ -293,6 +293,9 @@ public class SourceEntry {
                         else if(placeHolder[0].toUpperCase().matches(regExes.OPENDBCOMMAND)){  // OPEN Command for DB or DI 
                             statment.command = placeHolder[0];
                             statment.arg1 = placeHolder[1];
+                            if(!(statment.arg1.toUpperCase().matches(regExes.LOCALVARIABLE))){                                
+                                statment.arg1 = "DB"; // 
+                            }
                         }
                         // for everything else the same format applies...
                         else{                             // Default command.
@@ -671,7 +674,8 @@ public class SourceEntry {
                     String[] missingList = b.getMissingFunctions().split(",");
                     for(String s:missingList){ // go through each Function missing in the Block.
                         if(vRef.get(s)==null){ // The Function being called is not available                        
-                            JOptionPane.showMessageDialog(null, "Function '"+s+"' Not available", "Function Not Available", JOptionPane.WARNING_MESSAGE, null);
+                            //<<<< Comment out below until it's ironed out a bit.
+                            //JOptionPane.showMessageDialog(null, "Function '"+s+"' Not available", "Function Not Available", JOptionPane.WARNING_MESSAGE, null);
                             System.out.println("getBlockTimes: Function '"+s+"' Not available> Substituting for Zero.");
                             b.addFunctionTime(s, 0.0); // For now - Add an empty function.
                         }
