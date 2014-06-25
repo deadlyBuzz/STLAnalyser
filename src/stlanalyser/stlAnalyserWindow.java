@@ -4,16 +4,25 @@
  */
 package stlanalyser;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.Map;
 import java.util.LinkedHashMap;
+import javax.swing.JOptionPane;
+import javax.swing.ProgressMonitor;
+import javax.swing.SwingWorker;
 import stlanalyser.Model.SourceEntry;
 
 /**
  *
  * @author Alan Curley
  */
-public class stlAnalyserWindow extends javax.swing.JFrame {
+public class stlAnalyserWindow extends javax.swing.JFrame
+                                        implements PropertyChangeListener{
 
+    ProgressMonitor sdbPM;
     /**
      * Creates new form stlAnalyserWindow
      */
@@ -41,6 +50,7 @@ public class stlAnalyserWindow extends javax.swing.JFrame {
         dataEntryTA = new javax.swing.JTextArea();
         goButton = new javax.swing.JButton();
         debugLinesTF = new javax.swing.JTextField();
+        IHaveSDFFileButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -59,20 +69,27 @@ public class stlAnalyserWindow extends javax.swing.JFrame {
         debugLinesTF.setText("-1");
         debugLinesTF.setToolTipText("");
 
+        IHaveSDFFileButton.setText("I have SDF File");
+        IHaveSDFFileButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                IHaveSDFFileButtonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane1)
                     .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jScrollPane1))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(157, 157, 157)
+                        .addComponent(IHaveSDFFileButton)
+                        .addGap(60, 60, 60)
                         .addComponent(goButton)
-                        .addGap(18, 18, 18)
-                        .addComponent(debugLinesTF, javax.swing.GroupLayout.DEFAULT_SIZE, 168, Short.MAX_VALUE)))
+                        .addGap(32, 32, 32)
+                        .addComponent(debugLinesTF, javax.swing.GroupLayout.DEFAULT_SIZE, 136, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -83,7 +100,8 @@ public class stlAnalyserWindow extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(goButton)
-                    .addComponent(debugLinesTF, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(debugLinesTF, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(IHaveSDFFileButton))
                 .addContainerGap())
         );
 
@@ -102,6 +120,19 @@ public class stlAnalyserWindow extends javax.swing.JFrame {
         System.out.println("Map:"+tempMap.toString());
         System.out.println("Done.");
     }//GEN-LAST:event_goButtonActionPerformed
+
+    private void IHaveSDFFileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_IHaveSDFFileButtonActionPerformed
+        // TODO add your handling code here:
+        String message = "This Option is for providing an exported symbol table \n"
+                + "for inport into the program to aid analysis.\n"
+                + "The symbol table must be exported in \".SDF\" format\n"
+                + "If a symbol table is available in this format, please press \"OK\"\n"
+                + "This will prompt you to select the file for import.\n"
+                + "Press \"Cancel\" if you no longer wish to load a symbol table";
+        int result = JOptionPane.showConfirmDialog(null, message,"Load Symbol Table",JOptionPane.OK_CANCEL_OPTION,JOptionPane.QUESTION_MESSAGE);
+        if(result == JOptionPane.OK_OPTION)
+            JOptionPane.showMessageDialog(null, "Work in Progress");        
+    }//GEN-LAST:event_IHaveSDFFileButtonActionPerformed
 
     /**
      * @param args the command line arguments
@@ -139,9 +170,57 @@ public class stlAnalyserWindow extends javax.swing.JFrame {
         });
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton IHaveSDFFileButton;
     private javax.swing.JTextArea dataEntryTA;
     private javax.swing.JTextField debugLinesTF;
     private javax.swing.JButton goButton;
     private javax.swing.JScrollPane jScrollPane1;
     // End of variables declaration//GEN-END:variables
+
+    /**
+     * Abstract Method required to implement StringWorker.
+     * This method will update once the swingworker class 
+     * updates the progress.
+     * @param e 
+     */
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    /**
+     * Swingworker Class to represent iteration through the SDB File.
+     */
+    private class SDBFileIterator extends SwingWorker<Void, Void> {
+
+        /**
+         * The worker method for the thread.
+         * @return
+         * @throws Exception 
+         */
+        @Override
+        protected Void doInBackground() throws Exception {
+            // It's in here we've to take the file outlined, open it and iterate through it
+            // to determine what functions are used.
+            
+            //** NOTE! **//
+            // It is important to note how this thread opens and gains access to the file.
+            // this resource needs to be locked and also needs to be notified in case of deadlock.
+            // The ArrayList / Hashmap associated with the function block list also needs to be locked
+            // to make it thread safe.
+            // This may also be expanded to include the iteration of the source code
+            // to derermine what blocks are missing from the symbol table.
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+        
+        /**
+         * This method will be called once the "doInBackground()" method has completed
+         */
+        @Override
+        public void done(){
+            
+        }
+        
+    }
+    
 }
