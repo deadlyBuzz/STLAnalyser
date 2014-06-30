@@ -4,12 +4,16 @@
  */
 package stlanalyser;
 
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.*;
 import java.util.Map;
 import java.util.LinkedHashMap;
+import java.util.List;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.ProgressMonitor;
 import javax.swing.SwingWorker;
@@ -23,6 +27,11 @@ public class stlAnalyserWindow extends javax.swing.JFrame
                                         implements PropertyChangeListener{
 
     ProgressMonitor sdbPM;
+    File sdfFile;
+    SDBFileIterator sdbfI;
+    Map<String,String> sdfBlockList;
+    boolean sdfFileAvailable = false; // <-- Flag to indicate that an sDF File is available
+    
     /**
      * Creates new form stlAnalyserWindow
      */
@@ -130,8 +139,30 @@ public class stlAnalyserWindow extends javax.swing.JFrame
                 + "This will prompt you to select the file for import.\n"
                 + "Press \"Cancel\" if you no longer wish to load a symbol table";
         int result = JOptionPane.showConfirmDialog(null, message,"Load Symbol Table",JOptionPane.OK_CANCEL_OPTION,JOptionPane.QUESTION_MESSAGE);
-        if(result == JOptionPane.OK_OPTION)
-            JOptionPane.showMessageDialog(null, "Work in Progress");        
+        if(result == JOptionPane.OK_OPTION){
+            JFileChooser fc = new JFileChooser("c:\\temp\\Siemens");
+            int fileChooserRetVal = fc.showOpenDialog(this);
+            if (fileChooserRetVal == JFileChooser.APPROVE_OPTION){ // User accepted a valid file
+                sdfFile = fc.getSelectedFile();            
+                sdfFileAvailable = true;
+            }
+            else
+                sdfFileAvailable = false;
+        }
+        if(sdfFileAvailable){
+            sdfBlockList = new LinkedHashMap();
+            sdbPM = new ProgressMonitor(stlAnalyserWindow.this,
+                    "Processing the SDB file",
+                    "Run",0,100);
+            sdbPM.setProgress(0);
+            sdbfI = new SDBFileIterator();
+            sdbfI.addPropertyChangeListener(this);
+            goButton.setEnabled(false);
+            IHaveSDFFileButton.setEnabled(false);
+            sdbfI.execute();
+        }
+            
+        // JOptionPane.showMessageDialog(null, "Work in Progress");        
     }//GEN-LAST:event_IHaveSDFFileButtonActionPerformed
 
     /**
@@ -184,15 +215,37 @@ public class stlAnalyserWindow extends javax.swing.JFrame
      * @param e 
      */
     @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void propertyChange(PropertyChangeEvent evt) {        
+        if ("progress" == evt.getPropertyName() ) {
+            int progress = (Integer) evt.getNewValue();
+            System.out.println("Debug - "+String.valueOf(progress));
+            sdbPM.setProgress(progress);
+            String message =
+                String.format("Completed %d%%.\n", progress);
+            sdbPM.setNote(message);
+            //taskOutput.append(message);
+            if (sdbPM.isCanceled() || sdbfI.isDone()) {
+                Toolkit.getDefaultToolkit().beep();
+                if (sdbPM.isCanceled()) {
+                    sdbfI.cancel(true);
+                    //taskOutput.append("Task canceled.\n");
+                } else {
+                    sdbPM.setNote("Complete");
+                }
+                goButton.setEnabled(true);
+                IHaveSDFFileButton.setEnabled(true);
+            }
+        }
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
     /**
      * Swingworker Class to represent iteration through the SDB File.
      */
-    private class SDBFileIterator extends SwingWorker<Void, Void> {
-
+    private class SDBFileIterator extends SwingWorker<Void, Integer> {
+        int state = 0;
+        int loopCount = 0;
+        int result = 0;
         /**
          * The worker method for the thread.
          * @return
@@ -202,6 +255,10 @@ public class stlAnalyserWindow extends javax.swing.JFrame
         protected Void doInBackground() throws Exception {
             // It's in here we've to take the file outlined, open it and iterate through it
             // to determine what functions are used.
+            String lineRead;
+            setProgress(0);
+            state = 1;
+            
             
             //** NOTE! **//
             // It is important to note how this thread opens and gains access to the file.
@@ -210,7 +267,51 @@ public class stlAnalyserWindow extends javax.swing.JFrame
             // to make it thread safe.
             // This may also be expanded to include the iteration of the source code
             // to derermine what blocks are missing from the symbol table.
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            
+            //synchronized(sdfFile){ // Eugh, American spelling :-P
+            //synchronized(sdfBlockList){
+                state = 2;
+                BufferedReader inStream = getReader(sdfFile);  
+                long totalSize = sdfFile.length();
+                long currentSize = 0;
+                int currentPerc = 0;
+                
+                try{
+                    lineRead = inStream.readLine();
+                    do{
+                        loopCount++;
+                        state = (state>3)?state:3;                        
+                        state = (state>4)?state:4;
+                        currentSize += lineRead.getBytes().length;
+                        state = (state>5)?state:5;
+                        currentPerc = (int) ((currentSize/totalSize)*100); //Hints.
+                        result = currentPerc;
+                        state = (state>6)?state:6;
+                        lineRead = lineRead.replace('"', ' ').trim();
+                        //System.out.println(lineRead);
+                        if((lineRead!=null)&(lineRead.split(",")[2].matches("\\W*s?F[BC]\\W+\\d+.*"))){ // SFC, SFB, FC or FB                            
+                            state = (state>7)?state:7;
+                            sdfBlockList.put(lineRead.split(",")[1],lineRead.split(",")[2]);
+                            state = (state>8)?state:8;
+                            System.out.println(lineRead.split(",")[1]+"-"+lineRead.split(",")[2]);
+                        }                       
+                        setProgress(currentPerc);
+                        lineRead = inStream.readLine();
+                    }while(lineRead != null);
+                    state = (state>9)?state:9;
+                }
+                catch(IOException e){
+                    JOptionPane.showMessageDialog(null, "<<<< IOException encountered in SDBFileIterator.doInBackground()", "oops!", JOptionPane.ERROR_MESSAGE);
+                    //state = -1;
+                }
+                catch(NullPointerException e){
+                    JOptionPane.showMessageDialog(null, "<<<< Null pointer encountered in SDBFileIterator.doInBackground()", "oops!", JOptionPane.ERROR_MESSAGE);
+                    //state = -2;
+                }
+            //}
+            //}
+            return null;
+            //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
         
         /**
@@ -218,8 +319,40 @@ public class stlAnalyserWindow extends javax.swing.JFrame
          */
         @Override
         public void done(){
-            
+            System.out.println("Debug: "+String.valueOf(state)+","+String.valueOf(loopCount)+","+String.valueOf(result));
+            setProgress(100);
         }
+        
+        
+        /** 
+        * Taken from the "JAVA For Dummies" Book by Bob Lowe and Barry Burd<br/>
+        * This function gives back a BufferedReader object in which points
+        * to the file provided in the @Name parameter.
+        * 
+        * Updated to have passed a File rather than a String.
+        * 
+        * @param name
+        * @return Bufferedreader
+        */
+       private BufferedReader getReader(File passedFile){
+           BufferedReader in = null;
+           try{               
+               in = new BufferedReader(
+               new FileReader(passedFile));
+           }
+           catch(FileNotFoundException e){
+               System.out.println("The File does not exist");
+               JOptionPane.showMessageDialog(null, "The File does not exist");
+               System.exit(0);
+           }
+           catch(IOException e){
+               System.out.println("I/O Error");
+               JOptionPane.showMessageDialog(null, "I/O Error");
+               System.exit(0);
+           }
+           return in;
+       }
+
         
     }
     
