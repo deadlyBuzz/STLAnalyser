@@ -67,6 +67,12 @@ public static final String DBHEADER        =  "DATA_BLOCK.*";
     public static final String AREAINDIRECT    =  "\\[[ML][DW].*"; // Area indirect addressing
 /**  Regex String: <br/>"\\s*(S?F[BC])\\s+\\d+"; **/
     public static final String FBIdBlock  =  "\\s*(S?F[BC])\\s+(\\d+)";
+    
+/** 
+ * Function block match for symbol table 
+ * regex String: <br/>\\W&#42;(\s?F[BC])\\W+\\(d+).&#42;
+ */
+    public static final String ST_FBId = "\\W*(s?F[BC])\\W+(\\d+).*";
 /** Pointer Constant 
  * Regex String: <br/>"P##?\\w"; 
  */

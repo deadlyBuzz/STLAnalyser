@@ -13,17 +13,18 @@ import java.io.*;
 import java.util.Map;
 import java.util.LinkedHashMap;
 import java.util.List;
-import javax.swing.JFileChooser;
+import javax.swing.*;
 import javax.swing.JOptionPane;
 import javax.swing.ProgressMonitor;
 import javax.swing.SwingWorker;
 import stlanalyser.Model.SourceEntry;
+import stlanalyser.Model.regExes;
 
 /**
  *
  * @author Alan Curley
  */
-public class stlAnalyserWindow extends javax.swing.JFrame
+public class stlAnalyserWindow extends JFrame
                                         implements PropertyChangeListener{
 
     ProgressMonitor sdbPM;
@@ -150,11 +151,12 @@ public class stlAnalyserWindow extends javax.swing.JFrame
                 sdfFileAvailable = false;
         }
         if(sdfFileAvailable){
+            System.out.println("-");
             sdfBlockList = new LinkedHashMap();
             sdbPM = new ProgressMonitor(stlAnalyserWindow.this,
                     "Processing the SDB file",
                     "Run",0,100);
-            sdbPM.setProgress(0);
+            sdbPM.setProgress(0);            
             sdbfI = new SDBFileIterator();
             sdbfI.addPropertyChangeListener(this);
             goButton.setEnabled(false);
@@ -216,6 +218,7 @@ public class stlAnalyserWindow extends javax.swing.JFrame
      */
     @Override
     public void propertyChange(PropertyChangeEvent evt) {        
+        System.out.println("Debug > "+evt.getPropertyName());
         if ("progress" == evt.getPropertyName() ) {
             int progress = (Integer) evt.getNewValue();
             System.out.println("Debug - "+String.valueOf(progress));
@@ -240,7 +243,7 @@ public class stlAnalyserWindow extends javax.swing.JFrame
     }
     
     /**
-     * Swingworker Class to represent iteration through the SDB File.
+     * SwingWorker Class to represent iteration through the SDB File.
      */
     private class SDBFileIterator extends SwingWorker<Void, Integer> {
         int state = 0;
@@ -256,8 +259,7 @@ public class stlAnalyserWindow extends javax.swing.JFrame
             // It's in here we've to take the file outlined, open it and iterate through it
             // to determine what functions are used.
             String lineRead;
-            setProgress(0);
-            state = 1;
+            //setProgress(0);            
             
             
             //** NOTE! **//
@@ -270,43 +272,41 @@ public class stlAnalyserWindow extends javax.swing.JFrame
             
             //synchronized(sdfFile){ // Eugh, American spelling :-P
             //synchronized(sdfBlockList){
-                state = 2;
+
                 BufferedReader inStream = getReader(sdfFile);  
                 long totalSize = sdfFile.length();
                 long currentSize = 0;
                 int currentPerc = 0;
                 
+                System.out.println("IsEDT?:"+(javax.swing.SwingUtilities.isEventDispatchThread()?"1":"0"));
                 try{
                     lineRead = inStream.readLine();
                     do{
                         loopCount++;
-                        state = (state>3)?state:3;                        
-                        state = (state>4)?state:4;
                         currentSize += lineRead.getBytes().length;
-                        state = (state>5)?state:5;
-                        currentPerc = (int) ((currentSize/totalSize)*100); //Hints.
-                        result = currentPerc;
-                        state = (state>6)?state:6;
+                        currentPerc = (int) (currentSize*100/totalSize); //Hints.
                         lineRead = lineRead.replace('"', ' ').trim();
                         //System.out.println(lineRead);
-                        if((lineRead!=null)&(lineRead.split(",")[2].matches("\\W*s?F[BC]\\W+\\d+.*"))){ // SFC, SFB, FC or FB                            
-                            state = (state>7)?state:7;
-                            sdfBlockList.put(lineRead.split(",")[1],lineRead.split(",")[2]);
-                            state = (state>8)?state:8;
-                            System.out.println(lineRead.split(",")[1]+"-"+lineRead.split(",")[2]);
+                        if((lineRead!=null)&(lineRead.split(",")[1].matches(regExes.ST_FBId))){ // SFC, SFB, FC or FB                            
+                           String key;
+                           String item;
+                           key = lineRead.split(",")[1].replaceAll(regExes.ST_FBId, "$1$2");
+                           item = lineRead.split(",")[0];
+                            sdfBlockList.put(key,item);
+                            System.out.println(key+"-"+item);
                         }                       
-                        setProgress(currentPerc);
+                        publish(currentPerc);
                         lineRead = inStream.readLine();
+//                        System.out.println(String.valueOf(currentPerc)+"%: "+lineRead);
                     }while(lineRead != null);
-                    state = (state>9)?state:9;
                 }
                 catch(IOException e){
                     JOptionPane.showMessageDialog(null, "<<<< IOException encountered in SDBFileIterator.doInBackground()", "oops!", JOptionPane.ERROR_MESSAGE);
-                    //state = -1;
+                    state = -1;
                 }
                 catch(NullPointerException e){
                     JOptionPane.showMessageDialog(null, "<<<< Null pointer encountered in SDBFileIterator.doInBackground()", "oops!", JOptionPane.ERROR_MESSAGE);
-                    //state = -2;
+                    state = -2;
                 }
             //}
             //}
@@ -320,7 +320,15 @@ public class stlAnalyserWindow extends javax.swing.JFrame
         @Override
         public void done(){
             System.out.println("Debug: "+String.valueOf(state)+","+String.valueOf(loopCount)+","+String.valueOf(result));
-            setProgress(100);
+            publish(100);
+        }
+         @Override
+        // Can safely update the GUI from this method.
+        protected void process(List<Integer> chunks) {
+            // Here we receive the values that we publish().
+            // They may come grouped in chunks.
+            int mostRecentValue = chunks.get(chunks.size()-1);         
+            setProgress(mostRecentValue);
         }
         
         
