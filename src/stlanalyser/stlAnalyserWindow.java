@@ -10,9 +10,11 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Set;
 import javax.swing.*;
 import javax.swing.JOptionPane;
 import javax.swing.ProgressMonitor;
@@ -29,9 +31,10 @@ public class stlAnalyserWindow extends JFrame
 
     ProgressMonitor sdbPM;
     File sdfFile;
-    SDBFileIterator sdbfI;
+    SDFfileIterator sdbfI;
     Map<String,String> sdfBlockList;
-    boolean sdfFileAvailable = false; // <-- Flag to indicate that an sDF File is available
+    boolean sdfFileSelected = false; // <-- Flag to indicate that an sDF File has been selected by the user
+    boolean sdfFileProcessed = false; // <-- Flag to indicate that the SDF File has been processed.
     
     /**
      * Creates new form stlAnalyserWindow
@@ -122,7 +125,25 @@ public class stlAnalyserWindow extends JFrame
         // TODO add your handling code here:        
         SourceEntry source = new SourceEntry(dataEntryTA.getText());
         String debugLines[] = debugLinesTF.getText().split(",");        
-        source.processSourceCode(debugLines);        
+        source.processSourceCode(debugLines);  
+        ArrayList<String> names = source.arrangeBlocks();
+        // now I have a List of blocks referenced in the source code I can compare this with the list of blocks
+        // referenced in the SDF File.
+        if(sdfBlockList!=null){ // this should be initialised by the "I have an SDF File" button.            
+            Set<String> keys = sdfBlockList.keySet();            
+            for(String s:keys)
+                for(String n:names)                    
+                    if(n.equalsIgnoreCase(s)){// If this block exists on the Symbol table 
+                        sdfBlockList.remove(s);// remove it from the list
+                        break; //(Which loop will this break from???
+                    }
+            //At this stage, sdfBlockList should only contain blocks that are not represented in the source code.
+            // Now we should provide the list of blocks to a function that will pull the block names from]
+            // known block names (Such as SFBs or Stanard library blocks) and return a new HashMap with
+            // the block names and the associated delays.
+            <<<<<
+            
+        }
         //source.printDetails(System.out); // This is referencinbg the output of the SourceEntry object
         LinkedHashMap tempMap = new LinkedHashMap(source.getBlockTimes());        
         source.printBlockDetails(System.out); //this is referencing the output of each BlockList object
@@ -145,19 +166,19 @@ public class stlAnalyserWindow extends JFrame
             int fileChooserRetVal = fc.showOpenDialog(this);
             if (fileChooserRetVal == JFileChooser.APPROVE_OPTION){ // User accepted a valid file
                 sdfFile = fc.getSelectedFile();            
-                sdfFileAvailable = true;
+                sdfFileSelected = true;
             }
             else
-                sdfFileAvailable = false;
+                sdfFileSelected = false;
         }
-        if(sdfFileAvailable){
+        if(sdfFileSelected){
             System.out.println("-");
             sdfBlockList = new LinkedHashMap();
             sdbPM = new ProgressMonitor(stlAnalyserWindow.this,
                     "Processing the SDB file",
                     "Run",0,100);
             sdbPM.setProgress(0);            
-            sdbfI = new SDBFileIterator();
+            sdbfI = new SDFfileIterator();
             sdbfI.addPropertyChangeListener(this);
             goButton.setEnabled(false);
             IHaveSDFFileButton.setEnabled(false);
@@ -211,6 +232,15 @@ public class stlAnalyserWindow extends JFrame
     // End of variables declaration//GEN-END:variables
 
     /**
+     * Method called to process through the source code entry and check which
+     * blocks are declared in the symbol table versus which are in the source
+     * code.
+     */
+    public void checkSDFFile(){
+        
+    }
+    
+    /**
      * Abstract Method required to implement StringWorker.
      * This method will update once the swingworker class 
      * updates the progress.
@@ -238,17 +268,19 @@ public class stlAnalyserWindow extends JFrame
                 goButton.setEnabled(true);
                 IHaveSDFFileButton.setEnabled(true);
             }
-        }
+        }        
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
+    
     /**
-     * SwingWorker Class to represent iteration through the SDB File.
+     * SwingWorker Class to represent iteration through the SDF File.
      */
-    private class SDBFileIterator extends SwingWorker<Void, Integer> {
+    private class SDFfileIterator extends SwingWorker<Void, Integer> {
         int state = 0;
         int loopCount = 0;
         int result = 0;
+        
         /**
          * The worker method for the thread.
          * @return

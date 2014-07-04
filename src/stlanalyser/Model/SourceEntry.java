@@ -19,6 +19,9 @@ public class SourceEntry {
     private ArrayList<blockClass> blockList;
     private Map<String, Integer> m;
     private Map<String, String> t;
+    private Map<String,Double> func = new HashMap<>();                
+    private Map<String,Integer> vRef = new HashMap<>();
+
     
     //http://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html
     
@@ -631,22 +634,15 @@ public class SourceEntry {
         }    
     }    
     
-    /**
-     * Gets the Block times from the Database and returns a Hashmap
-     * of Strings representing Functions versus times.
-     * @return 
-     */
-    public Map getBlockTimes(){
-        Map<String,Double> func = new HashMap<>();                
-        Map<String,Integer> vRef = new HashMap<>();
-        ArrayList<String> blockNames = new ArrayList<>(); // Represents the complete list of Block Names used in the program.        
-        blockList = new ArrayList<>();
+    public ArrayList<String> arrangeBlocks(){
         String currentBlock;
         String previousBlock = "";        
-        boolean incompleteDetected = false;
-        Double currentMax = 0.0;
+
+        ArrayList<String> blockNames = new ArrayList<>(); // Represents the complete list of Block Names used in the program.        
+        if (blockList == null)
+            blockList = new ArrayList<>();
         
-        // Go through the entire source code and build a list of blocks using the lineEntries.        
+                // Go through the entire source code and build a list of blocks using the lineEntries.        
         //(This could have been done as sourceLineEntries was being built but thsi would have complicated the program) AC
         for(lineEntry a:sourceLineEntries){            
             currentBlock = a.getParentBlock();
@@ -661,6 +657,21 @@ public class SourceEntry {
                 blockList.get(blockList.size()-1).addLine(a);            
             }
         }
+        return blockNames;
+    }
+    /**
+     * Gets the Block times from the Database and returns a Hashmap
+     * of Strings representing Functions versus times.
+     * @return 
+     */
+    public Map getBlockTimes(){        
+        if (blockList == null){
+            blockList = new ArrayList<>();
+            arrangeBlocks();
+        }
+        boolean incompleteDetected = false;
+        Double currentMax = 0.0;        
+        
         
         // we now have a list of BlockCall Objects.  Now we have to check which ones are missing functions
         int noLoops = 1;        
