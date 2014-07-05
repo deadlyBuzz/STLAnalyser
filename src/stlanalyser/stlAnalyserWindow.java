@@ -131,23 +131,30 @@ public class stlAnalyserWindow extends JFrame
         // referenced in the SDF File.
         if(sdfBlockList!=null){ // this should be initialised by the "I have an SDF File" button.            
             Set<String> keys = sdfBlockList.keySet();            
-            for(String s:keys)
+            ArrayList<String> undeclaredBlocks = new ArrayList<>();
+            
+            for(String s:keys){
+                undeclaredBlocks.add(s); // Add this to the undeclared list by default
                 for(String n:names)                    
-                    if(n.equalsIgnoreCase(s)){// If this block exists on the Symbol table 
-                        sdfBlockList.remove(s);// remove it from the list
-                        break; //(Which loop will this break from???
+                    if(n.equalsIgnoreCase(s)){// If this block exists on the Symbol table                         
+                        undeclaredBlocks.remove(undeclaredBlocks.size()-1); // remove it from the undeclared list.
+                        break; 
                     }
+            }
             //At this stage, sdfBlockList should only contain blocks that are not represented in the source code.
             // Now we should provide the list of blocks to a function that will pull the block names from]
             // known block names (Such as SFBs or Stanard library blocks) and return a new HashMap with
             // the block names and the associated delays.
-            <<<<<
+            //<<<<<
+            for(String s:undeclaredBlocks){
+                System.out.println("Blocks Missing Source:"+s+"-"+sdfBlockList.get(s));                
+            }
             
         }
         //source.printDetails(System.out); // This is referencinbg the output of the SourceEntry object
         LinkedHashMap tempMap = new LinkedHashMap(source.getBlockTimes());        
-        source.printBlockDetails(System.out); //this is referencing the output of each BlockList object
-        source.testMethod(); // Test Method- Comment out when not using... or don't... I dont care. ;-)
+        //source.printBlockDetails(System.out); //this is referencing the output of each BlockList object
+        //source.testMethod(); // Test Method- Comment out when not using... or don't... I dont care. ;-)
         System.out.println("Map:"+tempMap.toString());
         System.out.println("Done.");
     }//GEN-LAST:event_goButtonActionPerformed
@@ -319,7 +326,7 @@ public class stlAnalyserWindow extends JFrame
                         currentPerc = (int) (currentSize*100/totalSize); //Hints.
                         lineRead = lineRead.replace('"', ' ').trim();
                         //System.out.println(lineRead);
-                        if((lineRead!=null)&(lineRead.split(",")[1].matches(regExes.ST_FBId))){ // SFC, SFB, FC or FB                            
+                        if((lineRead!=null)&(lineRead.split(",")[1].toUpperCase().matches(regExes.ST_FBId))){ // SFC, SFB, FC or FB                            
                            String key;
                            String item;
                            key = lineRead.split(",")[1].replaceAll(regExes.ST_FBId, "$1$2");

@@ -19,6 +19,7 @@ public class SourceEntry {
     private ArrayList<blockClass> blockList;
     private Map<String, Integer> m;
     private Map<String, String> t;
+    private Map<String, String[]> Ex;
     private Map<String,Double> func = new HashMap<>();                
     private Map<String,Integer> vRef = new HashMap<>();
 
@@ -577,8 +578,10 @@ public class SourceEntry {
     private void getDataBaseInfo(){
         m = new HashMap<>();
         t = new HashMap<>();
+        Ex = new HashMap<>();
         doMConnection(m,"SELECT * from 315Instructions");
         doTConnection(t,"SELECT * from dataTypes");
+        doExConnection(Ex,"Select * from ExclusionList");
     }
     
     /**
@@ -586,7 +589,6 @@ public class SourceEntry {
      * @param m the HashTable in which to place the Data.
      * @param SQLString The SQL String used to read the Database.
      */
-
     public static void doMConnection(Map m,String SQLString){
         ResultSet rs = null;
         String path = new java.io.File("c:\\temp\\STLExecTimes.mdb").getAbsolutePath();
@@ -605,6 +607,38 @@ public class SourceEntry {
         }
         catch(SQLException | ClassNotFoundException ex){
             System.err.println("t:"+ex.toString());            
+        }    
+    }
+
+    /**
+     * Pull the Exclusion list from the database.
+     * @param m the HashTable in which to place the Data.
+     * @param SQLString The SQL String used to read the Database.
+     */
+    public static void doExConnection(Map m,String SQLString){
+        ResultSet rs = null;
+        String path = new java.io.File("c:\\temp\\STLExecTimes.mdb").getAbsolutePath();
+        String db ="jdbc:odbc:Driver={Microsoft Access Driver (*.mdb)};DBQ="+path;
+        try{
+            Class.forName("sun.jdbc.odbc.JdbcOdbcDriver");
+            Statement st; //<<<< Updated by Tips.
+            try (Connection con = DriverManager.getConnection(db)) {
+                st = con.createStatement();
+                rs = st.executeQuery(SQLString);
+                while(rs.next()){
+                    String Name =  rs.getString("Name");
+                    String Title = rs.getString("Title");
+                    String time = rs.getString("Time");
+                    //String[] newString = new String[]{Title,time};
+                    m.put(Name, new String[]{Title,time});
+                    //System.out.println(Name+":["+Title+","+time+"]");
+                }    
+            }
+            st.close();
+        }
+        catch(SQLException | ClassNotFoundException ex){
+            System.err.println("Ex:"+ex.toString()+"\n");            
+            ex.printStackTrace(System.err);
         }    
     }
 
