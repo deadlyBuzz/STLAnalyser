@@ -126,32 +126,20 @@ public class stlAnalyserWindow extends JFrame
         SourceEntry source = new SourceEntry(dataEntryTA.getText());
         String debugLines[] = debugLinesTF.getText().split(",");        
         source.processSourceCode(debugLines);  
-        ArrayList<String> names = source.arrangeBlocks();
-        // now I have a List of blocks referenced in the source code I can compare this with the list of blocks
-        // referenced in the SDF File.
-        if(sdfBlockList!=null){ // this should be initialised by the "I have an SDF File" button.            
-            Set<String> keys = sdfBlockList.keySet();            
-            ArrayList<String> undeclaredBlocks = new ArrayList<>();
-            
-            for(String s:keys){
-                undeclaredBlocks.add(s); // Add this to the undeclared list by default
-                for(String n:names)                    
-                    if(n.equalsIgnoreCase(s)){// If this block exists on the Symbol table                         
-                        undeclaredBlocks.remove(undeclaredBlocks.size()-1); // remove it from the undeclared list.
-                        break; 
-                    }
-            }
-            //At this stage, sdfBlockList should only contain blocks that are not represented in the source code.
-            // Now we should provide the list of blocks to a function that will pull the block names from]
-            // known block names (Such as SFBs or Stanard library blocks) and return a new HashMap with
-            // the block names and the associated delays.
-            //<<<<<
-            for(String s:undeclaredBlocks){
-                System.out.println("Blocks Missing Source:"+s+"-"+sdfBlockList.get(s));                
-            }
-            
+        //ArrayList<String> names = source.arrangeBlocks();
+        source.setSDFList(sdfBlockList); // sdfBlockList has been generated from the swingworker thread
+        ArrayList<String> names = source.getUndeclaredBlocks();
+        for(String n:names)
+            System.out.println(n);
+        if(source.getUndeclaredBlocks().size()>0){
+            String errorMessage = "The following Blocks cannot be accounted for...\n";
+            for(String udb:source.getUndeclaredBlocks())
+                errorMessage+=udb+"\n";
+            errorMessage+="\nPlease input details for these blocks in the \n 'Exclusion' table of the Database";
+            JOptionPane.showMessageDialog(this, errorMessage, "Ooopsy", JOptionPane.ERROR_MESSAGE);
+            System.exit(0);
         }
-        //source.printDetails(System.out); // This is referencinbg the output of the SourceEntry object
+            
         LinkedHashMap tempMap = new LinkedHashMap(source.getBlockTimes());        
         //source.printBlockDetails(System.out); //this is referencing the output of each BlockList object
         //source.testMethod(); // Test Method- Comment out when not using... or don't... I dont care. ;-)

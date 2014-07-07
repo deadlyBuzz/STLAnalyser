@@ -5,7 +5,9 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import javax.swing.JOptionPane;
 
 /**
@@ -17,12 +19,14 @@ public class SourceEntry {
     private ArrayList<String> sourceLines;
     private ArrayList<lineEntry> sourceLineEntries;
     private ArrayList<blockClass> blockList;
+    private ArrayList<String> noSourceBlock;
     private Map<String, Integer> m;
     private Map<String, String> t;
-    private Map<String, String[]> Ex;
+    private Map<String, String[]> Ex;    
+    private Map<String, String> SDFMap;
     private Map<String,Double> func = new HashMap<>();                
     private Map<String,Integer> vRef = new HashMap<>();
-
+    
     
     //http://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html
     
@@ -668,6 +672,12 @@ public class SourceEntry {
         }    
     }    
     
+    
+    /**
+     * This Function iterates through the sourceLines that have been generated from
+     * the source code and return a list of Blocks used in the program.
+     * @return 
+     */
     public ArrayList<String> arrangeBlocks(){
         String currentBlock;
         String previousBlock = "";        
@@ -741,6 +751,14 @@ public class SourceEntry {
         return func;
     }
     
+    /** 
+     * function in which iterates through each block and determines the different
+     * paths, in the form of trees that are possible in the function.
+     */
+    public void getBlockTree(){
+        
+    }
+    
     /**
      * Performs the Function to "Get" the local string type from the VAR map.
      * @param key The name of the variable being sought.
@@ -773,6 +791,58 @@ public class SourceEntry {
      */
     public String IDDotExes(String variable){
         return "p"; // for the moment - return a placeholder
+    }
+    
+    /**
+     * Simple enough setter for SDF List
+     * @param SDFList 
+     */
+    public void setSDFList(Map SDFList){
+        SDFMap = SDFList;
+    }
+    
+    /**
+     * Generate an ArrayList of undeclared blocks.
+     */    
+    public ArrayList<String> getUndeclaredBlocks(){
+        ArrayList<String> names = arrangeBlocks();
+        Set<String> keys = SDFMap.keySet();            
+        ArrayList<String> undeclaredBlocks = new ArrayList<>();
+
+        for(String s:keys){
+            undeclaredBlocks.add(s); // Add this to the undeclared list by default
+            for(String n:names)                    
+                if(n.equalsIgnoreCase(s)){// If this block exists on the Symbol table                         
+                    undeclaredBlocks.remove(undeclaredBlocks.size()-1); // remove it from the undeclared list.
+                    break; 
+                }
+        }
+        if(SDFMap.isEmpty()|SDFMap==null|Ex.isEmpty()|Ex==null)
+            return undeclaredBlocks;
+        else{
+            Set<String> ExKey = Ex.keySet();
+            for(int i=0; i<undeclaredBlocks.size();i++){//(String s:undeclaredBlocks){// for every block that remains on the undeclared Block list
+                breakLabel1:
+                if(Ex.get(undeclaredBlocks.get(i))==null){ // if this doesn't exist
+//                if(Ex.get(s)==null){ // If this doesn't
+                    for (Iterator<String> it = ExKey.iterator(); it.hasNext();) { //<<<< Updated by Java tips
+                        String X = it.next();
+                        if(SDFMap.get(undeclaredBlocks.get(i)).equalsIgnoreCase(Ex.get(X)[0])){
+                            undeclaredBlocks.remove(i);
+                            break breakLabel1; // exit all these loops.
+                        }
+                            
+                    //Ex is broken into <String, String[]> where...
+                    // String = key - Name (E.G FC16)
+                    // String[0] = Title (E.G I_STRNG)
+                    // String[1] = Time  (E.G 1390ns)
+                    }
+                    
+                  }
+                                                                  
+            }        
+        }
+        return undeclaredBlocks;
     }
     
     private class S7Statement{
