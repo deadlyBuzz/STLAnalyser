@@ -26,7 +26,8 @@ public class blockClass {
     private boolean complete;
     private Double totalTime;
     private ArrayList<String> functions;         // List of functions called from this block
-    private ArrayList<MissingFnStruct> missingFunctions;  // List of Missing functions 
+    private ArrayList<String> jumpLineMarkers;
+    private ArrayList<FnStruct> utilisedFunctions;  // List of Missing functions 
     private Map<Integer,lineEntry> lines;
     private ArrayList<simpleJumpLabels> jumpLabels;
     
@@ -36,7 +37,7 @@ public class blockClass {
         complete = false;
         totalTime = 0.0;
         functions = new ArrayList<>();
-        missingFunctions= new ArrayList<>();
+        utilisedFunctions= new ArrayList<>();
         lines = new LinkedHashMap<>();
     }
     
@@ -46,10 +47,29 @@ public class blockClass {
         if(line.getLineType() == lineEntry.CALLFUNCTION){
             String functionCalled = line.getLineSource().replaceAll(regExes.LABELID, "$2").trim();
             functionCalled = functionCalled.replaceAll("\\s*CALL([\\w\\s]+)[\\(\\,]{0,1}.*", "$1").replaceAll("\\s","");
-            missingFunctions.add(new MissingFnStruct(line.getLineNumber(), functionCalled));
+            utilisedFunctions.add(new FnStruct(line.getLineNumber(), functionCalled));
         }        
         if(line.getLineType()==lineEntry.BLOCK_END)
-            complete = (missingFunctions.isEmpty());
+            complete = (utilisedFunctions.isEmpty());
+        
+        if(jumpLineMarkers==null){
+            jumpLineMarkers = new ArrayList<>();
+        }
+        
+        String sourceLine = line.getLineSource().trim();
+        if(sourceLine.replaceAll(regExes.LABELID, "$2").matches(regExes.JUMPSTATEMENT+" .*")){
+            String jumpTo = sourceLine.replaceAll(regExes.LABELID, "$2");
+            jumpTo = jumpTo.replaceAll(regExes.JUMPSTATEMENT+"(.*)","$2");
+            jumpTo = jumpTo.replaceAll("(.+);?\\w*(//.*)?", "$1").trim();                
+            jumpTo = jumpTo.replaceAll(";", "");
+            jumpLineMarkers.add("Jump:"+String.valueOf(line.getLineNumber())+"|"+jumpTo);
+        }
+
+        if(sourceLine.matches(regExes.LABELID)){
+            String labelMarker = sourceLine.replaceAll(regExes.LABELID, "$1");
+            labelMarker = labelMarker.replaceAll(regExes.JUMPSTATEMENT+" .*", "$1").trim();
+            jumpLineMarkers.add("Label:"+String.valueOf(line.getLineNumber())+"|"+labelMarker);
+        }
     }
     
     public void setName(String name){ this.Name = name; }
@@ -64,12 +84,18 @@ public class blockClass {
             return lines.get(lineNo);
     }
     
+    /**
+     * Obsolete function to get a list of functions that have been or have yet to be processed
+     * and to find ones that have not been identidied.
+     * Replaced with a version comparing the SDF File.
+     * @return 
+     */
     public String getMissingFunctions(){        
         ArrayList<String> fnList = new ArrayList<>();
-        fnList.add(missingFunctions.get(0).fnName); // Add the first function as per default
-        String placeHolder = missingFunctions.get(0).fnName;
+        fnList.add(utilisedFunctions.get(0).fnName); // Add the first function as per default
+        String placeHolder = utilisedFunctions.get(0).fnName;
         boolean found = false;
-        for(MissingFnStruct a:missingFunctions){
+        for(FnStruct a:utilisedFunctions){
             found = false;
             for(int i=0;i<fnList.size();i++)
                 if(fnList.get(i).equalsIgnoreCase(a.fnName))
@@ -85,23 +111,29 @@ public class blockClass {
     public boolean isComplete(){ return complete; }
     public Double getExecutionTime(){ return totalTime; }
     
+    /**
+     * Called by the old getBlockTimes function as each block processed was
+     * complete.
+     * @param function
+     * @param time Do
+     */    
     public void addFunctionTime(String function, Double time){
-        for(int i=0; i<missingFunctions.size();i++){
-            if(missingFunctions.get(i).fnName.equalsIgnoreCase(function)){
+        for(int i=0; i<utilisedFunctions.size();i++){
+            if(utilisedFunctions.get(i).fnName.equalsIgnoreCase(function)){
                 // Add the new Time to the Total Time.
                 totalTime+=time;
                 // Get the existing time for the Line enty identified.
-                int tempTime = lines.get(missingFunctions.get(i).lineNo).getLineTime();
+                int tempTime = lines.get(utilisedFunctions.get(i).lineNo).getLineTime();
                 // Add the new FB Time for the new line Entry.
-                lines.get(missingFunctions.get(i).lineNo).setLineTime(tempTime+time.intValue());
+                lines.get(utilisedFunctions.get(i).lineNo).setLineTime(tempTime+time.intValue());
                 // Remove this function from the List.
-                missingFunctions.remove(i);
+                utilisedFunctions.remove(i);
                 i--;
             }
         }
         // Once we've added a function - check if there are any more functiosn to be checked.
         // if not, this function is now complete.
-        complete = missingFunctions.isEmpty();                
+        complete = utilisedFunctions.isEmpty();                
     }
     
     /**
@@ -126,10 +158,10 @@ public class blockClass {
         return jumpLabels;
     }
     
-    private class MissingFnStruct{
+    private class FnStruct{
         public int lineNo;
         public String fnName;
-        public MissingFnStruct(int lineNo,String fnName){
+        public FnStruct(int lineNo,String fnName){
             this.lineNo= lineNo;
             this.fnName = fnName;
         }
@@ -166,7 +198,8 @@ public class blockClass {
     
     /**
      * This function is the function that builds the internal list of jumpLabel
-     * objects and 
+     * objects.  
+     * Obsolete... Pulled into addLine.
      * @return T
      */
     public ArrayList<String> getJumpLabels(){

@@ -827,7 +827,9 @@ public class SourceEntry {
 //                if(Ex.get(s)==null){ // If this doesn't
                     for (Iterator<String> it = ExKey.iterator(); it.hasNext();) { //<<<< Updated by Java tips
                         String X = it.next();
-                        if(SDFMap.get(undeclaredBlocks.get(i)).equalsIgnoreCase(Ex.get(X)[0])){
+                        String temp1 = SDFMap.get(undeclaredBlocks.get(i));
+                        String temp2 = Ex.get(X)[0];
+                        if(SDFMap.get(undeclaredBlocks.get(i)).trim().equalsIgnoreCase(Ex.get(X)[0].trim())){
                             undeclaredBlocks.remove(i);
                             break breakLabel1; // exit all these loops.
                         }
@@ -839,7 +841,8 @@ public class SourceEntry {
                     }
                     
                   }
-                                                                  
+                else
+                    undeclaredBlocks.remove(i--);                                                                  
             }        
         }
         return undeclaredBlocks;

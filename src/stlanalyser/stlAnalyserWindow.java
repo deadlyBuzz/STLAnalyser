@@ -136,14 +136,15 @@ public class stlAnalyserWindow extends JFrame
             for(String udb:source.getUndeclaredBlocks())
                 errorMessage+=udb+"\n";
             errorMessage+="\nPlease input details for these blocks in the \n 'Exclusion' table of the Database";
+            errorMessage+="\n\nIf the blocks are not used in the program, \n please remove them from the SDF File.";
             JOptionPane.showMessageDialog(this, errorMessage, "Ooopsy", JOptionPane.ERROR_MESSAGE);
             System.exit(0);
         }
             
-        LinkedHashMap tempMap = new LinkedHashMap(source.getBlockTimes());        
+        //LinkedHashMap tempMap = new LinkedHashMap(source.getBlockTimes());        
         //source.printBlockDetails(System.out); //this is referencing the output of each BlockList object
         //source.testMethod(); // Test Method- Comment out when not using... or don't... I dont care. ;-)
-        System.out.println("Map:"+tempMap.toString());
+        //System.out.println("Map:"+tempMap.toString());
         System.out.println("Done.");
     }//GEN-LAST:event_goButtonActionPerformed
 
