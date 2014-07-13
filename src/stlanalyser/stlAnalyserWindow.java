@@ -70,6 +70,11 @@ public class stlAnalyserWindow extends JFrame
         dataEntryTA.setColumns(20);
         dataEntryTA.setRows(5);
         dataEntryTA.setText("Paste or type the code to be analysed here.");
+        dataEntryTA.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                dataEntryTAMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(dataEntryTA);
 
         goButton.setText("GO");
@@ -183,6 +188,45 @@ public class stlAnalyserWindow extends JFrame
             
         // JOptionPane.showMessageDialog(null, "Work in Progress");        
     }//GEN-LAST:event_IHaveSDFFileButtonActionPerformed
+
+    private void dataEntryTAMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_dataEntryTAMouseClicked
+        // TODO add your handling code here:
+        //JOptionPane.showMessageDialog(null, "Click");
+        String message = "Press \"OK\" to select an AWL File to process \n and \"Cancel\" to paste the source into the field.";
+        String readData;
+        String readLine;
+        int result = JOptionPane.showConfirmDialog(null, message,"Load Symbol Table",JOptionPane.OK_CANCEL_OPTION,JOptionPane.QUESTION_MESSAGE);
+        if(result == JOptionPane.OK_OPTION){
+            dataEntryTA.setText("");
+            JFileChooser fc = new JFileChooser("c:\\temp\\Siemens");
+            int fileChooserRetVal = fc.showOpenDialog(this);
+            if (fileChooserRetVal == JFileChooser.APPROVE_OPTION){ // User accepted a valid file
+                BufferedReader AWLReader = null;
+                try{               
+                    AWLReader = new BufferedReader(
+                    new FileReader(fc.getSelectedFile()));
+                    readData = AWLReader.readLine();
+                    do{
+                        readLine = AWLReader.readLine();                    
+                        if(readLine!=null)
+                            readData += "\n"+readLine;                    
+                    }while(readLine!=null);
+                    dataEntryTA.setText(readData);
+                }
+                catch(FileNotFoundException e){
+                    System.out.println("The File does not exist");
+                    JOptionPane.showMessageDialog(null, "The File does not exist");
+                    System.exit(0);
+                }
+                catch(IOException e){
+                    System.out.println("I/O Error");
+                    JOptionPane.showMessageDialog(null, "I/O Error");
+                    System.exit(0);
+                }
+                
+            }
+        }        
+    }//GEN-LAST:event_dataEntryTAMouseClicked
 
     /**
      * @param args the command line arguments

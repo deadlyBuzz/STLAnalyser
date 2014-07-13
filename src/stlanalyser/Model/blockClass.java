@@ -226,5 +226,13 @@ public class blockClass {
             System.out.println(this.Name+"-"+a);
         return jumpLineMarkers;
     }
-
+    
+    /**
+     * This Block is where the Map of the program path will be generated.
+     * The Block will 
+     * @param s 
+     */
+    public void generateBlockMap(PrintStream s){
+        
+    }
 }
