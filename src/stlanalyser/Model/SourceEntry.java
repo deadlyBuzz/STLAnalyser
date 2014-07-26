@@ -18,8 +18,7 @@ public class SourceEntry {
     // Global Variables 
     private ArrayList<String> sourceLines;
     private ArrayList<lineEntry> sourceLineEntries;
-    private ArrayList<blockClass> blockList;
-    private ArrayList<String> noSourceBlock;
+    private ArrayList<blockClass> blockList;    
     private Map<String, Integer> m;
     private Map<String, String> t;
     private Map<String, String[]> Ex;    
@@ -778,9 +777,22 @@ public class SourceEntry {
      * Let this be a test method to call other WIP Methods for calling.
      * Can be removed afterwards.
      */
-    public void testMethod(){
+    public void blockMethod(){        
         for(blockClass b:blockList)
             b.getJumpLabels();
+            
+    }
+    
+    public void markBlockSource(String filePath, String markerBlock){
+        int blockNumber = 0;
+        ArrayList<String> markedSource = new ArrayList<>();
+        for(blockClass b:blockList){
+            markedSource.addAll(b.markSource(markerBlock, String.valueOf(++blockNumber)));
+        }
+        System.out.println("New Source");
+        for(String s:markedSource)
+            System.out.println(s);
+        //System.out.println(filePath);
     }
     
     /**

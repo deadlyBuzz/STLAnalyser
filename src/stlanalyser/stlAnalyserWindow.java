@@ -41,6 +41,8 @@ public class stlAnalyserWindow extends JFrame
      */
     public stlAnalyserWindow() {
         initComponents();
+        markButton.setEnabled(false); // By Default - Disable the "Mark" button
+        jTMarkerFunction.setEnabled(false);
         this.setTitle("STL Analyser Window.");        
     }
     
@@ -64,12 +66,20 @@ public class stlAnalyserWindow extends JFrame
         goButton = new javax.swing.JButton();
         debugLinesTF = new javax.swing.JTextField();
         IHaveSDFFileButton = new javax.swing.JButton();
+        markerLabel = new javax.swing.JLabel();
+        jTMarkerFunction = new javax.swing.JTextField();
+        markButton = new javax.swing.JButton();
+        endScanLabel = new javax.swing.JLabel();
+        dataDBLabel = new javax.swing.JLabel();
+        jTendScanFunction = new javax.swing.JTextField();
+        jTdataDB = new javax.swing.JTextField();
+        jSeparator1 = new javax.swing.JSeparator();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         dataEntryTA.setColumns(20);
         dataEntryTA.setRows(5);
-        dataEntryTA.setText("Paste or type the code to be analysed here.");
+        dataEntryTA.setText("Click Here to Select the AWL file that \ncontains the source code.\n\nIf you wish to Enter the code manually or \nPaste from another source, press \"Cancel\" \nwhen the pop-up is displayed.");
         dataEntryTA.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 dataEntryTAMouseClicked(evt);
@@ -94,6 +104,25 @@ public class stlAnalyserWindow extends JFrame
             }
         });
 
+        markerLabel.setText("Marker Function:");
+
+        jTMarkerFunction.setText("FCXX");
+
+        markButton.setLabel("Mark");
+        markButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                markButtonActionPerformed(evt);
+            }
+        });
+
+        endScanLabel.setText("end Scan:");
+
+        dataDBLabel.setText("Data DB:");
+
+        jTendScanFunction.setText("FCYY");
+
+        jTdataDB.setText("DBZZ");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -107,8 +136,22 @@ public class stlAnalyserWindow extends JFrame
                         .addGap(60, 60, 60)
                         .addComponent(goButton)
                         .addGap(32, 32, 32)
-                        .addComponent(debugLinesTF, javax.swing.GroupLayout.DEFAULT_SIZE, 136, Short.MAX_VALUE)))
+                        .addComponent(debugLinesTF))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(markerLabel)
+                            .addComponent(endScanLabel)
+                            .addComponent(dataDBLabel))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jTdataDB)
+                            .addComponent(jTendScanFunction, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jTMarkerFunction, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(markButton, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 142, Short.MAX_VALUE)))
                 .addContainerGap())
+            .addComponent(jSeparator1)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -120,6 +163,21 @@ public class stlAnalyserWindow extends JFrame
                     .addComponent(goButton)
                     .addComponent(debugLinesTF, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(IHaveSDFFileButton))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(markerLabel)
+                    .addComponent(jTMarkerFunction, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(markButton))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(endScanLabel)
+                    .addComponent(jTendScanFunction, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(dataDBLabel)
+                    .addComponent(jTdataDB, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
 
@@ -147,12 +205,20 @@ public class stlAnalyserWindow extends JFrame
         }
             
         //LinkedHashMap tempMap = new LinkedHashMap(source.getBlockTimes());        
-        //source.printBlockDetails(System.out); //this is referencing the output of each BlockList object
-        //source.testMethod(); // Test Method- Comment out when not using... or don't... I dont care. ;-)
+        source.printBlockDetails(System.out); //this is referencing the output of each BlockList object
+        source.blockMethod(); // Test Method- Print out the Jumps and Labels identified by the system.
         //System.out.println("Map:"+tempMap.toString());
         System.out.println("Done.");
     }//GEN-LAST:event_goButtonActionPerformed
 
+    /** 
+     * This is the Method that is called when the user clicks the "I have an SDF File" button<br/>
+     * This starts by presenting a confirm dialog to describe the function<br/>
+     * If the use wished to continue, a filechooser is presented to select the SDF File.<br/>
+     * If a file is chosen, a new SDF File Iterator is created, linked to the progress monitor 
+     * attached to this window and started.
+     * @param evt 
+     */
     private void IHaveSDFFileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_IHaveSDFFileButtonActionPerformed
         // TODO add your handling code here:
         String message = "This Option is for providing an exported symbol table \n"
@@ -189,6 +255,11 @@ public class stlAnalyserWindow extends JFrame
         // JOptionPane.showMessageDialog(null, "Work in Progress");        
     }//GEN-LAST:event_IHaveSDFFileButtonActionPerformed
 
+    /**
+     * This is the method called when the Text area containing the instructions or 
+     * the pasted Source file is clicked.
+     * @param evt 
+     */
     private void dataEntryTAMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_dataEntryTAMouseClicked
         // TODO add your handling code here:
         //JOptionPane.showMessageDialog(null, "Click");
@@ -229,6 +300,14 @@ public class stlAnalyserWindow extends JFrame
     }//GEN-LAST:event_dataEntryTAMouseClicked
 
     /**
+     * This is the method called when the "Mark" button is performed.
+     * @param evt 
+     */
+    private void markButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_markButtonActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_markButtonActionPerformed
+
+    /**
      * @param args the command line arguments
      */
     public static void main(String args[]) {
@@ -265,10 +344,18 @@ public class stlAnalyserWindow extends JFrame
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton IHaveSDFFileButton;
+    private javax.swing.JLabel dataDBLabel;
     private javax.swing.JTextArea dataEntryTA;
     private javax.swing.JTextField debugLinesTF;
+    private javax.swing.JLabel endScanLabel;
     private javax.swing.JButton goButton;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JTextField jTMarkerFunction;
+    private javax.swing.JTextField jTdataDB;
+    private javax.swing.JTextField jTendScanFunction;
+    private javax.swing.JButton markButton;
+    private javax.swing.JLabel markerLabel;
     // End of variables declaration//GEN-END:variables
 
     /**
@@ -394,7 +481,8 @@ public class stlAnalyserWindow extends JFrame
             System.out.println("Debug: "+String.valueOf(state)+","+String.valueOf(loopCount)+","+String.valueOf(result));
             publish(100);
         }
-         @Override
+
+        @Override
         // Can safely update the GUI from this method.
         protected void process(List<Integer> chunks) {
             // Here we receive the values that we publish().
@@ -402,8 +490,7 @@ public class stlAnalyserWindow extends JFrame
             int mostRecentValue = chunks.get(chunks.size()-1);         
             setProgress(mostRecentValue);
         }
-        
-        
+                
         /** 
         * Taken from the "JAVA For Dummies" Book by Bob Lowe and Barry Burd<br/>
         * This function gives back a BufferedReader object in which points
@@ -434,6 +521,5 @@ public class stlAnalyserWindow extends JFrame
        }
 
         
-    }
-    
+    }       
 }

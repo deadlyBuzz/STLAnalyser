@@ -32,11 +32,28 @@
                       <EmptySpace min="-2" pref="60" max="-2" attributes="0"/>
                       <Component id="goButton" min="-2" max="-2" attributes="0"/>
                       <EmptySpace min="-2" pref="32" max="-2" attributes="0"/>
-                      <Component id="debugLinesTF" pref="136" max="32767" attributes="0"/>
+                      <Component id="debugLinesTF" max="32767" attributes="0"/>
+                  </Group>
+                  <Group type="102" attributes="0">
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="markerLabel" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="endScanLabel" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="dataDBLabel" alignment="0" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                          <Component id="jTdataDB" max="32767" attributes="0"/>
+                          <Component id="jTendScanFunction" alignment="1" max="32767" attributes="0"/>
+                          <Component id="jTMarkerFunction" alignment="1" min="-2" pref="83" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="markButton" min="-2" pref="55" max="-2" attributes="0"/>
+                      <EmptySpace min="0" pref="142" max="32767" attributes="0"/>
                   </Group>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
+          <Component id="jSeparator1" alignment="0" max="32767" attributes="0"/>
       </Group>
     </DimensionLayout>
     <DimensionLayout dim="1">
@@ -49,6 +66,24 @@
                   <Component id="goButton" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="debugLinesTF" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="IHaveSDFFileButton" alignment="3" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="jSeparator1" min="-2" pref="10" max="-2" attributes="0"/>
+              <EmptySpace max="32767" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="markerLabel" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="jTMarkerFunction" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="markButton" alignment="3" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="endScanLabel" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="jTendScanFunction" alignment="3" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="dataDBLabel" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="jTdataDB" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
@@ -67,7 +102,7 @@
           <Properties>
             <Property name="columns" type="int" value="20"/>
             <Property name="rows" type="int" value="5"/>
-            <Property name="text" type="java.lang.String" value="Paste or type the code to be analysed here."/>
+            <Property name="text" type="java.lang.String" value="Click Here to Select the AWL file that &#xa;contains the source code.&#xa;&#xa;If you wish to Enter the code manually or &#xa;Paste from another source, press &quot;Cancel&quot; &#xa;when the pop-up is displayed."/>
           </Properties>
           <Events>
             <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="dataEntryTAMouseClicked"/>
@@ -96,6 +131,46 @@
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="IHaveSDFFileButtonActionPerformed"/>
       </Events>
+    </Component>
+    <Component class="javax.swing.JLabel" name="markerLabel">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Marker Function:"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JTextField" name="jTMarkerFunction">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="FCXX"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JButton" name="markButton">
+      <Properties>
+        <Property name="label" type="java.lang.String" value="Mark"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="markButtonActionPerformed"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JLabel" name="endScanLabel">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="end Scan:"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="dataDBLabel">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Data DB:"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JTextField" name="jTendScanFunction">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="FCYY"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JTextField" name="jTdataDB">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="DBZZ"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JSeparator" name="jSeparator1">
     </Component>
   </SubComponents>
 </Form>
