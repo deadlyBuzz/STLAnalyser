@@ -1,6 +1,6 @@
 package stlanalyser.Model;
 
-import java.io.PrintStream;
+import java.io.*;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -783,11 +783,33 @@ public class SourceEntry {
             
     }
     
+    /**
+     * markedBlockSource where the header is added and the arrayList returned instead of 
+     * printing to the console.
+     */    
+    public ArrayList<String> getMarkedBlockSource(String markerBlock, String endScan, String dataDB){
+                int blockNumber = 0;
+        ArrayList<String> markedSource = new ArrayList<>();
+        ArrayList<String> tempArray = getPredefinedBlockSource(markerBlock, endScan, dataDB);
+        
+        // populate the start of the marked source with the added block data.
+        markedSource.addAll(tempArray);
+        
+        // Add the additional blocks from the generated source blocks.
+        for(blockClass b:blockList){
+            markedSource.addAll(b.markSource(markerBlock, String.valueOf(++blockNumber)));
+            //System.out.println(markedSource.get(markedSource.size()-1));
+        }
+        return markedSource;
+    }
+    
+    
     public void markBlockSource(String filePath, String markerBlock){
         int blockNumber = 0;
         ArrayList<String> markedSource = new ArrayList<>();
         for(blockClass b:blockList){
             markedSource.addAll(b.markSource(markerBlock, String.valueOf(++blockNumber)));
+            //System.out.println(markedSource.get(markedSource.size()-1));
         }
         System.out.println("New Source");
         for(String s:markedSource)
@@ -858,6 +880,47 @@ public class SourceEntry {
             }        
         }
         return undeclaredBlocks;
+    }
+    
+    /** 
+     * The Marker block as well as the end scan block, used for shifting data at the 
+     * end of the scan, are predefined functions.  This block is used for pulling the code
+     * from the predefined source(Stored in a file) and populating the arrayList with 
+     * the correct block numbers.
+     * @param markerBlock The name of the block that will perform the Marking
+     * @param endScanBlock The name of the block that will perform the "shift"
+     * @return 
+     */
+    private ArrayList<String> getPredefinedBlockSource(String markerBlock, String endScanBlock, String dataBlock){
+        BufferedReader predefSource;
+        ArrayList<String> predef = new ArrayList<>();
+        String readLine;
+        String marker = "FC"+markerBlock.trim(); //<<<<<AC1_2>>>>
+        String endScan = "FC" + endScanBlock.trim(); // <<<<AC1_3>>>>
+        String dataDB = "DB"+dataBlock.trim(); //<<<<AC1_1>>>>
+        
+        try{
+            predefSource = new BufferedReader(
+                    new FileReader("Marker.AWL"));
+                    readLine = predefSource.readLine().
+                            replaceAll("<<<<AC1_2>>>>", marker).
+                            replaceAll("<<<<AC1_1>>>>", dataDB).
+                            replaceAll("<<<<AC1_3>>>>",endScan);
+            while(readLine!=null){
+                predef.add(readLine);
+                readLine = predefSource.readLine().
+                            replaceAll("<<<<AC1_2>>>>", marker).
+                            replaceAll("<<<<AC1_1>>>>", dataDB).
+                            replaceAll("<<<<AC1_3>>>>",endScan);
+            }            
+        }
+        catch(IOException e){
+                    System.out.println("File Exception getting predefined source");
+                    //e.printStackTrace(System.err);
+                    JOptionPane.showMessageDialog(null, "predefined source IO Exception");
+                    System.exit(0);
+        }    
+        return predef;
     }
     
     private class S7Statement{

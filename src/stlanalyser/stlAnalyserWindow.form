@@ -32,23 +32,41 @@
                       <EmptySpace min="-2" pref="60" max="-2" attributes="0"/>
                       <Component id="goButton" min="-2" max="-2" attributes="0"/>
                       <EmptySpace min="-2" pref="32" max="-2" attributes="0"/>
-                      <Component id="debugLinesTF" max="32767" attributes="0"/>
+                      <Component id="debugLinesTF" pref="127" max="32767" attributes="0"/>
                   </Group>
                   <Group type="102" attributes="0">
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="markerLabel" alignment="0" min="-2" max="-2" attributes="0"/>
-                          <Component id="endScanLabel" alignment="0" min="-2" max="-2" attributes="0"/>
-                          <Component id="dataDBLabel" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Group type="102" alignment="0" attributes="0">
+                              <Component id="markerLabel" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace max="32767" attributes="0"/>
+                              <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                          <Group type="102" alignment="0" attributes="0">
+                              <Component id="endScanLabel" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace max="32767" attributes="0"/>
+                              <Component id="jLabel2" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                          <Group type="102" alignment="0" attributes="0">
+                              <Component id="dataDBLabel" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace max="32767" attributes="0"/>
+                              <Component id="jLabel3" min="-2" max="-2" attributes="0"/>
+                          </Group>
                       </Group>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                          <Component id="jTdataDB" max="32767" attributes="0"/>
-                          <Component id="jTendScanFunction" alignment="1" max="32767" attributes="0"/>
-                          <Component id="jTMarkerFunction" alignment="1" min="-2" pref="83" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Group type="102" alignment="1" attributes="0">
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="jTMarkerFunction" min="-2" pref="60" max="-2" attributes="0"/>
+                          </Group>
+                          <Group type="102" alignment="0" attributes="0">
+                              <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="1" max="-2" attributes="0">
+                                  <Component id="jTdataDB" pref="60" max="32767" attributes="0"/>
+                                  <Component id="jTendScanFunction" max="32767" attributes="0"/>
+                              </Group>
+                          </Group>
                       </Group>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Component id="markButton" min="-2" pref="55" max="-2" attributes="0"/>
-                      <EmptySpace min="0" pref="142" max="32767" attributes="0"/>
+                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                      <Component id="markButton" min="-2" pref="74" max="-2" attributes="0"/>
                   </Group>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
@@ -74,16 +92,19 @@
                   <Component id="markerLabel" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="jTMarkerFunction" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="markButton" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="jLabel1" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="endScanLabel" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="jTendScanFunction" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="jLabel2" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="dataDBLabel" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="jTdataDB" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="jLabel3" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
@@ -134,12 +155,12 @@
     </Component>
     <Component class="javax.swing.JLabel" name="markerLabel">
       <Properties>
-        <Property name="text" type="java.lang.String" value="Marker Function:"/>
+        <Property name="text" type="java.lang.String" value="Marker Function: (E.G 20 for FC20)"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JTextField" name="jTMarkerFunction">
       <Properties>
-        <Property name="text" type="java.lang.String" value="FCXX"/>
+        <Property name="text" type="java.lang.String" value="XX"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JButton" name="markButton">
@@ -162,15 +183,30 @@
     </Component>
     <Component class="javax.swing.JTextField" name="jTendScanFunction">
       <Properties>
-        <Property name="text" type="java.lang.String" value="FCYY"/>
+        <Property name="text" type="java.lang.String" value="YY"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JTextField" name="jTdataDB">
       <Properties>
-        <Property name="text" type="java.lang.String" value="DBZZ"/>
+        <Property name="text" type="java.lang.String" value="ZZ"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JSeparator" name="jSeparator1">
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel1">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="FC"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel2">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="FC"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel3">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="DB"/>
+      </Properties>
     </Component>
   </SubComponents>
 </Form>

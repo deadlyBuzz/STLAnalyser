@@ -245,29 +245,49 @@ public class blockClass {
     public ArrayList<String> markSource(String markFunction, String blockMark){
         ArrayList<String> newSource = new ArrayList<>();
         boolean markNext = false;
+        boolean newNetwork = false;
         int lineCount = 0;
         Set<Integer> keys = lines.keySet();
         
         for(Integer k:keys){
             lineCount++;
+            if(newNetwork){
+                newSource.add(addNewNetwork());
+            }
             if(markNext){
                 newSource.add(markString(markFunction,blockMark+String.valueOf(lineCount)));
+                if(newNetwork)
+                    newSource.add(addNewNetwork());
                 markNext = false;
+                newNetwork = false;
             }
             String sourceString = lines.get(k).getLineSource();            
             newSource.add(sourceString);//1- Add the line to the source list.
-            if(sourceString.matches(regExes.JUMPSTATEMENT)) // If the source entryis a jump statement
+            if(sourceString.matches(regExes.JUMPSTATEMENT+"(.*)")) // If the source entryis a jump statement
                 markNext= true;
-            if(lines.get(k).getLineType()==lineEntry.BEGIN) // Mark the first line in the Block.
+            if(lines.get(k).getLineType()==lineEntry.BEGIN){ // Mark the first line in the Block.
+                newNetwork= true;
                 markNext = true;
+            }
             if(sourceString.matches(regExes.LABELID))
                 markNext = true;
             
         }
+        
         return newSource;
     }
     
+    /** 
+     * Convenience method for calling the mark function 
+     */
     public String markString(String markFunction, String blockMark){
-        return "CALL "+ markFunction + "(\n\t\tMarker\t:=DW#16#"+blockMark+");\n";
+        return "CALL FC"+ markFunction + "(\n\t\tMarker\t:=DW#16#"+blockMark+");\n";
     }
+    
+    /**
+     * Convenience method for when we wish to add a new network
+     */
+    public String addNewNetwork(){
+        return "NETWORK\nTITLE = added by STLAnalyser Program \n";        
+    }        
 }
