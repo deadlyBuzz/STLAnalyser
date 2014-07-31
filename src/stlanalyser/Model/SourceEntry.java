@@ -894,7 +894,7 @@ public class SourceEntry {
     private ArrayList<String> getPredefinedBlockSource(String markerBlock, String endScanBlock, String dataBlock){
         BufferedReader predefSource;
         ArrayList<String> predef = new ArrayList<>();
-        String readLine;
+        String lineRead;
         String marker = "FC"+markerBlock.trim(); //<<<<<AC1_2>>>>
         String endScan = "FC" + endScanBlock.trim(); // <<<<AC1_3>>>>
         String dataDB = "DB"+dataBlock.trim(); //<<<<AC1_1>>>>
@@ -902,13 +902,13 @@ public class SourceEntry {
         try{
             predefSource = new BufferedReader(
                     new FileReader("Marker.AWL"));
-                    readLine = predefSource.readLine().
+                    lineRead = predefSource.readLine().
                             replaceAll("<<<<AC1_2>>>>", marker).
                             replaceAll("<<<<AC1_1>>>>", dataDB).
                             replaceAll("<<<<AC1_3>>>>",endScan);
-            while(readLine!=null){
-                predef.add(readLine);
-                readLine = predefSource.readLine().
+            while(lineRead!=null){
+                predef.add(lineRead);
+                lineRead = predefSource.readLine().
                             replaceAll("<<<<AC1_2>>>>", marker).
                             replaceAll("<<<<AC1_1>>>>", dataDB).
                             replaceAll("<<<<AC1_3>>>>",endScan);
@@ -920,6 +920,10 @@ public class SourceEntry {
                     JOptionPane.showMessageDialog(null, "predefined source IO Exception");
                     System.exit(0);
         }    
+        catch(NullPointerException NPE){
+            System.out.println("NPE - " + String.valueOf(predef.size()));
+            System.out.println(predef.get(predef.size()-1));
+        }
         return predef;
     }
     

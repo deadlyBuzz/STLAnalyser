@@ -261,10 +261,13 @@ public class blockClass {
                 markNext = false;
                 newNetwork = false;
             }
-            String sourceString = lines.get(k).getLineSource();            
+            String sourceString = lines.get(k).getLineSource().trim();            
             newSource.add(sourceString);//1- Add the line to the source list.
-            if(sourceString.matches(regExes.JUMPSTATEMENT+"(.*)")) // If the source entryis a jump statement
-                markNext= true;
+            
+            if(sourceString.replaceAll(regExes.LABELID, "$2").matches(regExes.JUMPSTATEMENT+" .*"))
+                markNext = true;            
+//            if(sourceString.matches(regExes.JUMPSTATEMENT+"(.*)")) // If the source entry is a jump statement
+//                markNext= true;
             if(lines.get(k).getLineType()==lineEntry.BEGIN){ // Mark the first line in the Block.
                 newNetwork= true;
                 markNext = true;
