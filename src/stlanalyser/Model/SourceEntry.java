@@ -172,7 +172,14 @@ public class SourceEntry {
                         break;
                     }
                     else if(stringLine.matches(regExes.ARRAYSTATEMENT)){
-                        memData.add(stringLine);
+                        if(stringLine.matches(regExes.SINGLELINEARRAYSTATEMENT)){
+                            String name, type;
+                            name = stringLine.replaceAll(regExes.SINGLELINEARRAYSTATEMENT,"$1").trim();
+                            type = stringLine.replaceAll(regExes.SINGLELINEARRAYSTATEMENT,"$2").trim();
+                            name = VAR.put(name, resolveMemory(type));                            
+                        }                            
+                        else
+                            memData.add(stringLine);
                         sourceLineEntries.add(new lineEntry(rawStringLine,i,0,lineEntry.VAR_DECLARE));
                         break;
                     }
@@ -503,6 +510,8 @@ public class SourceEntry {
                 else                                            // Otherwise
                     tagString +=";_riac";                       // Tag Register Indirect, Area Crossing.
             }
+            else if(placeHolder[i].matches(regExes.DATATYPE)&placeHolder.length>i)
+                tagString = placeHolder[i].replaceAll(regExes.DATATYPE, "$1");
             else if(placeHolder[i].matches(regExes.MEMORYINDIRECT)){
                 if(Statement.matches(regExes.DIRECTADDRESSING)){
                     tagString += ";_mi";
@@ -765,6 +774,8 @@ public class SourceEntry {
      */
     public static String varGet(Map VAR, String keyString){
         String tempString = keyString.replaceAll(regExes.ARRAYCLEAN, "$1"); // remove any "#" marks that identify the variable.                
+        if(tempString.equalsIgnoreCase("RET_VAL"))
+            return "b";
         tempString = (String)VAR.get(tempString);
         if(tempString==null){
             JOptionPane.showMessageDialog(null, "<<<<varGet: Error Matching Variables: "+keyString,"oops",JOptionPane.ERROR_MESSAGE);
@@ -840,9 +851,11 @@ public class SourceEntry {
      */    
     public ArrayList<String> getUndeclaredBlocks(){
         ArrayList<String> names = arrangeBlocks();
-        Set<String> keys = SDFMap.keySet();            
         ArrayList<String> undeclaredBlocks = new ArrayList<>();
-
+        if(SDFMap==null)
+            return undeclaredBlocks; // return an empty array.
+        
+        Set<String> keys = SDFMap.keySet();            
         for(String s:keys){
             undeclaredBlocks.add(s); // Add this to the undeclared list by default
             for(String n:names)                    

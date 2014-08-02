@@ -46,6 +46,8 @@ public class stlAnalyserWindow extends JFrame
         jTMarkerFunction.setEnabled(false); // and the associated fields.
         jTdataDB.setEnabled(false);
         jTendScanFunction.setEnabled(false);
+        cbPBL.setSelected(false);
+        cbPTA.setSelected(false);
         this.setTitle("STL Analyser Window.");        
     }
     
@@ -53,6 +55,8 @@ public class stlAnalyserWindow extends JFrame
         if(!enabled)
             debugLinesTF.setText("-1");
         debugLinesTF.setVisible(enabled);
+        cbPBL.setVisible(enabled);   
+        cbPTA.setVisible(enabled);
     }
 
     /**
@@ -80,6 +84,8 @@ public class stlAnalyserWindow extends JFrame
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
+        cbPBL = new javax.swing.JCheckBox();
+        cbPTA = new javax.swing.JCheckBox();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -135,13 +141,28 @@ public class stlAnalyserWindow extends JFrame
 
         jLabel3.setText("DB");
 
+        cbPBL.setText("Print BlockLists");
+        cbPBL.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cbPBLActionPerformed(evt);
+            }
+        });
+
+        cbPTA.setText("print textarea");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jSeparator1)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(cbPBL)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(cbPTA)
+                        .addGap(0, 0, Short.MAX_VALUE))
                     .addComponent(jScrollPane1)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(IHaveSDFFileButton)
@@ -175,7 +196,6 @@ public class stlAnalyserWindow extends JFrame
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(markButton, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
-            .addComponent(jSeparator1)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -188,8 +208,12 @@ public class stlAnalyserWindow extends JFrame
                     .addComponent(debugLinesTF, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(IHaveSDFFileButton))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(cbPBL)
+                    .addComponent(cbPTA))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(markerLabel)
                     .addComponent(jTMarkerFunction, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -205,7 +229,7 @@ public class stlAnalyserWindow extends JFrame
                     .addComponent(dataDBLabel)
                     .addComponent(jTdataDB, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel3))
-                .addContainerGap())
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
@@ -232,7 +256,8 @@ public class stlAnalyserWindow extends JFrame
         }
             
         //LinkedHashMap tempMap = new LinkedHashMap(source.getBlockTimes());        
-        //source.printBlockDetails(System.out); //this is referencing the output of each BlockList object
+        if(cbPBL.isSelected())
+            source.printBlockDetails(System.out); //this is referencing the output of each BlockList object
         markButton.setEnabled(true); // By Default - Disable the "Mark" button
         jTMarkerFunction.setEnabled(true); // and the associated fields.
         jTdataDB.setEnabled(true);
@@ -298,6 +323,9 @@ public class stlAnalyserWindow extends JFrame
         String message = "Press \"OK\" to select an AWL File to process \n and \"Cancel\" to paste the source into the field.";
         String readData;
         String readLine;
+        boolean printData = cbPTA.isSelected();
+       
+        int lineNumber = 0;
         int result = JOptionPane.showConfirmDialog(null, message,"Load Symbol Table",JOptionPane.OK_CANCEL_OPTION,JOptionPane.QUESTION_MESSAGE);
         if(result == JOptionPane.OK_OPTION){
             dataEntryTA.setText("");
@@ -311,8 +339,12 @@ public class stlAnalyserWindow extends JFrame
                     readData = AWLReader.readLine();
                     do{
                         readLine = AWLReader.readLine();                    
-                        if(readLine!=null)
+                        if(readLine!=null){
                             readData += "\n"+readLine;                    
+                            if(printData)
+                                System.out.println(String.valueOf(lineNumber)+">"+readLine);
+                            lineNumber++;
+                        }
                     }while(readLine!=null);
                     dataEntryTA.setText(readData);
                 }
@@ -345,6 +377,10 @@ public class stlAnalyserWindow extends JFrame
        for(String m:markedSource)
            System.out.println(m);
     }//GEN-LAST:event_markButtonActionPerformed
+
+    private void cbPBLActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbPBLActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_cbPBLActionPerformed
 
     /**
      * @param args the command line arguments
@@ -383,6 +419,8 @@ public class stlAnalyserWindow extends JFrame
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton IHaveSDFFileButton;
+    private javax.swing.JCheckBox cbPBL;
+    private javax.swing.JCheckBox cbPTA;
     private javax.swing.JLabel dataDBLabel;
     private javax.swing.JTextArea dataEntryTA;
     private javax.swing.JTextField debugLinesTF;

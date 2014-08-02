@@ -53,6 +53,9 @@ public static final String DBHEADER        =  "DATA_BLOCK.*";
     public static final String CALLSTATEMENT   =  "(CALL|UC|CC)";
 /**  Regex String: <br/>".*ARRAY\\s*\\[[0-9]+\\s+\\.+\\s[0-9]+\\s\\].*"; **/
     public static final String ARRAYSTATEMENT  =  ".*ARRAY\\s*\\[[0-9]+\\s+\\.+\\s[0-9]+\\s\\].*";
+    
+    public static final String SINGLELINEARRAYSTATEMENT = "\\W*(.+)\\W+: ARRAY\\W+\\[\\d+ \\.\\. \\d+\\W+\\] OF (.*);\\W*";
+    
 /** String Declaration from the Block header<br/> Regex String: .* : STRING\\W+\\[\\d+\\W*\\]; */    
     public static final String STRINGDECLARE = "\\W*STRING\\W+\\[\\d+\\W*\\];?";
 /**  Regex String: <br/>"(\\[[ \\t0-9]+\\]\\s+)?;"; **/
@@ -90,7 +93,7 @@ public static final String DBHEADER        =  "DATA_BLOCK.*";
      * 
      * Regex String: <br/>"(.*)\\[[0-9]+\\]"
      */
-    public static final String ARRAYCLEAN = "(.*)\\[[0-9]+\\]";
+    public static final String ARRAYCLEAN = "(.*)\\[[\\W0-9]+\\]";
 
     /* ---- Typically used in IDMemory Function ----- */ 
 
@@ -138,6 +141,9 @@ public static final String DBHEADER        =  "DATA_BLOCK.*";
     
     /** Open DB Command <br/> Regex String: OPN*/
     public static final String OPENDBCOMMAND = "OPN";
+    
+    /** Where the Memory type is used, for example W for Word access etc. **/
+    public static final String DATATYPE = "(B|W|DW|D)"; 
     
     /** 
      * An Access to a variable through dot extensions, such as found on <br/>
