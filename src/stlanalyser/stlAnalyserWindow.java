@@ -252,6 +252,7 @@ public class stlAnalyserWindow extends JFrame
             errorMessage+="\nPlease input details for these blocks in the \n 'Exclusion' table of the Database";
             errorMessage+="\n\nIf the blocks are not used in the program, \n please remove them from the SDF File.";
             JOptionPane.showMessageDialog(this, errorMessage, "Ooopsy", JOptionPane.ERROR_MESSAGE);
+            System.err.println(errorMessage);
             System.exit(0);
         }
             
@@ -602,4 +603,28 @@ public class stlAnalyserWindow extends JFrame
 
         
     }       
+
+    private class AWLfileIterator extends SwingWorker<Void, Integer>{
+
+        @Override
+        protected Void doInBackground() throws Exception {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+        
+        @Override
+        public void done(){
+            //System.out.println("Debug: "+String.valueOf(state)+","+String.valueOf(loopCount)+","+String.valueOf(result));
+            publish(100);
+        }
+
+        @Override
+        // Can safely update the GUI from this method.
+        protected void process(List<Integer> chunks) {
+            // Here we receive the values that we publish().
+            // They may come grouped in chunks.
+            int mostRecentValue = chunks.get(chunks.size()-1);         
+            setProgress(mostRecentValue);
+        }
+
+    }
 }
