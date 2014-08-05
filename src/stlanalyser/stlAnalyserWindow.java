@@ -322,13 +322,14 @@ public class stlAnalyserWindow extends JFrame
         // TODO add your handling code here:
         //JOptionPane.showMessageDialog(null, "Click");
         String message = "Press \"OK\" to select an AWL File to process \n and \"Cancel\" to paste the source into the field.";
-        String readData;
+        StringBuilder readData = new StringBuilder();
         String readLine;
         boolean printData = cbPTA.isSelected();
        
         int lineNumber = 0;
         int result = JOptionPane.showConfirmDialog(null, message,"Load Symbol Table",JOptionPane.OK_CANCEL_OPTION,JOptionPane.QUESTION_MESSAGE);
         if(result == JOptionPane.OK_OPTION){
+            
             dataEntryTA.setText("");
             JFileChooser fc = new JFileChooser("c:\\temp\\Siemens");
             int fileChooserRetVal = fc.showOpenDialog(this);
@@ -336,18 +337,23 @@ public class stlAnalyserWindow extends JFrame
                 BufferedReader AWLReader = null;
                 try{               
                     AWLReader = new BufferedReader(
-                    new FileReader(fc.getSelectedFile()));
-                    readData = AWLReader.readLine();
-                    do{
-                        readLine = AWLReader.readLine();                    
+                    new FileReader(fc.getSelectedFile()));                    
+                    readLine = AWLReader.readLine();
+                    
+                    do{                        
                         if(readLine!=null){
-                            readData += "\n"+readLine;                    
+                            readLine+="\n";
+                            readData.append(readLine);                    
                             if(printData)
                                 System.out.println(String.valueOf(lineNumber)+">"+readLine);
                             lineNumber++;
                         }
+                        readLine = AWLReader.readLine();
                     }while(readLine!=null);
-                    dataEntryTA.setText(readData);
+                    
+                    dataEntryTA.setText(readData.toString());
+                    readData = null;// empty the heap.
+                    
                 }
                 catch(FileNotFoundException e){
                     System.out.println("The File does not exist");
@@ -357,6 +363,10 @@ public class stlAnalyserWindow extends JFrame
                 catch(IOException e){
                     System.out.println("I/O Error");
                     JOptionPane.showMessageDialog(null, "I/O Error");
+                    System.exit(0);
+                }
+                catch(OutOfMemoryError OOME){
+                    System.err.println("OOME: Crapped out on line "+String.valueOf(lineNumber));
                     System.exit(0);
                 }
                 

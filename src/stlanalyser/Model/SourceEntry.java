@@ -90,7 +90,9 @@ public class SourceEntry {
         for(int i=0; i<sourceLines.size(); i++){                        
             String rawStringLine = sourceLines.get(i); // get rid of any Labels
             String stringLine = rawStringLine.replaceAll(regExes.LABELID, "$2").trim();
-            stringLine = stringLine.replaceAll("(.+)//.*", "$1");
+            //stringLine = stringLine.replaceAll("(.+)//.*", "$1"); // Not removing nested comments
+            if(stringLine.matches("(.+)//.*"))
+                stringLine = stringLine.split("//")[0].trim();
             
             if(rawStringLine.replaceAll(regExes.LABELID,"$3").equalsIgnoreCase("(")) // reappend the open bracket so the block transfer parameters are ignored.
                 stringLine += " (";
