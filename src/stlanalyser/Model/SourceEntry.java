@@ -25,6 +25,7 @@ public class SourceEntry {
     private Map<String, String> SDFMap;
     private Map<String,Double> func = new HashMap<>();                
     private Map<String,Integer> vRef = new HashMap<>();
+    boolean forMarking = false;
     
     
     //http://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html
@@ -63,6 +64,13 @@ public class SourceEntry {
      */
     public void addLine(String lineToAdd){ sourceLines.add(lineToAdd); }
     
+    /**
+     * I want to call another version of processSourceCode with another argument
+     */
+    public void processSourceCode(String[] args, boolean forMarking){
+        this.forMarking = forMarking;
+        processSourceCode(args); // now call the standard function.
+    }
     /**
      * This is the method that performs the process of analysing the source code.
      */
@@ -293,7 +301,8 @@ public class SourceEntry {
                             else{
                                 statment.arg1 = IDMemoryType(placeHolder,statment.arg1,VAR); // This is a local variable - Find out what it is.                               
                                 // Replace the Named instance of the Block being called with the actual Block being called.
-                               rawStringLine = rawStringLine.replaceAll("#"+placeHolder[1], statment.arg1);
+                               if(!forMarking) // as long as we're not processing this code for marking.
+                                   rawStringLine = rawStringLine.replaceAll("#"+placeHolder[1], statment.arg1); // Replace any local blocks being referenced with a reference to the block type.
                                statment.arg1 = statment.arg1.replaceAll("(S?F[BC])\\W+\\d+", "$1");
                                 
                                 /**Replace the Named instance of the Block

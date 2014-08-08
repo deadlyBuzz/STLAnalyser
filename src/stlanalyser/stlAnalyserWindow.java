@@ -86,6 +86,7 @@ public class stlAnalyserWindow extends JFrame
         jLabel3 = new javax.swing.JLabel();
         cbPBL = new javax.swing.JCheckBox();
         cbPTA = new javax.swing.JCheckBox();
+        cmProc4Mrk = new javax.swing.JCheckBox();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -150,6 +151,8 @@ public class stlAnalyserWindow extends JFrame
 
         cbPTA.setText("print textarea");
 
+        cmProc4Mrk.setText("process for Marking");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -158,18 +161,7 @@ public class stlAnalyserWindow extends JFrame
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(cbPBL)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(cbPTA)
-                        .addGap(0, 0, Short.MAX_VALUE))
                     .addComponent(jScrollPane1)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(IHaveSDFFileButton)
-                        .addGap(60, 60, 60)
-                        .addComponent(goButton)
-                        .addGap(32, 32, 32)
-                        .addComponent(debugLinesTF, javax.swing.GroupLayout.DEFAULT_SIZE, 127, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
@@ -194,7 +186,23 @@ public class stlAnalyserWindow extends JFrame
                                     .addComponent(jTdataDB, javax.swing.GroupLayout.DEFAULT_SIZE, 60, Short.MAX_VALUE)
                                     .addComponent(jTendScanFunction))))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(markButton, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(markButton, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(IHaveSDFFileButton)
+                                .addGap(60, 60, 60)
+                                .addComponent(goButton))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(cbPBL)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(cbPTA)))
+                        .addGap(32, 32, 32)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(cmProc4Mrk)
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addComponent(debugLinesTF))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -210,7 +218,8 @@ public class stlAnalyserWindow extends JFrame
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(cbPBL)
-                    .addComponent(cbPTA))
+                    .addComponent(cbPTA)
+                    .addComponent(cmProc4Mrk))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -239,7 +248,7 @@ public class stlAnalyserWindow extends JFrame
         // TODO add your handling code here:        
         source = new SourceEntry(dataEntryTA.getText());
         String debugLines[] = debugLinesTF.getText().split(",");        
-        source.processSourceCode(debugLines);  
+        source.processSourceCode(debugLines, this.cmProc4Mrk.isSelected());  
         //ArrayList<String> names = source.arrangeBlocks();
         source.setSDFList(sdfBlockList); // sdfBlockList has been generated from the swingworker thread
         //ArrayList<String> names = source.getUndeclaredBlocks();
@@ -432,6 +441,7 @@ public class stlAnalyserWindow extends JFrame
     private javax.swing.JButton IHaveSDFFileButton;
     private javax.swing.JCheckBox cbPBL;
     private javax.swing.JCheckBox cbPTA;
+    private javax.swing.JCheckBox cmProc4Mrk;
     private javax.swing.JLabel dataDBLabel;
     private javax.swing.JTextArea dataEntryTA;
     private javax.swing.JTextField debugLinesTF;

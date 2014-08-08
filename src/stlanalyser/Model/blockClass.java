@@ -254,7 +254,7 @@ public class blockClass {
             if(newNetwork){
                 newSource.add(addNewNetwork());
             }
-            if(markNext){
+            if((markNext)&(lines.get(k).getLineType()!=lineEntry.CODE_COMMENT)){
                 newSource.add(markString(markFunction,blockMark+String.valueOf(lineCount)));
                 if(newNetwork)
                     newSource.add(addNewNetwork());
