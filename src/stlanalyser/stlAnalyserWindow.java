@@ -297,6 +297,7 @@ public class stlAnalyserWindow extends JFrame
         int result = JOptionPane.showConfirmDialog(null, message,"Load Symbol Table",JOptionPane.OK_CANCEL_OPTION,JOptionPane.QUESTION_MESSAGE);
         if(result == JOptionPane.OK_OPTION){
             JFileChooser fc = new JFileChooser("c:\\temp\\Siemens");
+            fc.setDialogTitle("Select SDF File");
             int fileChooserRetVal = fc.showOpenDialog(this);
             if (fileChooserRetVal == JFileChooser.APPROVE_OPTION){ // User accepted a valid file
                 sdfFile = fc.getSelectedFile();            
@@ -341,6 +342,7 @@ public class stlAnalyserWindow extends JFrame
             
             dataEntryTA.setText("");
             JFileChooser fc = new JFileChooser("c:\\temp\\Siemens");
+            fc.setDialogTitle("Select AWL (Source) File.");
             int fileChooserRetVal = fc.showOpenDialog(this);
             if (fileChooserRetVal == JFileChooser.APPROVE_OPTION){ // User accepted a valid file
                 BufferedReader AWLReader = null;
@@ -390,12 +392,28 @@ public class stlAnalyserWindow extends JFrame
     private void markButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_markButtonActionPerformed
         // TODO add your handling code here:
        //source.markBlockSource("c:\\temp\\MarkedSource.AWL", this.jTMarkerFunction.getText());
+        JFileChooser saveJFC = new JFileChooser();
+        saveJFC.setDialogTitle("Select where to save the Marked source.");            
         String markBlock = this.jTMarkerFunction.getText();
         String endScan = this.jTendScanFunction.getText();
         String dataDB = this.jTdataDB.getText();
-       ArrayList<String> markedSource = source.getMarkedBlockSource(markBlock, endScan, dataDB);
-       for(String m:markedSource)
-           System.out.println(m);
+        ArrayList<String> markedSource = source.getMarkedBlockSource(markBlock, endScan, dataDB);
+        if(saveJFC.showSaveDialog(null)==JFileChooser.APPROVE_OPTION){ // Select where to save the marked source
+            try{
+                File markedSourceFile = saveJFC.getSelectedFile();
+                PrintWriter out = new PrintWriter(new BufferedWriter(
+                            new FileWriter(markedSourceFile)),true);
+                for(String m:markedSource)
+                    out.println(m);
+                JOptionPane.showMessageDialog(null, "Complete", "Mared Source code File Saved", JOptionPane.INFORMATION_MESSAGE);
+            }
+            catch(IOException IOE){
+                JOptionPane.showMessageDialog(null, "Oops!", "Error processing marked file", JOptionPane.ERROR_MESSAGE);
+                IOE.printStackTrace(System.err);
+            }
+        }
+//       for(String m:markedSource)
+//           System.out.println(m);
     }//GEN-LAST:event_markButtonActionPerformed
 
     private void cbPBLActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbPBLActionPerformed
