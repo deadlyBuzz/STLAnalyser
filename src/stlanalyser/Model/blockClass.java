@@ -29,6 +29,7 @@ public class blockClass {
     private ArrayList<String> jumpLineMarkers;
     private ArrayList<FnStruct> utilisedFunctions;  // List of Missing functions 
     private Map<Integer,lineEntry> lines;
+    private Map<String,Integer> labels;
     private ArrayList<simpleJumpLabels> jumpLabels;
     
     public blockClass(){
@@ -39,6 +40,7 @@ public class blockClass {
         functions = new ArrayList<>();
         utilisedFunctions= new ArrayList<>();
         lines = new LinkedHashMap<>();
+        labels = new LinkedHashMap<>();
     }
     
     public void addLine(lineEntry line){
@@ -60,8 +62,11 @@ public class blockClass {
         if(sourceLine.replaceAll(regExes.LABELID, "$2").matches(regExes.JUMPSTATEMENT+" .*")){
             String jumpTo = sourceLine.replaceAll(regExes.LABELID, "$2");
             jumpTo = jumpTo.replaceAll(regExes.JUMPSTATEMENT+"(.*)","$2");
-            jumpTo = jumpTo.replaceAll("(.+);?\\w*(//.*)?", "$1").trim();                
+            //jumpTo = jumpTo.replaceAll("(.+);?\\W*(//.*)?", "$1").trim();                
+            jumpTo = jumpTo.replaceAll("\\W*(\\w+)(.*);?\\W*(//.*)?", "$1").trim();                
             jumpTo = jumpTo.replaceAll(";", "");
+            if(labels.get(jumpTo)!=null)
+                jumpTo += ".loop";            
             jumpLineMarkers.add("Jump:"+String.valueOf(line.getLineNumber())+"|"+jumpTo);
         }
 
@@ -69,6 +74,7 @@ public class blockClass {
             String labelMarker = sourceLine.replaceAll(regExes.LABELID, "$1");
             labelMarker = labelMarker.replaceAll(regExes.JUMPSTATEMENT+" .*", "$1").trim();
             jumpLineMarkers.add("Label:"+String.valueOf(line.getLineNumber())+"|"+labelMarker);
+            labels.put(labelMarker, line.getLineNumber()); // remember this label.
         }
     }
     
@@ -203,7 +209,7 @@ public class blockClass {
      * @return T
      */
     public ArrayList<String> getJumpLabels(){
-        ArrayList<String> jumpLineMarkers = new ArrayList<>();
+        /*jumpLineMarkers = new ArrayList<>();
         Set<Integer> keys = lines.keySet();
         for(Integer k:keys){
             // This will iterate through each lineEntry.
@@ -221,7 +227,7 @@ public class blockClass {
                 labelMarker = labelMarker.replaceAll(regExes.JUMPSTATEMENT+" .*", "$1").trim();
                 jumpLineMarkers.add("Label:"+String.valueOf(lines.get(k).getLineNumber())+"|"+labelMarker);
             }
-        }
+        }*/
         for(String a:jumpLineMarkers)
             System.out.println(this.Name+"-"+a);
         return jumpLineMarkers;

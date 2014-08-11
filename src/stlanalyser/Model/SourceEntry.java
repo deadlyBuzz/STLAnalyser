@@ -809,10 +809,10 @@ public class SourceEntry {
      * markedBlockSource where the header is added and the arrayList returned instead of 
      * printing to the console.
      */    
-    public ArrayList<String> getMarkedBlockSource(String markerBlock, String endScan, String dataDB){
+    public ArrayList<String> getMarkedBlockSource(String markerBlock, String endScan, String dataDB, String loops){
                 int blockNumber = 0;
         ArrayList<String> markedSource = new ArrayList<>();
-        ArrayList<String> tempArray = getPredefinedBlockSource(markerBlock, endScan, dataDB);
+        ArrayList<String> tempArray = getPredefinedBlockSource(markerBlock, endScan, dataDB, loops);
         
         // populate the start of the marked source with the added block data.
         markedSource.addAll(tempArray);
@@ -915,27 +915,43 @@ public class SourceEntry {
      * @param endScanBlock The name of the block that will perform the "shift"
      * @return 
      */
-    private ArrayList<String> getPredefinedBlockSource(String markerBlock, String endScanBlock, String dataBlock){
+    private ArrayList<String> getPredefinedBlockSource(String markerBlock, String endScanBlock, String dataBlock, String loops){
         BufferedReader predefSource;
         ArrayList<String> predef = new ArrayList<>();
         String lineRead;
         String marker = "FC"+markerBlock.trim(); //<<<<<AC1_2>>>>
         String endScan = "FC" + endScanBlock.trim(); // <<<<AC1_3>>>>
         String dataDB = "DB"+dataBlock.trim(); //<<<<AC1_1>>>>
+        Integer loopCount = Integer.parseInt(loops); // <<<< AC1_4 >>>>
+        String regexString = "\\W*(.*)\\<<<<LOOP:(\\w+)\\.\\.(\\w+)>>>>(.*)";
+        Integer startLoop;
+        Integer endLoop;
         
         try{
             predefSource = new BufferedReader(
-                    new FileReader("Marker.AWL"));
-                    lineRead = predefSource.readLine().
+                    new FileReader("Marker2.AWL"));
+
+                            lineRead = predefSource.readLine().
                             replaceAll("<<<<AC1_2>>>>", marker).
                             replaceAll("<<<<AC1_1>>>>", dataDB).
-                            replaceAll("<<<<AC1_3>>>>",endScan);
+                            replaceAll("<<<<AC1_3>>>>",endScan).
+                            replaceAll("<<<<AC1_4>>>>",loops);
             while(lineRead!=null){
                 predef.add(lineRead);
                 lineRead = predefSource.readLine().
                             replaceAll("<<<<AC1_2>>>>", marker).
                             replaceAll("<<<<AC1_1>>>>", dataDB).
-                            replaceAll("<<<<AC1_3>>>>",endScan);
+                            replaceAll("<<<<AC1_3>>>>",endScan).
+                            replaceAll("<<<<AC1_3>>>>",loops);
+                if(lineRead.matches(".*<<<<LOOP.*")){ // If a Loop has been defined
+                    lineRead = lineRead.replaceAll("AC1_4", loops);
+                    startLoop = Integer.parseInt(lineRead.replaceAll(regexString, "$2"));
+                    endLoop = Integer.parseInt(lineRead.replaceAll(regexString, "$3"));
+                    for(int i=startLoop; i<=endLoop; i++)
+                        predef.add(lineRead.replaceAll(regexString, "$1")+
+                                String.valueOf(i)+
+                                lineRead.replaceAll(regexString, "$4"));
+                }
             }            
         }
         catch(IOException e){
