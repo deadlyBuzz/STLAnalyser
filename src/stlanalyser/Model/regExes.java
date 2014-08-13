@@ -111,8 +111,10 @@ public static final String DBHEADER        =  "DATA_BLOCK.*";
     /**  Regex String: D[BI](\\d+)\\.DB(\\w); **/
     public static final String FULLYQUALIFIEDDBACCESS  =  "D[BI](\\d+)\\.DB(\\w)";
     /**  Regex String: "D[BI](\\d+)"; **/
-    public static final String PARTIALLYQUALIFIEDDBACCESS  =  "D[BI](\\w+)";
+    public static final String PARTIALLYQUALIFIEDDBACCESS  =  "D[BI]([XBWD]\\w*)";
     
+    /** Regex pattern to differentiate DINO, DBLG etc, **/
+    public static final String DBNUMBERLENGHTFUNCTION = "D[IB](NO|LG)\\W*";
     /** Timer constant.<br/> Regex String: (S5)?T#.* */
     public static final String TIMERCONSTANT = "(S5)?T#.*";
     

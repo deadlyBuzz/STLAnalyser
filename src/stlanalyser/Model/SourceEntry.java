@@ -312,7 +312,7 @@ public class SourceEntry {
                                 statment.arg1 += ";_pa";                            // Tag to accomodate the additional delay for parameter access.                                
                             }                                
                             statment.blockType = lineEntry.CALLFUNCTION;                            
-                            if(stringLine.matches(".*\\(.*")) // If the "CALL" function does not have an open bracket, then then there won't be a close bracket.
+                            if(stringLine.matches(".*[\\(\\{].*")) // If the "CALL" function does not have an open bracket, then then there won't be a close bracket.
                                 StateMachine = BLOCKCALL; // S7300_instruction_list.PDF P59                                                       // AWL_e.PDF P265
                         }
                         else if(placeHolder[0].toUpperCase().matches(regExes.OPENDBCOMMAND)){  // OPEN Command for DB or DI 
@@ -355,7 +355,7 @@ public class SourceEntry {
                     // ignore all the entries while in block call until we see a ")"                    
                     sourceLineEntries.add(new lineEntry(rawStringLine,i,0,lineEntry.CODE_COMMENT));
                     //If this is a closing bracket - go back to calcuating execution times.
-                    if(stringLine.matches(".*\\);?.*"))
+                    if(stringLine.matches(".*[\\)\\}];?.*"))
                         StateMachine = NETWORKANALYSIS;
                     break;
                 default :
@@ -548,6 +548,8 @@ public class SourceEntry {
             else if(placeHolder[i].matches(regExes.DOTEXTENSIONACCESS)){ //If this is an FB or UDT type access.
                 Statement = IDDotExes(placeHolder[i]);
             }
+            else if(placeHolder[i].matches(regExes.DBNUMBERLENGHTFUNCTION))
+                Statement = placeHolder[i].trim();
             else if(placeHolder[i].matches("\\("))
                 Statement = Statement; // Do nothing - ignore this entry as the Bracket does nothing.
             else if((placeHolder[i].matches(regExes.TIMERCONSTANT))|
@@ -929,7 +931,7 @@ public class SourceEntry {
         
         try{
             predefSource = new BufferedReader(
-                    new FileReader("Marker2.AWL"));
+                    new FileReader("Marker.AWL"));
 
                             lineRead = predefSource.readLine().
                             replaceAll("<<<<AC1_2>>>>", marker).
