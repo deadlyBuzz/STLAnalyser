@@ -413,6 +413,7 @@ public class stlAnalyserWindow extends JFrame
         String dataDB = this.jTdataDB.getText();
         String loopCount = this.jTMPScan.getText();
         ArrayList<String> markedSource = source.getMarkedBlockSource(markBlock, endScan, dataDB, loopCount);
+        ArrayList<String> blockMap = source.getBlockMaps();
         if(saveJFC.showSaveDialog(null)==JFileChooser.APPROVE_OPTION){ // Select where to save the marked source
             try{
                 File markedSourceFile = saveJFC.getSelectedFile();
@@ -427,6 +428,12 @@ public class stlAnalyserWindow extends JFrame
                 IOE.printStackTrace(System.err);
             }
         }
+        System.out.println("---- Segments Vs Execution times. ----");
+        System.out.println("Mark,Delay");
+        for(String s:blockMap){
+            System.out.println(s);
+        }
+        System.out.println("-------------------------------------");
         source.blockMethod();
     }//GEN-LAST:event_markButtonActionPerformed
 

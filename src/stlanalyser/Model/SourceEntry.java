@@ -826,6 +826,14 @@ public class SourceEntry {
         }
         return markedSource;
     }
+    public ArrayList<String> getBlockMaps(){
+        ArrayList<String> blockMaps = new ArrayList<>();
+        for(blockClass b:blockList){
+            if(b.classHasSegmentDetails())
+                blockMaps.addAll(b.getBlockMap());
+        }
+        return blockMaps;
+    }
     
     
     public void markBlockSource(String filePath, String markerBlock){

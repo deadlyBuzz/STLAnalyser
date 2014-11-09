@@ -31,6 +31,8 @@ public class blockClass {
     private Map<Integer,lineEntry> lines;
     private Map<String,Integer> labels;
     private ArrayList<simpleJumpLabels> jumpLabels;
+    private Map<String,Integer> segments; // map of the different segments and corresponding execution time.
+    private boolean haveSegmentDetails;
     
     public blockClass(){
         Name = "";
@@ -41,6 +43,7 @@ public class blockClass {
         utilisedFunctions= new ArrayList<>();
         lines = new LinkedHashMap<>();
         labels = new LinkedHashMap<>();
+        haveSegmentDetails = false;
     }
     
     public void addLine(lineEntry line){
@@ -254,16 +257,29 @@ public class blockClass {
         boolean newNetwork = false;
         int lineCount = 0;
         Set<Integer> keys = lines.keySet();
+        segments = new HashMap<>();
+        String segmentName = "";
+        String oldSegmentName = "";
+        Integer segmentTime = 0;
         
         for(Integer k:keys){
             lineCount++;
             if(newNetwork){
                 newSource.add(addNewNetwork());
             }
-            if((markNext)&(lines.get(k).getLineType()!=lineEntry.CODE_COMMENT)){
-                newSource.add(markString(markFunction,blockMark+String.valueOf(lineCount)));
+            // add up the executiont time of each line.
+            segmentTime += lines.get(k).getLineTime();
+            
+            if((markNext)&(lines.get(k).getLineType()!=lineEntry.CODE_COMMENT)){                
+                oldSegmentName = segmentName;
+                segmentName = blockMark+String.valueOf(lineCount);
+                newSource.add(markString(markFunction,segmentName));                
                 if(newNetwork)
                     newSource.add(addNewNetwork());
+                else{
+                    segments.put(oldSegmentName, segmentTime);
+                    segmentTime = lines.get(k).getLineTime();
+                }
                 markNext = false;
                 newNetwork = false;
             }
@@ -282,7 +298,8 @@ public class blockClass {
                 markNext = true;
             
         }
-        
+        segments.put(segmentName, segmentTime); // last thing, record what the last segment time was.
+        haveSegmentDetails = true;
         return newSource;
     }
     
@@ -299,4 +316,21 @@ public class blockClass {
     public String addNewNetwork(){
         return "NETWORK\nTITLE = added by STLAnalyser Program \n";        
     }        
+    
+    /**
+     * public accessors class to determine if the segments are complete
+     */
+    public boolean classHasSegmentDetails(){return haveSegmentDetails;}
+    
+    /**
+     * Return the block map in ArrayList&gt;String&lt; Format
+     */
+    public ArrayList<String> getBlockMap(){
+        ArrayList<String> blockMap = new ArrayList<>();
+        Set<String> keys = segments.keySet();
+        for(String k:keys){
+            blockMap.add(k+","+segments.get(k));                    
+        }        
+        return blockMap;
+    }
 }
