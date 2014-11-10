@@ -267,8 +267,7 @@ public class blockClass {
             if(newNetwork){
                 newSource.add(addNewNetwork());
             }
-            // add up the executiont time of each line.
-            segmentTime += lines.get(k).getLineTime();
+            // add up the executiont time of each line.            
             
             if((markNext)&(lines.get(k).getLineType()!=lineEntry.CODE_COMMENT)){                
                 oldSegmentName = segmentName;
@@ -278,12 +277,13 @@ public class blockClass {
                     newSource.add(addNewNetwork());
                 else{
                     segments.put(oldSegmentName, segmentTime);
-                    segmentTime = lines.get(k).getLineTime();
+                    segmentTime = 0;
                 }
                 markNext = false;
                 newNetwork = false;
             }
             String sourceString = lines.get(k).getLineSource().trim();            
+            segmentTime += lines.get(k).getLineTime();
             newSource.add(sourceString);//1- Add the line to the source list.
             
             if(sourceString.replaceAll(regExes.LABELID, "$2").matches(regExes.JUMPSTATEMENT+" .*"))
