@@ -802,6 +802,9 @@ public class SourceEntry {
      * Can be removed afterwards.
      */
     public void blockMethod(){        
+        System.out.println(">---- Printing Jumps labels: ---------------------");
+        System.out.println(">Block-Jump/Labal:globalLocation|label/dest");
+
         for(blockClass b:blockList)
             b.getJumpLabels();
             
@@ -820,6 +823,8 @@ public class SourceEntry {
         markedSource.addAll(tempArray);
         
         // Add the additional blocks from the generated source blocks.
+        System.out.println(">---- Printing segment Details: ---------------------");
+        System.out.println(">BlockName|startMarker|ExecutionTime(Weight)|type|endMarker");
         for(blockClass b:blockList){
             markedSource.addAll(b.markSource(markerBlock, String.valueOf(++blockNumber)));
             //System.out.println(markedSource.get(markedSource.size()-1));

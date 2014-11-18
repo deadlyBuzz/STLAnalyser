@@ -270,13 +270,16 @@ public class stlAnalyserWindow extends JFrame
           //  System.out.println(n);
         if(source.getUndeclaredBlocks().size()>0){
             String errorMessage = "The following Blocks cannot be accounted for...\n";
-            for(String udb:source.getUndeclaredBlocks())
-                errorMessage+=udb+"\n";
+            int udbCount = 0;
+            for(String udb:source.getUndeclaredBlocks()){
+                udbCount++;
+                errorMessage+=udb+(((udbCount%3)==0)?"\n":", ");
+            }
             errorMessage+="\nPlease input details for these blocks in the \n 'Exclusion' table of the Database";
             errorMessage+="\n\nIf the blocks are not used in the program, \n please remove them from the SDF File.";
             JOptionPane.showMessageDialog(this, errorMessage, "Ooopsy", JOptionPane.ERROR_MESSAGE);
             System.err.println(errorMessage);
-            System.exit(0);
+            //System.exit(0);
         }
             
         //LinkedHashMap tempMap = new LinkedHashMap(source.getBlockTimes());        
@@ -321,7 +324,7 @@ public class stlAnalyserWindow extends JFrame
                 sdfFileSelected = false;
         }
         if(sdfFileSelected){
-            System.out.println("-");
+            System.out.println("---- Processing SDF File ---------------");
             sdfBlockList = new LinkedHashMap();
             sdbPM = new ProgressMonitor(stlAnalyserWindow.this,
                     "Processing the SDB file",
@@ -428,12 +431,14 @@ public class stlAnalyserWindow extends JFrame
                 IOE.printStackTrace(System.err);
             }
         }
+        /*
         System.out.println("---- Segments Vs Execution times. ----");
         System.out.println("Mark,Delay");
         for(String s:blockMap){
             System.out.println(s);
         }
         System.out.println("-------------------------------------");
+        */
         source.blockMethod();
     }//GEN-LAST:event_markButtonActionPerformed
 
@@ -517,10 +522,10 @@ public class stlAnalyserWindow extends JFrame
      */
     @Override
     public void propertyChange(PropertyChangeEvent evt) {        
-        System.out.println("Debug > "+evt.getPropertyName());
+        //System.out.println("Debug > "+evt.getPropertyName());
         if ("progress" == evt.getPropertyName() ) {
             int progress = (Integer) evt.getNewValue();
-            System.out.println("Debug - "+String.valueOf(progress));
+            //System.out.println("Debug - "+String.valueOf(progress));
             sdbPM.setProgress(progress);
             String message =
                 String.format("Completed %d%%.\n", progress);
@@ -579,7 +584,7 @@ public class stlAnalyserWindow extends JFrame
                 long currentSize = 0;
                 int currentPerc = 0;
                 
-                System.out.println("IsEDT?:"+(javax.swing.SwingUtilities.isEventDispatchThread()?"1":"0"));
+                //System.out.println("IsEDT?:"+(javax.swing.SwingUtilities.isEventDispatchThread()?"1":"0"));
                 try{
                     lineRead = inStream.readLine();
                     do{

@@ -311,10 +311,16 @@ public class blockClass {
                 newNetwork= true;
                 markNext = true;
             }
-            if(sourceString.matches(regExes.LABELID)){
-                markNext = true;
-                segmentDest = segment.LABEL;
-                jumpTo = sourceString.replaceAll(regExes.LABELID, "$1");
+            try{
+                String[] tempString = sourceString.split("//"); // clear out any comments
+                if(tempString[0].trim().matches(regExes.LABELID)){
+                    markNext = true;
+                    segmentDest = segment.LABEL;
+                    jumpTo = tempString[0].replaceAll(regExes.LABELID, "$1").trim();
+                }
+            }
+            catch(ArrayIndexOutOfBoundsException AIOOBE){
+                //System.err.println("Mark Err: "+sourceString);
             }
             
         }
