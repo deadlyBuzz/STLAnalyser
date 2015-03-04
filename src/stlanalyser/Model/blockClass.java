@@ -244,7 +244,8 @@ public class blockClass {
             
             if((markNext)&(lines.get(k).getLineType()!=lineEntry.CODE_COMMENT)){                
                 oldSegmentName = segmentName;
-                segmentName = blockMark+String.valueOf(lineCount);                
+                segmentName = String.valueOf(lines.get(k).getLineNumber());
+                //segmentName = blockMark+String.valueOf(lineCount);                
                 newSource.add(markString(markFunction,segmentName));                
                 if(newNetwork){
                     newSource.add(addNewNetwork()); // probably not needed.
