@@ -1,0 +1,96 @@
+DATA_BLOCK <<<<AC1_1>>>>
+TITLE = Scan Data
+VERSION : 0.1
+
+
+  STRUCT 	
+   MarkerOffset : DWORD ;	//Counter to manage the next item to be recorded.
+   ScanString : ARRAY  [1 .. <<<<AC1_4>>>>] OF //Temporary placeholder variable
+   DWORD ;	
+   scanString2 : ARRAY  [1 .. <<<<AC1_4>>>>] OF DWORD ;	
+   scanString3 : ARRAY  [1 .. <<<<AC1_4>>>>] OF DWORD ;	
+   scanString4 : ARRAY  [1 .. <<<<AC1_4>>>>] OF DWORD ;	
+   scanString5 : ARRAY  [1 .. <<<<AC1_4>>>>] OF DWORD ;	
+   scanString6 : ARRAY  [1 .. <<<<AC1_4>>>>] OF DWORD ;	
+  END_STRUCT ;	
+BEGIN
+   MarkerOffset := DW#16#0; 
+   ScanString[<<<<AC1_5>>>>] := DW#16#0; <<<<LOOP:0..<<<<AC1_4>>>>>>>>
+   ScanString2[<<<<AC1_5>>>>] := DW#16#0; <<<<LOOP:0..<<<<AC1_4>>>>>>>>
+   ScanString3[<<<<AC1_5>>>>] := DW#16#0; <<<<LOOP:0..<<<<AC1_4>>>>>>>>
+   ScanString4[<<<<AC1_5>>>>] := DW#16#0; <<<<LOOP:0..<<<<AC1_4>>>>>>>>
+   ScanString5[<<<<AC1_5>>>>] := DW#16#0; <<<<LOOP:0..<<<<AC1_4>>>>>>>>
+   ScanString6[<<<<AC1_5>>>>] := DW#16#0; <<<<LOOP:0..<<<<AC1_4>>>>>>>>
+END_DATA_BLOCK
+
+FUNCTION <<<<AC1_3>>>>: VOID
+TITLE = End Scan
+VERSION : 0.1
+
+
+VAR_TEMP
+  blkmov_retval : INT ;	
+  AllZeroes : BYTE ;	
+  fill_RetVal : INT ;	
+END_VAR
+BEGIN
+NETWORK
+TITLE =
+
+      CALL SFC   20 (
+           SRCBLK                   := P#<<<<AC1_1>>>>.DBX4.0 BYTE 8000,
+           RET_VAL                  := #blkmov_retval,
+           DSTBLK                   := P#<<<<AC1_1>>>>.DBX1604.0 BYTE 8000);
+
+
+
+NETWORK
+TITLE =
+
+      L     0; 
+      T     #AllZeroes; 
+
+      CALL SFC   21 (
+           BVAL                     := P#L 2.0 BYTE 1,
+           RET_VAL                  := #fill_RetVal,
+           BLK                      := P#<<<<AC1_1>>>>.DBX0.0 BYTE 1604);
+
+
+
+END_FUNCTION
+
+FUNCTION <<<<AC1_2>>>> : VOID
+TITLE = Marker
+VERSION : 0.1
+
+
+VAR_INPUT
+  Marker : DWORD ;	
+END_VAR
+VAR_TEMP
+  DBPointer : ANY ;	
+  blkmov_retval : INT ;	
+  MarkerPointer : ANY ;	
+  MarkerVal : DWORD ;	
+END_VAR
+BEGIN
+NETWORK
+TITLE =
+
+      OPN   <<<<AC1_1>>>>; 
+      LAR1  P#DBX 4.0; 
+      L     <<<<AC1_1>>>>.DBD    0; 
+      +AR1  ; 
+
+      L     #Marker; 
+      T     D [AR1,P#0.0]; 
+
+NETWORK
+TITLE =
+
+      L     <<<<AC1_1>>>>.DBD    0; 
+      L     P#4.0; // 4 bytes = double word.
+      +I    ; 
+      T     <<<<AC1_1>>>>.DBD    0; 
+END_FUNCTION
+

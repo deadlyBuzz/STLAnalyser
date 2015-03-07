@@ -345,6 +345,9 @@ public class blockClass {
         return newSource;
     }
     
+    public ArrayList getSegments(){
+        return segmentList;
+    }
     /** 
      * Convenience method for calling the mark function 
      */
@@ -379,7 +382,7 @@ public class blockClass {
     /**
      * Private class to represent each segment.
      */
-    private static class segment{
+    public static class segment{
         String mark;
         Integer executionTime;
         String parentBlock;

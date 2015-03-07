@@ -36,18 +36,26 @@ public class stlAnalyserWindow extends JFrame
     boolean sdfFileSelected = false; // <-- Flag to indicate that an sDF File has been selected by the user
     boolean sdfFileProcessed = false; // <-- Flag to indicate that the SDF File has been processed.
     SourceEntry source = null;
+    String fileChooserPath;
     
     /**
      * Creates new form stlAnalyserWindow
      */
     public stlAnalyserWindow() {
         initComponents();
+        fileChooserPath = "C:\\temp\\siemens";
         markButton.setEnabled(false); // By Default - Disable the "Mark" button
         jTMarkerFunction.setEnabled(false); // and the associated fields.
         jTdataDB.setEnabled(false);
         jTendScanFunction.setEnabled(false);
         cbPBL.setSelected(false);
         cbPTA.setSelected(false);
+        cmProc4Mrk.setSelected(true);
+        cmProc4Mrk.setVisible(false);
+        this.jTendScanFunction.setVisible(false);
+        this.endScanLabel.setVisible(false);
+        this.jLabel2.setVisible(false);
+        showSegmentsButton.setEnabled(false); // Disable the "Segments" button.
         this.setTitle("STL Analyser Window.");        
     }
     
@@ -57,6 +65,7 @@ public class stlAnalyserWindow extends JFrame
         debugLinesTF.setVisible(enabled);
         cbPBL.setVisible(enabled);   
         cbPTA.setVisible(enabled);
+        cmProc4Mrk.setVisible(enabled);
     }
 
     /**
@@ -89,6 +98,7 @@ public class stlAnalyserWindow extends JFrame
         cmProc4Mrk = new javax.swing.JCheckBox();
         jLabel4 = new javax.swing.JLabel();
         jTMPScan = new javax.swing.JTextField();
+        showSegmentsButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -155,9 +165,17 @@ public class stlAnalyserWindow extends JFrame
 
         cmProc4Mrk.setText("process for Marking");
 
-        jLabel4.setText("Marks Per Scan");
+        jLabel4.setText("loop Setpoint");
 
         jTMPScan.setText("800");
+
+        showSegmentsButton.setText("Segments");
+        showSegmentsButton.setToolTipText("Show Segments");
+        showSegmentsButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                showSegmentsButtonActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -168,32 +186,6 @@ public class stlAnalyserWindow extends JFrame
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane1)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(markerLabel)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(jLabel1))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(endScanLabel)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(jLabel2))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(dataDBLabel)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(jLabel3)))
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jTMarkerFunction, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(10, 10, 10)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(jTMPScan)
-                                    .addComponent(jTdataDB, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 60, Short.MAX_VALUE)
-                                    .addComponent(jTendScanFunction, javax.swing.GroupLayout.Alignment.TRAILING))))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(markButton, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
@@ -210,9 +202,35 @@ public class stlAnalyserWindow extends JFrame
                                 .addComponent(cmProc4Mrk)
                                 .addGap(0, 0, Short.MAX_VALUE))
                             .addComponent(debugLinesTF)))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel4)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(markerLabel)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jLabel1)
+                                .addGap(10, 10, 10)
+                                .addComponent(jTMarkerFunction, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel4)
+                                .addGap(201, 201, 201))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(endScanLabel)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jLabel2)
+                                .addGap(10, 10, 10)
+                                .addComponent(jTendScanFunction, javax.swing.GroupLayout.PREFERRED_SIZE, 63, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addComponent(dataDBLabel)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jLabel3)
+                                .addGap(10, 10, 10)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(jTMPScan)
+                                    .addComponent(jTdataDB, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(markButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(showSegmentsButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -239,19 +257,22 @@ public class stlAnalyserWindow extends JFrame
                     .addComponent(markButton)
                     .addComponent(jLabel1))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(endScanLabel)
-                    .addComponent(jTendScanFunction, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel2))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(dataDBLabel)
-                    .addComponent(jTdataDB, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel3))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel4)
-                    .addComponent(jTMPScan, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(showSegmentsButton)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(dataDBLabel)
+                            .addComponent(jTdataDB, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel3))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel4)
+                            .addComponent(jTMPScan, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(endScanLabel)
+                            .addComponent(jTendScanFunction, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel2))))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -313,12 +334,13 @@ public class stlAnalyserWindow extends JFrame
                 + "Press \"Cancel\" if you no longer wish to load a symbol table";
         int result = JOptionPane.showConfirmDialog(null, message,"Load Symbol Table",JOptionPane.OK_CANCEL_OPTION,JOptionPane.QUESTION_MESSAGE);
         if(result == JOptionPane.OK_OPTION){
-            JFileChooser fc = new JFileChooser("c:\\temp\\Siemens");
+            JFileChooser fc = new JFileChooser(fileChooserPath);
             fc.setDialogTitle("Select SDF File");
             int fileChooserRetVal = fc.showOpenDialog(this);
             if (fileChooserRetVal == JFileChooser.APPROVE_OPTION){ // User accepted a valid file
                 sdfFile = fc.getSelectedFile();            
                 sdfFileSelected = true;
+                fileChooserPath = fc.getSelectedFile().getAbsolutePath();
             }
             else
                 sdfFileSelected = false;
@@ -354,14 +376,15 @@ public class stlAnalyserWindow extends JFrame
         boolean printData = cbPTA.isSelected();
        
         int lineNumber = 0;
-        int result = JOptionPane.showConfirmDialog(null, message,"Load Symbol Table",JOptionPane.OK_CANCEL_OPTION,JOptionPane.QUESTION_MESSAGE);
+        int result = JOptionPane.showConfirmDialog(null, message,"Load Source File",JOptionPane.OK_CANCEL_OPTION,JOptionPane.QUESTION_MESSAGE);
         if(result == JOptionPane.OK_OPTION){
             
             dataEntryTA.setText("");
-            JFileChooser fc = new JFileChooser("c:\\temp\\Siemens");
+            JFileChooser fc = new JFileChooser(fileChooserPath);
             fc.setDialogTitle("Select AWL (Source) File.");
             int fileChooserRetVal = fc.showOpenDialog(this);
             if (fileChooserRetVal == JFileChooser.APPROVE_OPTION){ // User accepted a valid file
+                fileChooserPath = fc.getSelectedFile().getAbsolutePath();
                 BufferedReader AWLReader = null;
                 try{               
                     AWLReader = new BufferedReader(
@@ -409,10 +432,11 @@ public class stlAnalyserWindow extends JFrame
     private void markButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_markButtonActionPerformed
         // TODO add your handling code here:
        //source.markBlockSource("c:\\temp\\MarkedSource.AWL", this.jTMarkerFunction.getText());
-        JFileChooser saveJFC = new JFileChooser();
+        JFileChooser saveJFC = new JFileChooser(fileChooserPath);
         saveJFC.setDialogTitle("Select where to save the Marked source.");            
         String markBlock = this.jTMarkerFunction.getText();
-        String endScan = this.jTendScanFunction.getText();
+        //String endScan = this.jTendScanFunction.getText();
+        String endScan = "";
         String dataDB = this.jTdataDB.getText();
         String loopCount = this.jTMPScan.getText();
         ArrayList<String> markedSource = source.getMarkedBlockSource(markBlock, endScan, dataDB, loopCount);
@@ -425,6 +449,7 @@ public class stlAnalyserWindow extends JFrame
                 for(String m:markedSource)
                     out.println(m);
                 JOptionPane.showMessageDialog(null, "Complete", "Mared Source code File Saved", JOptionPane.INFORMATION_MESSAGE);
+                showSegmentsButton.setEnabled(true);
             }
             catch(IOException IOE){
                 JOptionPane.showMessageDialog(null, "Oops!", "Error processing marked file", JOptionPane.ERROR_MESSAGE);
@@ -445,6 +470,11 @@ public class stlAnalyserWindow extends JFrame
     private void cbPBLActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbPBLActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_cbPBLActionPerformed
+
+    private void showSegmentsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showSegmentsButtonActionPerformed
+        // TODO add your handling code here:
+       segmentResults temp = new segmentResults(source.getSegmentDetails());
+    }//GEN-LAST:event_showSegmentsButtonActionPerformed
 
     /**
      * @param args the command line arguments
@@ -503,6 +533,7 @@ public class stlAnalyserWindow extends JFrame
     private javax.swing.JTextField jTendScanFunction;
     private javax.swing.JButton markButton;
     private javax.swing.JLabel markerLabel;
+    private javax.swing.JButton showSegmentsButton;
     // End of variables declaration//GEN-END:variables
 
     /**

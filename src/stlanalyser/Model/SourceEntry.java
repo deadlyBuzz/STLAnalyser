@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import javax.swing.JOptionPane;
+import stlanalyser.Model.blockClass.segment;
 
 /**
  * Model representing the Complete segment of STL source being analysed
@@ -19,6 +20,7 @@ public class SourceEntry {
     private ArrayList<String> sourceLines;
     private ArrayList<lineEntry> sourceLineEntries;
     private ArrayList<blockClass> blockList;    
+    private ArrayList<segment> segmentList;
     private Map<String, Integer> m;
     private Map<String, String> t;
     private Map<String, String[]> Ex;    
@@ -817,6 +819,7 @@ public class SourceEntry {
     public ArrayList<String> getMarkedBlockSource(String markerBlock, String endScan, String dataDB, String loops){
                 int blockNumber = 0;
         ArrayList<String> markedSource = new ArrayList<>();
+        segmentList = new ArrayList<>();
         ArrayList<String> tempArray = getPredefinedBlockSource(markerBlock, endScan, dataDB, loops);
         
         // populate the start of the marked source with the added block data.
@@ -826,7 +829,8 @@ public class SourceEntry {
         System.out.println(">---- Printing segment Details: ---------------------");
         System.out.println(">BlockName|startMarker|ExecutionTime(Weight)|type|endMarker");
         for(blockClass b:blockList){
-            markedSource.addAll(b.markSource(markerBlock, String.valueOf(++blockNumber)));
+            markedSource.addAll(b.markSource(markerBlock, String.valueOf(++blockNumber)));            
+            segmentList.addAll(b.getSegments());
             //System.out.println(markedSource.get(markedSource.size()-1));
         }
         return markedSource;
@@ -838,6 +842,17 @@ public class SourceEntry {
                 blockMaps.addAll(b.getBlockMap());
         }
         return blockMaps;
+    }
+    
+    public String getSegmentDetails(){        
+        StringBuilder String1 = new StringBuilder();
+        String1.append(">---- Printing segment Details: ---------------------");
+        String1.append(">BlockName|startMarker|ExecutionTime(Weight)|type|endMarker");
+        for(segment s:segmentList){
+            String1.append(s.toString());
+            String1.append("\n");
+        }        
+        return String1.toString();
     }
     
     
@@ -938,7 +953,7 @@ public class SourceEntry {
         String endScan = "FC" + endScanBlock.trim(); // <<<<AC1_3>>>>
         String dataDB = "DB"+dataBlock.trim(); //<<<<AC1_1>>>>
         Integer loopCount = Integer.parseInt(loops); // <<<< AC1_4 >>>>
-        String regexString = "\\W*(.*)\\<<<<LOOP:(\\w+)\\.\\.(\\w+)>>>>(.*)";
+        String regexString = "\\W*(.*)<<<<LOOP:(\\w+)\\.\\.(\\w+)>>>>(.*)";
         Integer startLoop;
         Integer endLoop;
         
@@ -951,28 +966,35 @@ public class SourceEntry {
                             replaceAll("<<<<AC1_1>>>>", dataDB).
                             replaceAll("<<<<AC1_3>>>>",endScan).
                             replaceAll("<<<<AC1_4>>>>",loops);
-            while(lineRead!=null){
-                predef.add(lineRead);
+                            predef.add(lineRead);
+            while(lineRead!=null){                
                 lineRead = predefSource.readLine().
                             replaceAll("<<<<AC1_2>>>>", marker).
                             replaceAll("<<<<AC1_1>>>>", dataDB).
                             replaceAll("<<<<AC1_3>>>>",endScan).
-                            replaceAll("<<<<AC1_3>>>>",loops);
-                if(lineRead.matches(".*<<<<LOOP.*")){ // If a Loop has been defined
-                    lineRead = lineRead.replaceAll("AC1_4", loops);
+                            replaceAll("<<<<AC1_4>>>>",loops);
+                if(lineRead.matches(".*<<<<AC1_6.*")){ // contains a formula
+                    String regexp = "(.*)<<<<AC1_6:(\\w+)>>>>(.*)";
+                    Integer result = Integer.valueOf(lineRead.replaceAll(regexp, "$2"));
+                    lineRead = lineRead.replaceAll(regexp, "$1"+String.valueOf(result*Integer.valueOf(loops))+"$3");
+                    predef.add(lineRead);
+                }
+                else if(lineRead.matches(".*<<<<LOOP.*")){ // If a Loop has been defined
+                    lineRead = lineRead.replaceAll("<<<<AC1_4>>>>", loops);
                     startLoop = Integer.parseInt(lineRead.replaceAll(regexString, "$2"));
                     endLoop = Integer.parseInt(lineRead.replaceAll(regexString, "$3"));
+                    lineRead = lineRead.replaceAll(regexString, "$1");
                     for(int i=startLoop; i<=endLoop; i++)
-                        predef.add(lineRead.replaceAll(regexString, "$1")+
-                                String.valueOf(i)+
-                                lineRead.replaceAll(regexString, "$4"));
+                        predef.add(lineRead.replaceAll("<<<<AC1_5>>>>",String.valueOf(i)));
                 }
+                else
+                    predef.add(lineRead);
             }            
         }
         catch(IOException e){
                     System.out.println("File Exception getting predefined source");
                     //e.printStackTrace(System.err);
-                    JOptionPane.showMessageDialog(null, "predefined source IO Exception");
+                    JOptionPane.showMessageDialog(null, "predefined source IO Exception (Can't find Marker.awl?)");
                     System.exit(0);
         }    
         catch(NullPointerException NPE){
