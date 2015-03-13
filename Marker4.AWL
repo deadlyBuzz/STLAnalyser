@@ -1,0 +1,120 @@
+DATA_BLOCK <<<<AC1_1>>>>
+TITLE = Scan Data
+VERSION : 0.1
+
+
+  STRUCT 	
+   MarkerOffset : DWORD ;	//Counter to manage the next item to be recorded.
+   ScanString : ARRAY  [1 .. <<<<AC1_4>>>>] OF //Temporary placeholder variable
+   DWORD ;	
+   scanString2 : ARRAY  [1 .. <<<<AC1_4>>>>] OF DWORD ;	
+   scanString3 : ARRAY  [1 .. <<<<AC1_4>>>>] OF DWORD ;	
+   scanString4 : ARRAY  [1 .. <<<<AC1_4>>>>] OF DWORD ;	
+   scanString5 : ARRAY  [1 .. <<<<AC1_4>>>>] OF DWORD ;	
+   scanString6 : ARRAY  [1 .. <<<<AC1_4>>>>] OF DWORD ;	
+  END_STRUCT ;	
+BEGIN
+   MarkerOffset := DW#16#0; 
+   ScanString[<<<<AC1_5>>>>] := DW#16#0; <<<<LOOP:1..<<<<AC1_4>>>>>>>>
+   ScanString2[<<<<AC1_5>>>>] := DW#16#0; <<<<LOOP:1..<<<<AC1_4>>>>>>>>
+   ScanString3[<<<<AC1_5>>>>] := DW#16#0; <<<<LOOP:1..<<<<AC1_4>>>>>>>>
+   ScanString4[<<<<AC1_5>>>>] := DW#16#0; <<<<LOOP:1..<<<<AC1_4>>>>>>>>
+   ScanString5[<<<<AC1_5>>>>] := DW#16#0; <<<<LOOP:1..<<<<AC1_4>>>>>>>>
+   ScanString6[<<<<AC1_5>>>>] := DW#16#0; <<<<LOOP:1..<<<<AC1_4>>>>>>>>
+END_DATA_BLOCK
+
+FUNCTION <<<<AC1_2>>>> : VOID
+TITLE = Marker
+VERSION : 0.1
+
+
+VAR_INPUT
+  Marker : DWORD ;	
+END_VAR
+VAR_TEMP
+  DBPointer : ANY ;	
+  blkmov_retval : INT ;	
+  MarkerPointer : ANY ;	
+  MarkerVal : DWORD ;	
+END_VAR
+BEGIN
+NETWORK
+TITLE =
+
+      OPN   <<<<AC1_1>>>>; 
+      LAR1  P#DBX 4.0; 
+      L     <<<<AC1_1>>>>.DBD    0; 
+      +AR1  ; 
+
+      L     #Marker; 
+      T     D [AR1,P#0.0]; 
+
+NETWORK
+TITLE =
+
+      L     <<<<AC1_1>>>>.DBD    0; 
+      L     P#4.0; // 4 bytes = double word.
+      +I    ; 
+      T     <<<<AC1_1>>>>.DBD    0; 
+END_FUNCTION
+
+FUNCTION FC <<<<AC1_2>>>> : VOID
+TITLE =
+VERSION : 0.1
+
+
+VAR_INPUT
+  Marker : DWORD ;	
+END_VAR
+VAR_TEMP
+  DBPointer : ANY ;	
+  blkmov_retval : INT ;	
+  MarkerPointer : ANY ;	
+  MarkerVal : DWORD ;	
+  oldDBNo : WORD ;	
+  oldAR1 : DWORD ;	
+END_VAR
+BEGIN
+NETWORK
+TITLE =Store DB Registers and Address registers
+
+      L     DBNO; 
+      T     #oldDBNo; 
+      TAR1  #oldAR1; 
+
+NETWORK
+TITLE =
+
+      OPN   <<<<AC1_1>>>>; 
+      L     P#DBX 0.0; 
+      T     #MarkerVal; 
+      L     <<<<AC1_1>>>>.DBD    0; // 32bits  = 4 bytes
+      AD    DW#16#FFFFFF; // remove the "Area".
+      SRD   3; // Shift to remove bit reference
+      L     L#<<<<AC1_6:24>>>>; //
+      >=D   ; 
+      JC    _end; 
+      POP   ; 
+      L     4; // 4 bytes = double
+      +D    ; // Add this to the existing pointer variable
+      SLD   3; // rotate back to make this a byte reference
+      AD    DW#16#FFFFF8; // and remove any residual bit addresses from the shift operation
+      T     <<<<AC1_1>>>>.DBD    0; // now store the result (minus the area)
+      L     #MarkerVal; // load the original pointer      
+      L     <<<<AC1_1>>>>.DBD    0; // load the remaining byte address
+      OD    ; // add the 2 together
+      T     <<<<AC1_1>>>>.DBD    0; 
+      LAR1  ; 
+
+      L     #Marker; 
+      T     D [AR1,P#0.0]; 
+
+NETWORK
+TITLE =final item - Restore old registers.
+
+_end: NOP   0; 
+
+      LAR1  #oldAR1; 
+      OPN   DB [#oldDBNo]; 
+END_FUNCTION
+

@@ -846,8 +846,8 @@ public class SourceEntry {
     
     public String getSegmentDetails(){        
         StringBuilder String1 = new StringBuilder();
-        String1.append(">---- Printing segment Details: ---------------------");
-        String1.append(">BlockName|startMarker|ExecutionTime(Weight)|type|endMarker");
+        String1.append(">---- Printing segment Details: ---------------------\n");
+        String1.append(">BlockName|startMarker|ExecutionTime(Weight)|type|endMarker\n");
         for(segment s:segmentList){
             String1.append(s.toString());
             String1.append("\n");
