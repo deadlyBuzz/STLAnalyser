@@ -496,7 +496,7 @@ public class SourceEntry {
      */
     private String IDMemoryType(String[] placeHolder, String Statement,Map VAR){
         //Go through each item in placeHolder.
-        String tagString = "";  // Tags should be appended to the end.
+         String tagString = "";  // Tags should be appended to the end.
                               // allow the loop to buils the tagList and 
                               // append it to the returnString at the end.
         for(int i=1;i<placeHolder.length;i++){            
@@ -544,7 +544,8 @@ public class SourceEntry {
             }
             else if(placeHolder[i].matches(regExes.LOCALVARIABLE)){ // Check if this is a Local variable
                 placeHolder[i] = placeHolder[i].replaceAll(regExes.LOCALCLEAN, "$1"); // Clean out any array brackets etc. if required.
-                Statement = varGet(VAR, placeHolder[i]);          // if so, Get the Memory type from the parameter list
+                Statement = "i"+varGet(VAR, placeHolder[i]);          // if so, Get the Memory type from the parameter list and mark as a parameter variable
+                //Statement = varGet(VAR, placeHolder[i]);          // if so, Get the Memory type from the parameter list and mark as a parameter variable
                 //Statement += ";_pa";                                // and Tag this for Parameter access.
             }
             else if(placeHolder[i].matches(regExes.DOTEXTENSIONACCESS)){ //If this is an FB or UDT type access.
@@ -606,7 +607,7 @@ public class SourceEntry {
         m = new HashMap<>();
         t = new HashMap<>();
         Ex = new HashMap<>();
-        doMConnection(m,"SELECT * from 315Instructions");
+        doMConnection(m,"SELECT * from 316Instructions");
         doTConnection(t,"SELECT * from dataTypes");
         doExConnection(Ex,"Select * from ExclusionList");
     }

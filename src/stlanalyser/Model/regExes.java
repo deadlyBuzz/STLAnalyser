@@ -98,7 +98,8 @@ public static final String DBHEADER        =  "DATA_BLOCK.*";
     /* ---- Typically used in IDMemory Function ----- */ 
 
     /**  Regex String: <br/>"P?[LMIQb]([^#]*)**/
-    public static final String DIRECTADDRESSING  =  "P?[LMIQb]([^#]*)"; // include "b" incase the boolean has already been identified.
+    public static final String DIRECTADDRESSING  =  "P?([LMIQb][^#]*)"; // include "b" incase the boolean has already been identified.
+    //public static final String DIRECTADDRESSING  =  "P?[LMIQb]([^#]*)"; // include "b" incase the boolean has already been identified.
         
     /** Memory Indirect, E.G A M[MD 2] <br/> Regex String: <br/>"\\d+\\[[MLIQ].*" **/
     public static final String MEMORYINDIRECT = "\\[[MLIQ].*";
